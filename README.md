@@ -1,5 +1,11 @@
 # ◈ Opsora
 
+[![CI](https://github.com/suryaprakash251201/Opsora/actions/workflows/ci.yml/badge.svg)](https://github.com/suryaprakash251201/Opsora/actions/workflows/ci.yml)
+[![Release](https://github.com/suryaprakash251201/Opsora/actions/workflows/release.yml/badge.svg)](https://github.com/suryaprakash251201/Opsora/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/suryaprakash251201/Opsora?sort=semver)](https://github.com/suryaprakash251201/Opsora/releases)
+[![Docker image](https://img.shields.io/badge/image-ghcr.io-2088FF?logo=docker&logoColor=white)](https://ghcr.io/suryaprakash251201/opsora)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 **A personal command center — what needs your attention now, in one place.**
 
 Opsora is a self-hosted dashboard that answers one question: _what should I care
@@ -150,6 +156,19 @@ pnpm lint         # eslint
 
 ### Self-host with Docker
 
+Pull the prebuilt image (CI publishes it on every release tag):
+
+```bash
+docker run -d \
+  --name opsora \
+  -p 3000:3000 \
+  -v opsora-data:/app/.data \
+  # -v /var/run/docker.sock:/var/run/docker.sock:ro  # monitor host containers
+  ghcr.io/suryaprakash251201/opsora:latest
+```
+
+Or build and run from source:
+
 ```bash
 docker compose up -d --build
 ```
@@ -157,6 +176,19 @@ docker compose up -d --build
 The image builds a Next.js standalone server and runs as a non-root user. Ingested
 agent metrics persist in the `opsora-data` volume. Uncomment the socket mount in
 `docker-compose.yml` to monitor the host's containers.
+
+## CI/CD
+
+| Workflow | Trigger | What it does |
+| -------- | ------- | ------------ |
+| **CI** (`.github/workflows/ci.yml`) | push to `main`, PRs | lint → typecheck → test → production build |
+| **Release** (`.github/workflows/release.yml`) | tag `v*` | verify → build & push multi-arch image to `ghcr.io/suryaprakash251201/opsora` → create GitHub release |
+
+To cut a release:
+
+```bash
+git tag v0.5.0 && git push origin v0.5.0
+```
 
 ## Architecture
 
