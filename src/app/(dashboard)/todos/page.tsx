@@ -75,21 +75,21 @@ export default function TodosPage() {
         }
       />
 
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {statTiles.map((tile) => (
           <div
             key={tile.key}
-            className="border-border bg-panel rounded-card border p-3"
+            className="border-border bg-panel rounded-card border p-3.5 transition-all hover:border-border-strong"
           >
             <p className="text-subtle text-xs">{tile.label}</p>
-            <p className="metrics mt-1 text-lg font-semibold">
+            <p className="metrics mt-1.5 text-xl font-semibold tracking-tight">
               {stats[tile.key]}
             </p>
           </div>
         ))}
       </div>
 
-      <div className="mb-4 flex flex-col gap-2">
+      <div className="mb-4 flex flex-col gap-2.5">
         <div className="flex items-center gap-2">
           <div className="relative max-w-sm flex-1">
             <Search className="text-subtle pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
@@ -97,7 +97,7 @@ export default function TodosPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Filter tasks…"
-              className="h-8 pl-8 text-xs"
+              className="h-9 pl-8 text-xs"
             />
           </div>
           <div className="hidden items-center gap-2 sm:flex">
@@ -119,7 +119,7 @@ export default function TodosPage() {
               type="button"
               onClick={() => setView(item.value)}
               className={cn(
-                "flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
+                "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors",
                 view === item.value
                   ? "border-border-strong bg-surface text-foreground"
                   : "text-muted hover:bg-surface/60 hover:text-foreground border-transparent",
@@ -181,7 +181,7 @@ export default function TodosPage() {
           }
         />
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 pb-4">
           {filtered.map((todo) => (
             <TodoItem
               key={todo.id}
