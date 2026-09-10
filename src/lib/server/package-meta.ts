@@ -17,3 +17,9 @@ export function readPackageVersion(): string {
   }
   return cached;
 }
+
+/** Server-only: bypass the cache so a version change is picked up live. */
+export function readPackageVersionFresh(): string {
+  cached = null;
+  return readPackageVersion();
+}

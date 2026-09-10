@@ -2,7 +2,7 @@ import {
   getTodoRepository,
   normalizeTodoList,
 } from "@/lib/server/todo-repository";
-import { readPackageVersion } from "@/lib/server/package-meta";
+import { readPackageVersionFresh } from "@/lib/server/package-meta";
 import type { BackupEnvelope } from "@/lib/server/backup";
 
 export const dynamic = "force-dynamic";
@@ -16,7 +16,7 @@ export async function GET() {
     schemaVersion: 1,
     exportedAt: new Date().toISOString(),
     exportedBy: "opsora",
-    appVersion: readPackageVersion(),
+    appVersion: readPackageVersionFresh(),
     preferences: {
       theme: null,
       sidebarCollapsed: false,
