@@ -1,8 +1,8 @@
 "use client";
 
-import { RefreshCw, Server } from "lucide-react";
+import { RefreshCw, Server, Terminal } from "lucide-react";
 import { PageHeader } from "@/components/viz/page-header";
-import { ErrorState, SectionHeader } from "@/components/viz/section";
+import { EmptyConfigHint, ErrorState, SectionHeader } from "@/components/viz/section";
 import { SourceWarning } from "@/components/viz/source-warning";
 import { StatTile } from "@/components/viz/stat-tile";
 import { Button } from "@/components/ui/button";
@@ -12,9 +12,14 @@ import { REFETCH_INTERVALS, useSourceSnapshot } from "@/hooks/use-snapshot";
 import { formatBytes, timeAgo } from "@/lib/format";
 
 export default function ServersPage() {
-  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot("servers", REFETCH_INTERVALS.servers);
+  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot(
+    "servers",
+    REFETCH_INTERVALS.servers,
+  );
 
   const snapshot = data?.data;
+  const isUnconfigured =
+    data?.mode === "live" && snapshot !== undefined && snapshot.servers.length === 0;
 
   return (
     <>
@@ -22,7 +27,7 @@ export default function ServersPage() {
         title="Servers"
         accent="var(--accent-servers)"
         description={
-          snapshot
+          snapshot && !isUnconfigured
             ? `${snapshot.summary.online}/${snapshot.summary.total} online · updated ${timeAgo(snapshot.updatedAt)}`
             : "Linux agent metrics — CPU, memory, disks, services"
         }
@@ -52,6 +57,14 @@ export default function ServersPage() {
             <Skeleton key={index} className="h-[92px]" />
           ))}
         </div>
+      ) : isUnconfigured ? (
+        <EmptyConfigHint
+          icon={Terminal}
+          accent="var(--accent-servers)"
+          title="Start the Opsora agent"
+          description="Run the dependency-free Node script on each host you want to monitor. It reads /proc, runs df / ps / systemctl, and POSTs a compact JSON snapshot to the dashboard every 30s. There is nothing to install besides Node 22+."
+          env={["OPSORA_URL", "OPSORA_AGENT_TOKEN", "OPSORA_SERVICES"]}
+        />
       ) : (
         <div className="flex flex-col gap-5">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

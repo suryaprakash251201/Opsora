@@ -4,13 +4,14 @@ import {
   Ban,
   Globe,
   Network,
+  Plug,
   RefreshCw,
   ShieldCheck,
   Users,
   Zap,
 } from "lucide-react";
 import { PageHeader } from "@/components/viz/page-header";
-import { ErrorState } from "@/components/viz/section";
+import { EmptyConfigHint, ErrorState } from "@/components/viz/section";
 import { SourceWarning } from "@/components/viz/source-warning";
 import { StatTile } from "@/components/viz/stat-tile";
 import { StatusDot } from "@/components/viz/status-dot";
@@ -67,6 +68,11 @@ export default function PiholePage() {
   const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot("pihole", REFETCH_INTERVALS.pihole);
 
   const snapshot = data?.data;
+  const isUnconfigured =
+    data?.mode === "live" &&
+    snapshot !== undefined &&
+    snapshot.summary.queries === 0 &&
+    snapshot.history.length === 0;
 
   return (
     <>
@@ -74,7 +80,7 @@ export default function PiholePage() {
         title="Pi-hole"
         accent="var(--accent-pihole)"
         description={
-          snapshot
+          snapshot && !isUnconfigured
             ? `${formatNumber(snapshot.summary.domains)} domains on blocklist · gravity updated ${timeAgo(snapshot.summary.gravityUpdatedAt)}`
             : "DNS queries, blocks, clients and upstream health"
         }
@@ -104,6 +110,14 @@ export default function PiholePage() {
             <Skeleton key={index} className="h-[92px]" />
           ))}
         </div>
+      ) : isUnconfigured ? (
+        <EmptyConfigHint
+          icon={Plug}
+          accent="var(--accent-pihole)"
+          title="Connect Pi-hole"
+          description="Opsora speaks the Pi-hole v6 admin API. The dashboard needs the admin URL and password to pull queries, blocks, top clients and the gravity list — everything stays on the server."
+          env={["PIHOLE_URL", "PIHOLE_PASSWORD"]}
+        />
       ) : (
         <div className="flex flex-col gap-5">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

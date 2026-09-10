@@ -1,8 +1,8 @@
 "use client";
 
-import { Boxes, Container, RefreshCw, RotateCw, TriangleAlert } from "lucide-react";
+import { Boxes, Container, Plug, RefreshCw, RotateCw, TriangleAlert } from "lucide-react";
 import { PageHeader } from "@/components/viz/page-header";
-import { ErrorState } from "@/components/viz/section";
+import { EmptyConfigHint, ErrorState } from "@/components/viz/section";
 import { SourceWarning } from "@/components/viz/source-warning";
 import { StatTile } from "@/components/viz/stat-tile";
 import { Badge } from "@/components/ui/badge";
@@ -43,7 +43,7 @@ export default function DockerPage() {
         title="Docker"
         accent="var(--accent-docker)"
         description={
-          snapshot
+          snapshot && containers.length > 0
             ? `${snapshot.summary.running} running · ${snapshot.summary.images} images · updated ${timeAgo(snapshot.updatedAt)}`
             : "Containers, health, resource usage and restarts"
         }
@@ -73,6 +73,14 @@ export default function DockerPage() {
             <Skeleton key={index} className="h-[92px]" />
           ))}
         </div>
+      ) : containers.length === 0 ? (
+        <EmptyConfigHint
+          icon={Plug}
+          accent="var(--accent-docker)"
+          title="Connect the Docker socket"
+          description="Opsora talks directly to the Docker Engine via its unix socket. Make sure /var/run/docker.sock is reachable (Opsora's user must be in the docker group) and that OPSORA_DOCKER isn't set to mock. Inside the Docker image, mount the socket at /var/run/docker.sock."
+          env={["DOCKER_SOCKET", "OPSORA_DOCKER"]}
+        />
       ) : (
         <div className="flex flex-col gap-5">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">

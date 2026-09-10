@@ -2,13 +2,19 @@
 
 import {
   CircleAlert,
+  GitBranch,
   GitCommitHorizontal,
   GitPullRequest,
   RefreshCw,
   Star,
 } from "lucide-react";
 import { PageHeader } from "@/components/viz/page-header";
-import { ErrorState, SectionHeader } from "@/components/viz/section";
+import {
+  EmptyConfigHint,
+  EmptyState,
+  ErrorState,
+  SectionHeader,
+} from "@/components/viz/section";
 import { SourceWarning } from "@/components/viz/source-warning";
 import { StatTile } from "@/components/viz/stat-tile";
 import { Button } from "@/components/ui/button";
@@ -16,11 +22,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RepoCard } from "@/features/github/repo-card";
 import { IssueList, PullList } from "@/features/github/lists";
 import { REFETCH_INTERVALS, useSourceSnapshot } from "@/hooks/use-snapshot";
+import { GitHubIcon } from "@/components/icons/github";
 
 export default function GithubPage() {
-  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot("github", REFETCH_INTERVALS.github);
+  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot(
+    "github",
+    REFETCH_INTERVALS.github,
+  );
 
   const snapshot = data?.data;
+  const isUnconfigured =
+    data?.mode === "live" && snapshot !== undefined && snapshot.repos.length === 0;
 
   return (
     <>
@@ -29,7 +41,7 @@ export default function GithubPage() {
         accent="var(--accent-github)"
         description={
           snapshot
-            ? `@${snapshot.user.login} · ${snapshot.repos.length} repositories · ${snapshot.stats.openPulls} open PRs`
+            ? `@${snapshot.user.login || "—"} · ${snapshot.repos.length} repositories · ${snapshot.stats.openPulls} open PRs`
             : "Repositories, pull requests, issues and Actions"
         }
         actions={
@@ -60,6 +72,27 @@ export default function GithubPage() {
             ))}
           </div>
           <Skeleton className="h-64" />
+        </div>
+      ) : isUnconfigured ? (
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatTile label="Repositories" value={0} icon={Star} />
+            <StatTile label="Open PRs" value={0} icon={GitPullRequest} />
+            <StatTile label="Open issues" value={0} icon={CircleAlert} />
+            <StatTile label="Commits today" value={0} icon={GitCommitHorizontal} />
+          </div>
+          <EmptyConfigHint
+            icon={GitHubIcon}
+            accent="var(--accent-github)"
+            title="Connect a GitHub personal access token"
+            description="Repos, PRs, issues, Actions runs, and review requests will appear here once Opsora can reach the GitHub API on your behalf. Use a read-only classic or fine-grained token — it stays on the server, never in the browser."
+            env={["GITHUB_TOKEN"]}
+          />
+          <EmptyState
+            icon={GitBranch}
+            title="No repositories yet"
+            description="Once your token has access to at least one repository, it will show up here automatically."
+          />
         </div>
       ) : (
         <div className="flex flex-col gap-5">

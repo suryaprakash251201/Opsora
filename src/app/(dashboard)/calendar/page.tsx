@@ -1,9 +1,9 @@
 "use client";
 
-import { CalendarDays, Clock, MapPin, Users } from "lucide-react";
+import { CalendarDays, CalendarPlus, Clock, MapPin, Users } from "lucide-react";
 import { isToday, parseISO } from "date-fns";
 import { PageHeader } from "@/components/viz/page-header";
-import { ErrorState } from "@/components/viz/section";
+import { EmptyConfigHint, EmptyState, ErrorState } from "@/components/viz/section";
 import { SourceWarning } from "@/components/viz/source-warning";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,10 +22,14 @@ const colorClasses: Record<CalendarEvent["color"], string> = {
 };
 
 export default function CalendarPage() {
-  const { data, isLoading, isError, refetch } = useSourceSnapshot("calendar", REFETCH_INTERVALS.calendar);
+  const { data, isLoading, isError, refetch } = useSourceSnapshot(
+    "calendar",
+    REFETCH_INTERVALS.calendar,
+  );
   const now = useClock(30_000);
 
   const events = data?.data.events ?? [];
+  const isUnconfigured = data?.mode === "live" && events.length === 0;
   const days = new Map<string, CalendarEvent[]>();
 
   for (const event of events) {
@@ -33,8 +37,7 @@ export default function CalendarPage() {
     days.set(key, [...(days.get(key) ?? []), event]);
   }
 
-  const todayCount = events.filter((event) => isToday(parseISO(event.start)))
-    .length;
+  const todayCount = events.filter((event) => isToday(parseISO(event.start))).length;
 
   return (
     <>
@@ -44,7 +47,9 @@ export default function CalendarPage() {
         description={
           isLoading
             ? "Next seven days"
-            : `${todayCount} event${todayCount === 1 ? "" : "s"} today · ${events.length} in the next seven days`
+            : isUnconfigured
+              ? "Connect Google Calendar to see your events"
+              : `${todayCount} event${todayCount === 1 ? "" : "s"} today · ${events.length} in the next seven days`
         }
         actions={
           <Badge variant="outline" className="gap-1.5 px-2.5 py-1">
@@ -67,6 +72,25 @@ export default function CalendarPage() {
             <Skeleton key={index} className="h-40" />
           ))}
         </div>
+      ) : isUnconfigured ? (
+        <div className="flex flex-col gap-4">
+          <EmptyConfigHint
+            icon={CalendarPlus}
+            accent="var(--accent-calendar)"
+            title="Connect Google Calendar"
+            description="Opsora reads your events through the official Google Calendar API. The agent script under scripts/google-oauth.mjs walks you through a one-time consent and prints the refresh token you need to drop into .env.local."
+            env={[
+              "GOOGLE_CLIENT_ID",
+              "GOOGLE_CLIENT_SECRET",
+              "GOOGLE_REFRESH_TOKEN",
+            ]}
+          />
+          <EmptyState
+            icon={CalendarDays}
+            title="No events to show"
+            description="Today and the next seven days will appear here once Google Calendar is configured."
+          />
+        </div>
       ) : (
         <div className="flex flex-col gap-4">
           {[...days.entries()].map(([day, dayEvents]) => {
@@ -82,11 +106,9 @@ export default function CalendarPage() {
                 )}
               >
                 <header className="border-border/60 flex items-center justify-between border-b px-4 py-2.5">
-                  <h2 className="flex items-center gap-2 text-[13px] font-medium">
+                  <h2 className="flex items-center gap-2 text-[13px] font-semibold">
                     {formatDayLabel(day)}
-                    {isCurrentDay ? (
-                      <Badge variant="info">today</Badge>
-                    ) : null}
+                    {isCurrentDay ? <Badge variant="info">today</Badge> : null}
                   </h2>
                   <span className="text-subtle text-xs">
                     {dayEvents.length} event{dayEvents.length === 1 ? "" : "s"}
@@ -147,9 +169,7 @@ export default function CalendarPage() {
                             </span>
                           </p>
                         </div>
-                        {current ? (
-                          <Badge variant="info">now</Badge>
-                        ) : null}
+                        {current ? <Badge variant="info">now</Badge> : null}
                       </li>
                     );
                   })}
