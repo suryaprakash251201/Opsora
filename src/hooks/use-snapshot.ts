@@ -4,13 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 import type {
   AdapterSourceId,
   Snapshot,
+  SnapshotBundle,
   SnapshotMap,
 } from "@/lib/adapters/types";
-import type { ActivityEvent } from "@/lib/mock/activity";
-import { useRealtimeStore } from "@/stores/realtime-store";
+import type { ActivityEvent } from "@/lib/mock/activity";import { useRealtimeStore } from "@/stores/realtime-store";
 
 export interface DashboardSnapshot {
-  sources: { [K in AdapterSourceId]: Snapshot<SnapshotMap[K]> };
+  sources: SnapshotBundle;
   activity: ActivityEvent[];
   fetchedAt: string;
 }

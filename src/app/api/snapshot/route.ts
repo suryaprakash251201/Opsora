@@ -2,15 +2,11 @@ import { getAllSnapshots } from "@/lib/adapters";
 import { getActivityFeed } from "@/lib/mock/activity";
 
 export async function GET() {
-  const [sources] = await Promise.all([
-    getAllSnapshots(),
-    // Keep a little latency variance between polls so the UI feels alive.
-    new Promise((resolve) => setTimeout(resolve, 40)),
-  ]);
+  const sources = await getAllSnapshots();
 
   return Response.json({
     sources,
-    activity: getActivityFeed(),
+    activity: getActivityFeed(sources),
     fetchedAt: new Date().toISOString(),
   });
 }

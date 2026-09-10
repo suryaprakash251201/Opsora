@@ -338,6 +338,11 @@
     border-color: var(--border);
   }
 
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
   }
@@ -452,6 +457,15 @@
   background: color-mix(in oklab, var(--panel) 90%, transparent);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
+}
+
+/* Hide scrollbars without affecting scroll behaviour */
+@utility scrollbar-hidden {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 /* Accent text helpers driven by the per-module accents */

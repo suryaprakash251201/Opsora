@@ -65,6 +65,22 @@ export function CommandPalette() {
         return;
       }
 
+      // ⌘⇧L / Ctrl+Shift+L — toggle dark/light theme
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.shiftKey &&
+        event.key.toLowerCase() === "l"
+      ) {
+        event.preventDefault();
+        // Lazy-load to avoid circular imports
+        void import("@/stores/theme-store").then(({ useThemeStore }) => {
+          const theme = useThemeStore.getState().theme;
+          const next = theme === "solar" ? "opsora" : "solar";
+          useThemeStore.getState().setTheme(next);
+        });
+        return;
+      }
+
       if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
 
       if (event.key === "\\") {
@@ -73,7 +89,7 @@ export function CommandPalette() {
         return;
       }
 
-      if (event.key === "/") {
+      if (event.key === "/" || (event.shiftKey && event.key === "?")) {
         event.preventDefault();
         setCommandOpen(true);
         return;

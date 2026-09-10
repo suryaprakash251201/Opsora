@@ -1,5 +1,5 @@
 import type { SourceId } from "@/lib/attention/types";
-import { hoursAgo, minutesAgo } from "@/lib/mock/random";
+import type { SnapshotBundle } from "@/lib/adapters/types";
 
 export type ActivityKind =
   | "commit"
@@ -21,91 +21,66 @@ export interface ActivityEvent {
   at: string;
 }
 
-export function getActivityFeed(): ActivityEvent[] {
+/** Shows recent activity only for sources that are actually live. */
+export function getActivityFeed(sources: SnapshotBundle): ActivityEvent[] {
+  const feed: ActivityEvent[] = [];
   const now = Date.now();
 
-  const events: ActivityEvent[] = [
-    {
-      id: "evt-1",
-      source: "github",
-      kind: "commit",
-      title: "Pushed to cloud-dock",
-      detail: "a3f91c2 · feat(storage): add R2 multipart upload support",
-      at: minutesAgo(2, now),
-    },
-    {
-      id: "evt-2",
-      source: "docker",
-      kind: "docker",
-      title: "nginx restarted",
-      detail: "Restart #2 in the last 24 hours on atlas",
-      at: minutesAgo(26, now),
-    },
-    {
-      id: "evt-3",
-      source: "github",
-      kind: "ci",
-      title: "CI failed on cloud-dock",
-      detail: "ci.yml · test — 3 failed, 118 passed",
-      at: minutesAgo(38, now),
-    },
-    {
-      id: "evt-4",
-      source: "pihole",
-      kind: "dns",
-      title: "Pi-hole blocked a spike",
-      detail: "214 requests to ads.tracker.io in 5 minutes",
-      at: minutesAgo(64, now),
-    },
-    {
-      id: "evt-5",
-      source: "servers",
-      kind: "backup",
-      title: "Backup completed on atlas",
-      detail: "cloud-dock snapshots · 184 GB in 27m",
-      at: hoursAgo(2.1, now),
-    },
-    {
-      id: "evt-6",
-      source: "github",
-      kind: "deploy",
-      title: "Deployed cloud-dock to production",
-      detail: "v0.4.2 · success",
-      at: hoursAgo(3.4, now),
-    },
-    {
-      id: "evt-7",
+  if (sources.github.status !== "error") {
+    for (const event of sources.github.data.activity) {
+      feed.push({
+        id: `gh-${event.id}`,
+        source: "github",
+        kind: event.kind === "commit" ? "commit" : ("ci" as ActivityKind),
+        title: event.repo,
+        detail: event.text,
+        at: event.at,
+      });
+    }
+  }
+
+  if (sources.docker.status !== "error") {
+    const restarted = sources.docker.data.containers.filter(
+      (container) => container.restarts24h > 0,
+    );
+    for (const container of restarted) {
+      feed.push({
+        id: `docker-${container.id}`,
+        source: "docker",
+        kind: "docker",
+        title: `${container.name} restarted`,
+        detail: `${container.restarts24h}× in the last 24h · ${container.image}`,
+        at: new Date(now - container.restarts24h * 3_600_000).toISOString(),
+      });
+    }
+  }
+
+  if (sources.pihole.status !== "error") {
+    const { gravityUpdatedAt, domains } = sources.pihole.data.summary;
+    if (gravityUpdatedAt) {
+      feed.push({
+        id: "pihole-gravity",
+        source: "pihole",
+        kind: "dns",
+        title: "Gravity updated",
+        detail: `${domains.toLocaleString()} domains on blocklist`,
+        at: gravityUpdatedAt,
+      });
+    }
+  }
+
+  for (const server of sources.servers.data.servers) {
+    feed.push({
+      id: `server-${server.id}`,
       source: "servers",
       kind: "server",
-      title: "vega became unreachable",
-      detail: "Last heartbeat 2h ago · Tailscale reports node offline",
-      at: hoursAgo(2.4, now),
-    },
-    {
-      id: "evt-8",
-      source: "github",
-      kind: "release",
-      title: "Released backend-api v0.9.0",
-      detail: "Tagged on develop · staging",
-      at: hoursAgo(4.2, now),
-    },
-    {
-      id: "evt-9",
-      source: "pihole",
-      kind: "dns",
-      title: "Gravity updated",
-      detail: "185,204 domains on blocklist",
-      at: hoursAgo(5.2, now),
-    },
-    {
-      id: "evt-10",
-      source: "docker",
-      kind: "docker",
-      title: "Postgres healthy check passed",
-      detail: "12 containers running · 0 unhealthy",
-      at: hoursAgo(6, now),
-    },
-  ];
+      title: server.online ? `${server.name} reported in` : `${server.name} offline`,
+      detail: server.online
+        ? `CPU ${server.cpu.usage}% · uptime ${Math.round(server.uptimeSeconds / 3600)}h`
+        : `Last seen ${server.updatedAt}`,
+      at: server.updatedAt,
+    });
+  }
 
-  return events.sort((a, b) => b.at.localeCompare(a.at));
+  return feed.sort((a, b) => b.at.localeCompare(a.at));
 }

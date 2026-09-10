@@ -31,7 +31,7 @@ async function getSharedPayload(): Promise<StreamPayload> {
       ]);
       return {
         sources,
-        activity: getActivityFeed(),
+        activity: getActivityFeed(sources),
         fetchedAt: new Date().toISOString(),
       };
     })();

@@ -186,7 +186,7 @@ function NavLinks({
   const setCommandOpen = useUiStore((state) => state.setCommandOpen);
 
   return (
-    <nav className="flex flex-1 flex-col gap-5 overflow-y-auto px-3 py-4">
+    <nav className="flex flex-1 flex-col gap-5 overflow-x-hidden overflow-y-auto px-3 py-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {navGroups.map((group, groupIndex) => (
         <div key={group.label ?? groupIndex} className="flex flex-col gap-1">
           {group.label && !collapsed ? (
@@ -355,14 +355,20 @@ function CollapseToggle({ collapsed }: { collapsed: boolean }) {
       aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       title={collapsed ? "Expand (⌘\\)" : "Collapse (⌘\\)"}
       className={cn(
-        "text-subtle hover:text-foreground hover:bg-surface absolute -right-3 top-9 z-10 flex size-6 items-center justify-center rounded-full border bg-[var(--panel)] shadow-md transition-all",
-        "hover:scale-110",
+        "text-subtle hover:text-foreground absolute -right-4 top-12 z-20 flex size-8 items-center justify-center rounded-full border bg-[var(--panel)] shadow-lg transition-all",
+        "hover:scale-110 hover:shadow-xl",
+        "active:scale-95",
       )}
+      style={{
+        borderColor: "var(--border-strong)",
+        boxShadow:
+          "0 6px 20px -6px color-mix(in oklab, var(--brand) 30%, transparent), 0 0 0 1px var(--border-strong)",
+      }}
     >
       {collapsed ? (
-        <ChevronsRight className="size-3" />
+        <ChevronsRight className="size-4" />
       ) : (
-        <ChevronsLeft className="size-3" />
+        <ChevronsLeft className="size-4" />
       )}
     </button>
   );
