@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Standalone agent script (plain Node ESM, not part of the Next app):
+    "agent/**",
+    ".data/**",
   ]),
 ]);
 

@@ -6,4 +6,15 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      # - GITHUB_TOKEN=${GITHUB_TOKEN}
+      # - PIHOLE_URL=${PIHOLE_URL}
+      # - PIHOLE_PASSWORD=${PIHOLE_PASSWORD}
+      # - OPSORA_AGENT_TOKEN=${OPSORA_AGENT_TOKEN}
+    volumes:
+      - opsora-data:/app/.data
+      # Mount the socket to monitor the host's containers:
+      # - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
+
+volumes:
+  opsora-data:

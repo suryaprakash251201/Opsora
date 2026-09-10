@@ -1,6 +1,14 @@
 "use client";
 
-import { Database, Keyboard, Palette, RotateCcw, Server } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  BellRing,
+  Database,
+  Keyboard,
+  Palette,
+  RotateCcw,
+  Server,
+} from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/viz/page-header";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +21,7 @@ import {
 } from "@/components/ui/card";
 import { useTodoStore } from "@/features/todos/store";
 import { createSeedTodos } from "@/features/todos/seed";
+import { useDashboardSnapshot } from "@/hooks/use-snapshot";
 
 const sources = [
   {
@@ -68,6 +77,19 @@ const palette = [
 ];
 
 export default function SettingsPage() {
+  const { data } = useDashboardSnapshot();
+  const sourceModes: Record<string, "live" | "mock"> = data
+    ? Object.fromEntries(
+        Object.entries(data.sources).map(([id, snapshot]) => [
+          id,
+          snapshot.mode,
+        ]),
+      )
+    : {};
+  const liveCount = Object.values(sourceModes).filter(
+    (mode) => mode === "live",
+  ).length;
+
   return (
     <>
       <PageHeader
@@ -82,26 +104,41 @@ export default function SettingsPage() {
               <Server className="text-subtle size-3.5" />
               Data sources
             </CardTitle>
-            <Badge variant="warning">mock data</Badge>
+            <Badge
+              variant={liveCount > 0 ? "success" : "warning"}
+            >
+              {liveCount > 0 ? `${liveCount} live` : "mock data"}
+            </Badge>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
-            {sources.map((source) => (
-              <div
-                key={source.id}
-                className="border-border/60 bg-surface/30 flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5"
-              >
-                <div className="min-w-0">
-                  <p className="text-[13px] font-medium">{source.label}</p>
-                  <p className="text-subtle truncate text-xs">{source.detail}</p>
+            {sources.map((source) => {
+              const mode = sourceModes[source.id] ?? "mock";
+
+              return (
+                <div
+                  key={source.id}
+                  className="border-border/60 bg-surface/30 flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5"
+                >
+                  <div className="min-w-0">
+                    <p className="flex items-center gap-2 text-[13px] font-medium">
+                      {source.label}
+                      <Badge variant={mode === "live" ? "success" : "outline"}>
+                        {mode}
+                      </Badge>
+                    </p>
+                    <p className="text-subtle truncate text-xs">{source.detail}</p>
+                  </div>
+                  <code className="text-subtle shrink-0 font-mono text-[10px]">
+                    /api/sources/{source.id}
+                  </code>
                 </div>
-                <code className="text-subtle shrink-0 font-mono text-[10px]">
-                  /api/sources/{source.id}
-                </code>
-              </div>
-            ))}
+              );
+            })}
             <p className="text-subtle mt-1 text-xs">
-              Every source implements the same adapter interface. Wiring a real
-              API only changes the server-side adapter — the UI stays as is.
+              Sources switch to live automatically, e.g. when the agent reports
+              metrics, a Docker socket exists, or <code>GITHUB_TOKEN</code> /{" "}
+              <code>PIHOLE_URL</code> is configured. See{" "}
+              <code>.env.example</code>.
             </p>
           </CardContent>
         </Card>
@@ -164,6 +201,8 @@ export default function SettingsPage() {
               ))}
             </CardContent>
           </Card>
+
+          <NotificationSettings />
         </div>
 
         <Card>
@@ -202,7 +241,7 @@ export default function SettingsPage() {
           <CardContent className="flex flex-col gap-1.5 text-xs">
             <div className="flex justify-between">
               <span className="text-muted">Version</span>
-              <span className="metrics">0.1.0</span>
+              <span className="metrics">0.2.0</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted">Framework</span>
@@ -210,7 +249,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-muted">Data</span>
-              <span>Mock adapters (v0.1)</span>
+              <span>{liveCount > 0 ? `${liveCount} live sources` : "Mock adapters"}</span>
             </div>
             <p className="text-subtle mt-2 leading-relaxed">
               Opsora is a self-hosted personal command center: what needs your
@@ -220,5 +259,93 @@ export default function SettingsPage() {
         </Card>
       </div>
     </>
+  );
+}
+
+function NotificationSettings() {
+  const [permission, setPermission] = useState<NotificationPermission>("default");
+  const [supported, setSupported] = useState(true);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      if (typeof window === "undefined" || !("Notification" in window)) {
+        setSupported(false);
+        return;
+      }
+      setPermission(Notification.permission);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const enable = async () => {
+    if (typeof window === "undefined" || !("Notification" in window)) return;
+
+    const result = await Notification.requestPermission();
+    setPermission(result);
+
+    if (result === "granted") {
+      new Notification("Opsora notifications enabled", {
+        body: "You will be alerted about critical signals while the tab is in the background.",
+      });
+    } else {
+      toast.error("Notifications were not enabled");
+    }
+  };
+
+  const test = () => {
+    new Notification("Opsora test notification", {
+      body: "Critical signals will look like this.",
+    });
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <BellRing className="text-subtle size-3.5" />
+          Notifications
+        </CardTitle>
+        <Badge
+          variant={
+            !supported
+              ? "outline"
+              : permission === "granted"
+                ? "success"
+                : permission === "denied"
+                  ? "danger"
+                  : "default"
+          }
+        >
+          {!supported
+            ? "unsupported"
+            : permission === "granted"
+              ? "enabled"
+              : permission === "denied"
+                ? "blocked"
+                : "not enabled"}
+        </Badge>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3">
+        <p className="text-muted text-xs">
+          Opsora watches the attention feed and sends a browser notification when
+          a new critical or warning signal appears while the dashboard is in the
+          background.
+        </p>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            onClick={() => void enable()}
+            disabled={!supported || permission === "granted"}
+          >
+            Enable notifications
+          </Button>
+          {permission === "granted" ? (
+            <Button variant="secondary" size="sm" onClick={test}>
+              Send test
+            </Button>
+          ) : null}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

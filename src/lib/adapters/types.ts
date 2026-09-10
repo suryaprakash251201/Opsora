@@ -20,6 +20,8 @@ export interface Snapshot<T> {
   data: T;
   fetchedAt: string;
   status: "ok" | "stale" | "error";
+  /** Whether the data came from a real integration or a mock adapter. */
+  mode: "live" | "mock";
   latencyMs: number;
 }
 
@@ -27,6 +29,7 @@ export interface SourceAdapter<T> {
   id: AdapterSourceId;
   label: string;
   description: string;
+  mode: "live" | "mock";
   getSnapshot(): Promise<Snapshot<T>>;
 }
 

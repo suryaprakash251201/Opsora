@@ -3,6 +3,7 @@ import { CommandPalette } from "@/components/shell/command-palette";
 import { Sidebar } from "@/components/shell/sidebar";
 import { StoreHydration } from "@/components/shell/store-hydration";
 import { Topbar } from "@/components/shell/topbar";
+import { NotificationWatcher } from "@/features/alerts/notification-watcher";
 import { GlobalTodoDialog } from "@/features/todos/global-todo-dialog";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
@@ -17,6 +18,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </div>
       <CommandPalette />
       <GlobalTodoDialog />
+      <NotificationWatcher />
       <StoreHydration />
     </div>
   );

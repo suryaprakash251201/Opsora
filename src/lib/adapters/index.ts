@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import type {
   AdapterSourceId,
   Snapshot,
@@ -5,93 +6,64 @@ import type {
   SnapshotMap,
   SourceAdapter,
 } from "@/lib/adapters/types";
-import { getCalendarSnapshot } from "@/lib/mock/calendar";
-import { getDockerSnapshot } from "@/lib/mock/docker";
-import { getGithubSnapshot } from "@/lib/mock/github";
-import { getPiholeSnapshot } from "@/lib/mock/pihole";
-import { getServersSnapshot } from "@/lib/mock/servers";
+import { mockAdapters } from "@/lib/adapters/mock";
+import { createAgentAdapter } from "@/lib/adapters/live/agent";
+import { hasAgentMetrics } from "@/lib/adapters/live/agent-store";
+import { createDockerAdapter } from "@/lib/adapters/live/docker";
+import { createGithubAdapter } from "@/lib/adapters/live/github";
+import { createPiholeAdapter } from "@/lib/adapters/live/pihole";
 
-const delay = (ms: number) =>
-  new Promise<void>((resolve) => {
-    setTimeout(resolve, ms);
-  });
+const dockerSocket = process.env.DOCKER_SOCKET ?? "/var/run/docker.sock";
 
-function createMockAdapter<K extends AdapterSourceId>(
-  id: K,
-  label: string,
-  description: string,
-  load: () => SnapshotMap[K],
-  latency: [number, number],
-): SourceAdapter<SnapshotMap[K]> {
-  return {
-    id,
-    label,
-    description,
-    async getSnapshot() {
-      const started = performance.now();
-      await delay(
-        Math.round(latency[0] + Math.random() * (latency[1] - latency[0])),
-      );
+type Resolver<K extends AdapterSourceId> = () => Promise<
+  SourceAdapter<SnapshotMap[K]>
+>;
 
-      return {
-        source: id,
-        data: load(),
-        fetchedAt: new Date().toISOString(),
-        status: "ok",
-        latencyMs: Math.round(performance.now() - started),
-      };
-    },
-  };
-}
+const resolvers: { [K in AdapterSourceId]: Resolver<K> } = {
+  /**
+   * Live when the agent has reported metrics (see /api/agent), otherwise the
+   * built-in mock so the dashboard is never empty.
+   */
+  servers: async () =>
+    (await hasAgentMetrics()) ? createAgentAdapter() : mockAdapters.servers,
 
-export const adapters = {
-  servers: createMockAdapter(
-    "servers",
-    "Linux agent",
-    "CPU, memory, disks, processes and services",
-    getServersSnapshot,
-    [70, 190],
-  ),
-  github: createMockAdapter(
-    "github",
-    "GitHub",
-    "Repositories, pull requests, issues and Actions",
-    getGithubSnapshot,
-    [90, 260],
-  ),
-  pihole: createMockAdapter(
-    "pihole",
-    "Pi-hole",
-    "DNS queries, blocks, clients and upstream health",
-    getPiholeSnapshot,
-    [60, 170],
-  ),
-  docker: createMockAdapter(
-    "docker",
-    "Docker",
-    "Containers, health, resource usage and restarts",
-    getDockerSnapshot,
-    [50, 140],
-  ),
-  calendar: createMockAdapter(
-    "calendar",
-    "Calendar",
-    "Today and the next seven days",
-    getCalendarSnapshot,
-    [40, 110],
-  ),
-} satisfies { [K in AdapterSourceId]: SourceAdapter<SnapshotMap[K]> };
+  /** Live when GITHUB_TOKEN is configured. */
+  github: async () => {
+    const token = process.env.GITHUB_TOKEN?.trim();
+    return token ? createGithubAdapter(token) : mockAdapters.github;
+  },
 
-export const adapterSources = Object.keys(adapters) as AdapterSourceId[];
+  /** Live when PIHOLE_URL is configured. */
+  pihole: async () => {
+    const url = process.env.PIHOLE_URL?.trim();
+    if (!url) return mockAdapters.pihole;
+    return createPiholeAdapter(url, process.env.PIHOLE_PASSWORD ?? "");
+  },
+
+  /** Live when the Docker socket exists; set OPSORA_DOCKER=mock to opt out. */
+  docker: async () => {
+    const enabled = process.env.OPSORA_DOCKER?.trim().toLowerCase() !== "mock";
+    if (enabled && existsSync(dockerSocket)) {
+      return createDockerAdapter(dockerSocket);
+    }
+    return mockAdapters.docker;
+  },
+
+  /** Google Calendar OAuth is still on the roadmap. */
+  calendar: async () => mockAdapters.calendar,
+};
+
+export const adapterSources = Object.keys(mockAdapters) as AdapterSourceId[];
 
 export function isAdapterSource(value: string): value is AdapterSourceId {
-  return value in adapters;
+  return (adapterSources as string[]).includes(value);
 }
 
-export function getSnapshot<K extends AdapterSourceId>(
+export async function getSnapshot<K extends AdapterSourceId>(
   source: K,
 ): Promise<Snapshot<SnapshotMap[K]>> {
-  return adapters[source].getSnapshot() as Promise<Snapshot<SnapshotMap[K]>>;
+  const adapter = await resolvers[source]();
+  return adapter.getSnapshot();
 }
 
 export async function getAllSnapshots(): Promise<SnapshotBundle> {
@@ -104,4 +76,25 @@ export async function getAllSnapshots(): Promise<SnapshotBundle> {
   ]);
 
   return { servers, github, pihole, docker, calendar };
+}
+
+export interface SourceStatus {
+  id: AdapterSourceId;
+  label: string;
+  description: string;
+  mode: "live" | "mock";
+}
+
+export async function getSourceStatuses(): Promise<SourceStatus[]> {
+  return Promise.all(
+    adapterSources.map(async (source) => {
+      const adapter = await resolvers[source]();
+      return {
+        id: source,
+        label: adapter.label,
+        description: adapter.description,
+        mode: adapter.mode,
+      };
+    }),
+  );
 }
