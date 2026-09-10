@@ -7,9 +7,10 @@ about right now?_ It pulls life (todos, calendar) and infrastructure (Linux
 servers, Pi-hole, Docker, GitHub) into a single ranked attention feed instead of
 a wall of charts.
 
-> **Status: v0.2** — every module is fully interactive. Sources run on realistic
+> **Status: v0.3** — every module is fully interactive. Sources run on realistic
 > mock data until you configure a real integration, then switch to live
-> automatically. The UI never changes; only the server-side adapter does.
+> automatically. Metrics stream over SSE, and tasks sync to SQLite on the
+> server. The UI never changes; only the server-side adapter does.
 
 ---
 
@@ -18,7 +19,7 @@ a wall of charts.
 | Area         | Included                                                                             |
 | ------------ | ------------------------------------------------------------------------------------ |
 | **Home**     | Attention feed, today's todos, today's schedule, infrastructure strip, activity       |
-| **Todos**    | CRUD, statuses, priorities, projects, tags, smart views, quick add, local persistence |
+| **Todos**    | CRUD, statuses, priorities, projects, tags, smart views, quick add, **SQLite sync** |
 | **Calendar** | Seven-day agenda with today highlighting                                             |
 | **GitHub**   | Repos, PRs, issues, CI status, activity — **live with `GITHUB_TOKEN`**               |
 | **Servers**  | CPU/RAM/disk/network, services, processes, history — **live via the agent**          |
@@ -26,6 +27,7 @@ a wall of charts.
 | **Docker**   | Container table, health, CPU/memory, uptime — **live automatically from the socket** |
 | **Alerts**   | Every signal, filtered by severity + browser notifications                           |
 | **Analytics**| Rule-based insights generated across all sources                                     |
+| **Live**     | SSE stream pushes updates every 5s; polling is the fallback                          |
 | **Command bar** | `⌘K` palette and single-key navigation (`N T C G D S P A`)                        |
 
 ## Live sources
@@ -110,7 +112,7 @@ Other scripts:
 ```bash
 pnpm build        # production build (standalone output)
 pnpm start        # run the production server
-pnpm test         # vitest — attention rules, adapter mappings (22 tests)
+pnpm test         # vitest — attention rules, adapter mappings, todo repo (27 tests)
 pnpm typecheck    # tsc --noEmit
 pnpm lint         # eslint
 ```
@@ -132,9 +134,12 @@ agent metrics persist in the `opsora-data` volume. Uncomment the socket mount in
                      │  /proc, df, ps, systemctl  →  POST /api/agent │
                      └───────────────────────┬───────────────────────┘
                                              ▼
-Browser ── TanStack Query (30–120s) ──► /api/snapshot + /api/sources/[source]
-                                             │
-                                  Adapter registry (server-side)
+Browser ── SSE /api/stream (5s) ──┐
+   │                              ├──► /api/snapshot + /api/sources/[source]
+   └── TanStack Query (fallback) ─┘             │
+                                     Adapter registry (server-side)
+                                                │
+Browser ◄── /api/todos ◄── SQLite (.data/opsora.db)
                                              │
         ┌────────────┬────────────┬──────────┴─────────┬────────────┐
      servers       github       pihole       docker      calendar
@@ -184,7 +189,7 @@ src/
 
 - [x] v0.1 — shell, todos, attention engine, mock sources, all pages
 - [x] v0.2 — live Docker + agent ingest + GitHub + Pi-hole adapters, notifications
-- [ ] v0.3 — SSE for real-time metrics, SQLite for todos, source health panel
+- [x] v0.3 — SSE live stream, SQLite task sync, source health panel
 - [ ] v0.4 — Google Calendar OAuth, Telegram/Discord notifications
 - [ ] v0.5 — AI daily summaries over the attention feed
 

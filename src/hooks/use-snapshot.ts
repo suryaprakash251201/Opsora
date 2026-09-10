@@ -48,3 +48,36 @@ export function useSourceSnapshot<K extends AdapterSourceId>(
     refetchInterval,
   });
 }
+
+export interface SourceStatusEntry {
+  id: AdapterSourceId;
+  label: string;
+  description: string;
+  mode: "live" | "mock";
+  status: "ok" | "stale" | "error";
+  latencyMs: number;
+  fetchedAt: string;
+}
+
+export interface AgentStatusEntry {
+  hostname: string;
+  role: string;
+  os: string;
+  online: boolean;
+  receivedAt: string;
+}
+
+export interface StatusResponse {
+  sources: SourceStatusEntry[];
+  agents: AgentStatusEntry[];
+  serverTime: string;
+  uptimeSeconds: number;
+}
+
+export function useSourceStatus(refetchInterval = 15_000) {
+  return useQuery<StatusResponse>({
+    queryKey: ["status"],
+    queryFn: () => fetchJson<StatusResponse>("/api/status"),
+    refetchInterval,
+  });
+}

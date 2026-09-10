@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { CommandPalette } from "@/components/shell/command-palette";
+import { LiveStreamProvider } from "@/components/shell/live-stream-provider";
 import { Sidebar } from "@/components/shell/sidebar";
 import { StoreHydration } from "@/components/shell/store-hydration";
 import { Topbar } from "@/components/shell/topbar";
@@ -19,6 +20,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       <CommandPalette />
       <GlobalTodoDialog />
       <NotificationWatcher />
+      <LiveStreamProvider />
       <StoreHydration />
     </div>
   );

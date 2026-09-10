@@ -6,6 +6,7 @@ import { StatusDot } from "@/components/viz/status-dot";
 import { useAttention } from "@/hooks/use-attention";
 import { useClock } from "@/hooks/use-clock";
 import { formatClock, formatLongDate } from "@/lib/format";
+import { useRealtimeStore } from "@/stores/realtime-store";
 import { useUiStore } from "@/stores/ui-store";
 
 function greetingFor(hour: number): string {
@@ -18,6 +19,7 @@ function greetingFor(hour: number): string {
 export function Topbar() {
   const now = useClock();
   const { health, summary, isLoading } = useAttention();
+  const connected = useRealtimeStore((state) => state.connected);
   const setSidebarOpen = useUiStore((state) => state.setSidebarOpen);
   const setCommandOpen = useUiStore((state) => state.setCommandOpen);
 
@@ -61,6 +63,13 @@ export function Topbar() {
             <Sun className="text-warning size-3.5" />
             <span className="metrics">32°C</span>
           </span>
+
+          {connected ? (
+            <span className="text-muted border-border bg-panel hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs md:flex">
+              <StatusDot status="healthy" pulse />
+              live
+            </span>
+          ) : null}
 
           <span className="text-muted border-border bg-panel flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs">
             <StatusDot

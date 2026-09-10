@@ -5,7 +5,7 @@ import type { DockerContainer, DockerSnapshot } from "@/lib/mock/docker";
 const DEFAULT_SOCKET =
   process.env.DOCKER_SOCKET ?? "/var/run/docker.sock";
 
-const CACHE_TTL_MS = 15_000;
+const CACHE_TTL_MS = 30_000;
 const STATS_LIMIT = 14;
 
 interface DockerListContainer {

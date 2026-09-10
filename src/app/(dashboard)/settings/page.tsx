@@ -21,6 +21,8 @@ import {
 } from "@/components/ui/card";
 import { useTodoStore } from "@/features/todos/store";
 import { createSeedTodos } from "@/features/todos/seed";
+import { SourceHealth } from "@/features/settings/source-health";
+import { SyncStatus } from "@/features/settings/sync-status";
 import { useDashboardSnapshot } from "@/hooks/use-snapshot";
 
 const sources = [
@@ -143,6 +145,8 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
+        <SourceHealth />
+
         <div className="flex flex-col gap-4">
           <Card>
             <CardHeader>
@@ -205,6 +209,8 @@ export default function SettingsPage() {
           <NotificationSettings />
         </div>
 
+        <SyncStatus />
+
         <Card>
           <CardHeader>
             <CardTitle>
@@ -214,9 +220,8 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <p className="text-muted text-xs">
-              Tasks and settings persist in your browser (localStorage) behind a
-              repository interface. Swapping to SQLite later is a one-file
-              change.
+              The browser keeps an offline copy for instant loads; the server
+              SQLite database is the source of truth and syncs across devices.
             </p>
             <div>
               <Button
@@ -241,7 +246,7 @@ export default function SettingsPage() {
           <CardContent className="flex flex-col gap-1.5 text-xs">
             <div className="flex justify-between">
               <span className="text-muted">Version</span>
-              <span className="metrics">0.2.0</span>
+              <span className="metrics">0.3.0</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted">Framework</span>
