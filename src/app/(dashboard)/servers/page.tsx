@@ -1,0 +1,92 @@
+"use client";
+
+import { RefreshCw, Server } from "lucide-react";
+import { PageHeader } from "@/components/viz/page-header";
+import { ErrorState, SectionHeader } from "@/components/viz/section";
+import { StatTile } from "@/components/viz/stat-tile";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ServerCard } from "@/features/servers/server-card";
+import { useSourceSnapshot } from "@/hooks/use-snapshot";
+import { formatBytes, timeAgo } from "@/lib/format";
+
+export default function ServersPage() {
+  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot(
+    "servers",
+    30_000,
+  );
+
+  const snapshot = data?.data;
+
+  return (
+    <>
+      <PageHeader
+        title="Servers"
+        description={
+          snapshot
+            ? `${snapshot.summary.online}/${snapshot.summary.total} online · updated ${timeAgo(snapshot.updatedAt)}`
+            : "Linux agent metrics — CPU, memory, disks, services"
+        }
+        actions={
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => void refetch()}
+            disabled={isFetching}
+          >
+            <RefreshCw className={isFetching ? "animate-spin" : undefined} />
+            Refresh
+          </Button>
+        }
+      />
+
+      {isError ? (
+        <ErrorState
+          title="Could not reach the agent"
+          onRetry={() => void refetch()}
+        />
+      ) : isLoading || !snapshot ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[0, 1, 2, 3].map((index) => (
+            <Skeleton key={index} className="h-[92px]" />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatTile
+              label="Online"
+              value={`${snapshot.summary.online}/${snapshot.summary.total}`}
+            />
+            <StatTile
+              label="Average CPU"
+              value={`${snapshot.summary.cpuAvg}%`}
+            />
+            <StatTile
+              label="Total memory"
+              value={formatBytes(snapshot.summary.memoryUsedBytes)}
+              unit={`of ${formatBytes(snapshot.summary.memoryTotalBytes)}`}
+            />
+            <StatTile
+              label="Average disk"
+              value={`${snapshot.summary.diskAvg}%`}
+            />
+          </div>
+
+          <section className="flex flex-col gap-3">
+            <SectionHeader
+              title="Machines"
+              icon={Server}
+              description="Metrics refresh every 30 seconds"
+            />
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              {snapshot.servers.map((server) => (
+                <ServerCard key={server.id} server={server} />
+              ))}
+            </div>
+          </section>
+        </div>
+      )}
+    </>
+  );
+}
