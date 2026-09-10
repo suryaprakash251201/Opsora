@@ -18,6 +18,8 @@ import { useTodoStore } from "@/features/todos/store";
 import { priorityMeta } from "@/features/todos/types";
 import { cn } from "@/lib/utils";
 
+const ACCENT = "var(--accent-todos)";
+
 export function TodayTodos() {
   const todos = useTodoStore((state) => state.todos);
   const addTodo = useTodoStore((state) => state.addTodo);
@@ -43,9 +45,19 @@ export function TodayTodos() {
   };
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="relative overflow-hidden">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-12 -right-10 size-36 rounded-full opacity-20 blur-3xl"
+        style={{ background: ACCENT }}
+      />
+      <CardHeader className="relative">
         <CardTitle>
+          <span
+            aria-hidden
+            className="inline-block size-1.5 rounded-full"
+            style={{ background: ACCENT }}
+          />
           Today
           {today.length > 0 ? (
             <Badge variant="default">{today.length}</Badge>
@@ -59,7 +71,7 @@ export function TodayTodos() {
         </Button>
       </CardHeader>
 
-      <CardContent className="pt-0">
+      <CardContent className="relative pt-0">
         <div className="flex flex-col">
           {today.length === 0 ? (
             <p className="text-subtle px-1 py-4 text-center text-xs">
@@ -94,7 +106,10 @@ export function TodayTodos() {
         </div>
 
         <div className="relative mt-2">
-          <Plus className="text-subtle pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
+          <Plus
+            className="pointer-events-none absolute top-1/2 left-2.5 z-10 size-3.5 -translate-y-1/2"
+            style={{ color: ACCENT }}
+          />
           <Input
             value={draft}
             onChange={(event) => setDraft(event.target.value)}

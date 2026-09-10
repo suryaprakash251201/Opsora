@@ -1,20 +1,21 @@
 import { cn } from "@/lib/utils";
 import { formatPercent } from "@/lib/format";
-import { toneForValue } from "@/components/viz/ring";
+import { toneForValue, type Tone } from "@/components/viz/ring";
 
-const toneBar = {
+const toneBar: Record<Tone, string> = {
   default: "bg-foreground",
   info: "bg-info",
   success: "bg-success",
   warning: "bg-warning",
   danger: "bg-danger",
-} as const;
+  brand: "bg-[var(--brand)]",
+};
 
 interface MeterProps {
   label: string;
   value: number;
   detail?: string;
-  tone?: keyof typeof toneBar;
+  tone?: Tone;
   thresholds?: [number, number];
   className?: string;
 }

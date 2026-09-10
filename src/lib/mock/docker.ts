@@ -235,7 +235,7 @@ export function getDockerSnapshot(): DockerSnapshot {
       stopped: live.length - running.length,
       unhealthy: running.filter((container) => container.health === "unhealthy")
         .length,
-      images: 18,
+      images: new Set(live.map((container) => container.image)).size,
       restarts24h,
       memoryUsedMb: running.reduce(
         (total, container) => total + container.memoryMb,

@@ -4,21 +4,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-info/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand)]/60 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-foreground text-background hover:bg-foreground/90",
+        default:
+          "text-white shadow-[0_4px_14px_-4px_color-mix(in_oklab,var(--brand)_45%,transparent)]",
         secondary:
-          "border-border bg-surface text-foreground hover:bg-surface-hover border",
-        ghost: "text-muted hover:bg-surface hover:text-foreground",
+          "border bg-[var(--surface)] text-[var(--foreground)] border-[var(--border)] hover:bg-[var(--surface-hover)]",
+        ghost: "text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--foreground)]",
         outline:
-          "border-border text-foreground hover:bg-surface border bg-transparent",
+          "border border-[var(--border)] text-[var(--foreground)] bg-transparent hover:bg-[var(--surface)]",
         destructive:
-          "border-danger/30 bg-danger/10 text-danger hover:bg-danger/20 border",
+          "border border-[color-mix(in_oklab,var(--danger)_30%,transparent)] bg-[color-mix(in_oklab,var(--danger)_10%,transparent)] text-[var(--danger)] hover:bg-[color-mix(in_oklab,var(--danger)_18%,transparent)]",
         success:
-          "border-success/30 bg-success/10 text-success hover:bg-success/20 border",
-        link: "text-info underline-offset-4 hover:underline",
+          "border border-[color-mix(in_oklab,var(--success)_30%,transparent)] bg-[color-mix(in_oklab,var(--success)_10%,transparent)] text-[var(--success)] hover:bg-[color-mix(in_oklab,var(--success)_18%,transparent)]",
+        link: "text-[var(--brand)] underline-offset-4 hover:underline",
       },
       size: {
         sm: "h-7 rounded-md px-2.5 text-xs [&_svg]:size-3.5",
@@ -40,6 +41,7 @@ function Button({
   variant,
   size,
   asChild = false,
+  style,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
@@ -47,10 +49,21 @@ function Button({
   }) {
   const Comp = asChild ? Slot : "button";
 
+  // Default = brand gradient
+  const computedStyle: React.CSSProperties =
+    variant === "default"
+      ? {
+          background:
+            "linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%)",
+          ...style,
+        }
+      : (style ?? {});
+
   return (
     <Comp
       data-slot="button"
       className={cn(buttonVariants({ variant, size }), className)}
+      style={computedStyle}
       {...props}
     />
   );

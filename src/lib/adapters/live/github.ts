@@ -159,6 +159,11 @@ function repoNameFromUrl(repositoryUrl: string): string {
   return parts[parts.length - 1] ?? "unknown";
 }
 
+export function repoFullNameFromUrl(repositoryUrl: string): string {
+  const match = repositoryUrl.match(/\/repos\/(.+?)\/?$/);
+  return match?.[1] ?? repoNameFromUrl(repositoryUrl);
+}
+
 export function mapPull(
   item: ApiSearchItem,
   reviewRequested: boolean,
@@ -270,14 +275,14 @@ async function fetchGithubSnapshot(token: string): Promise<GithubSnapshot> {
     item: ApiSearchItem,
     reviewRequested: boolean,
   ): Promise<GithubPull> {
-    const repo = repoNameFromUrl(item.repository_url);
+    const fullName = repoFullNameFromUrl(item.repository_url);
     const detail = await github<ApiPullDetail>(
-      `/repos/${repo}/pulls/${item.number}`,
+      `/repos/${fullName}/pulls/${item.number}`,
     ).catch(() => undefined);
 
     const status = detail
       ? await github<ApiStatusResponse>(
-          `/repos/${repo}/commits/${detail.head.sha}/status`,
+          `/repos/${fullName}/commits/${detail.head.sha}/status`,
         ).catch(() => undefined)
       : undefined;
 

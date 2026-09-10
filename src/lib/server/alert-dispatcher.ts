@@ -41,7 +41,9 @@ export function selectFreshAlerts(
 
   const seen = new Set(seenIds);
   const fresh = eligible.filter((item) => !seen.has(item.id));
-  const nextSeen = [...new Set([...seenIds, ...eligible.map((item) => item.id)])].slice(
+  // The seen set mirrors the previous run's eligible items. Resolved alerts
+  // are forgotten so they notify again if they recur.
+  const nextSeen = [...new Set(eligible.map((item) => item.id))].slice(
     -MAX_SEEN,
   );
 

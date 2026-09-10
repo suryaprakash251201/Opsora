@@ -108,10 +108,11 @@ export interface TodoStats {
 export function todoStats(todos: Todo[]): TodoStats {
   const today = startOfDay(new Date());
   const done = todos.filter((todo) => todo.status === "done");
+  const open = todos.filter((todo) => todo.status !== "done");
 
   return {
-    open: todos.length - done.length,
-    dueToday: todos.filter((todo) => todo.dueDate && isToday(parseISO(todo.dueDate)))
+    open: open.length,
+    dueToday: open.filter((todo) => todo.dueDate && isToday(parseISO(todo.dueDate)))
       .length,
     overdue: todos.filter(
       (todo) =>

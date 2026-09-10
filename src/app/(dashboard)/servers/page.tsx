@@ -8,14 +8,11 @@ import { StatTile } from "@/components/viz/stat-tile";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ServerCard } from "@/features/servers/server-card";
-import { useSourceSnapshot } from "@/hooks/use-snapshot";
+import { REFETCH_INTERVALS, useSourceSnapshot } from "@/hooks/use-snapshot";
 import { formatBytes, timeAgo } from "@/lib/format";
 
 export default function ServersPage() {
-  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot(
-    "servers",
-    30_000,
-  );
+  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot("servers", REFETCH_INTERVALS.servers);
 
   const snapshot = data?.data;
 
@@ -23,6 +20,7 @@ export default function ServersPage() {
     <>
       <PageHeader
         title="Servers"
+        accent="var(--accent-servers)"
         description={
           snapshot
             ? `${snapshot.summary.online}/${snapshot.summary.total} online · updated ${timeAgo(snapshot.updatedAt)}`

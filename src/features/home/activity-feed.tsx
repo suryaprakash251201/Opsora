@@ -28,6 +28,15 @@ const sourceIcons = {
   todos: ListTodo,
 } as const;
 
+const sourceAccent: Record<keyof typeof sourceIcons, string> = {
+  github: "var(--accent-github)",
+  docker: "var(--accent-docker)",
+  pihole: "var(--accent-pihole)",
+  servers: "var(--accent-servers)",
+  calendar: "var(--accent-calendar)",
+  todos: "var(--accent-todos)",
+};
+
 const kindTone: Record<ActivityEvent["kind"], string> = {
   commit: "text-info",
   ci: "text-danger",
@@ -58,18 +67,34 @@ export function ActivityFeed({ limit = 8 }: { limit?: number }) {
           </div>
         ) : (
           <ol className="relative flex flex-col gap-1">
+            {/* timeline rail */}
+            <span
+              aria-hidden
+              className="absolute top-1 bottom-1 left-[7px] w-px"
+              style={{
+                background:
+                  "linear-gradient(180deg, transparent, var(--border-strong), transparent)",
+              }}
+            />
             {events.map((event) => {
               const Icon = sourceIcons[event.source] ?? Server;
+              const accent = sourceAccent[event.source] ?? "var(--muted)";
               return (
                 <li
                   key={event.id}
-                  className="flex items-start gap-2.5 rounded-md px-1 py-1.5"
+                  className="relative flex items-start gap-2.5 rounded-md px-1 py-1.5"
                 >
-                  <Icon className="text-subtle mt-0.5 size-3.5 shrink-0" />
+                  <span
+                    className="mt-1 flex size-3.5 shrink-0 items-center justify-center rounded-full"
+                    style={{
+                      background: "var(--panel)",
+                      boxShadow: `0 0 0 2px color-mix(in oklab, ${accent} 30%, transparent)`,
+                    }}
+                  >
+                    <Icon className="size-2.5" style={{ color: accent }} />
+                  </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13px]">
-                      {event.title}
-                    </p>
+                    <p className="truncate text-[13px]">{event.title}</p>
                     {event.detail ? (
                       <p
                         className={`truncate text-[11px] ${kindTone[event.kind]}`}

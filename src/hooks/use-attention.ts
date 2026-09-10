@@ -9,14 +9,20 @@ import {
 import { useTodoStore } from "@/features/todos/store";
 import { useDashboardSnapshot } from "@/hooks/use-snapshot";
 
+/**
+ * Single source of truth for "what needs attention now". Pulls from the
+ * cached snapshot (cheap to read across pages) and memoizes each stage
+ * independently so referential equality stays stable when an upstream value
+ * hasn't changed.
+ */
 export function useAttention() {
   const query = useDashboardSnapshot();
   const todos = useTodoStore((state) => state.todos);
 
-  const items = useMemo(() => {
-    if (!query.data) return [];
-    const { sources } = query.data;
+  const sources = query.data?.sources;
 
+  const items = useMemo(() => {
+    if (!sources) return [];
     return evaluateAttention({
       servers: sources.servers.data,
       github: sources.github.data,
@@ -25,7 +31,7 @@ export function useAttention() {
       calendar: sources.calendar.data,
       todos,
     });
-  }, [query.data, todos]);
+  }, [sources, todos]);
 
   const summary = useMemo(() => summarizeAttention(items), [items]);
   const health = useMemo(() => overallHealth(items), [items]);

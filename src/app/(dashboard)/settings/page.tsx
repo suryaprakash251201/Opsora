@@ -19,11 +19,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ThemeSwitcher } from "@/components/shell/theme-switcher";
 import { useTodoStore } from "@/features/todos/store";
 import { createSeedTodos } from "@/features/todos/seed";
 import { SourceHealth } from "@/features/settings/source-health";
 import { SyncStatus } from "@/features/settings/sync-status";
 import { AlertChannels } from "@/features/settings/alert-channels";
+import { BackupRestore } from "@/features/settings/backup-restore";
 import { useDashboardSnapshot } from "@/hooks/use-snapshot";
 
 const sources = [
@@ -57,6 +59,7 @@ const sources = [
 const shortcuts = [
   { keys: ["⌘", "K"], label: "Open command palette" },
   { keys: ["/"], label: "Search pages and actions" },
+  { keys: ["⌘", "\\"], label: "Toggle sidebar collapse" },
   { keys: ["N"], label: "New task" },
   { keys: ["H"], label: "Go home" },
   { keys: ["T"], label: "Go to todos" },
@@ -68,15 +71,36 @@ const shortcuts = [
   { keys: ["A"], label: "Go to alerts" },
 ];
 
-const palette = [
-  { name: "Background", value: "#09090B", className: "bg-background" },
-  { name: "Panel", value: "#111113", className: "bg-panel" },
-  { name: "Surface", value: "#18181B", className: "bg-surface" },
-  { name: "Border", value: "#27272A", className: "bg-border" },
-  { name: "Success", value: "#22C55E", className: "bg-success" },
-  { name: "Warning", value: "#F59E0B", className: "bg-warning" },
-  { name: "Danger", value: "#EF4444", className: "bg-danger" },
-  { name: "Info", value: "#3B82F6", className: "bg-info" },
+interface PaletteSwatch {
+  name: string;
+  value: string;
+  className: string;
+  accent?: boolean;
+}
+
+const basePalette: PaletteSwatch[] = [
+  { name: "Background", value: "var(--background)", className: "bg-background" },
+  { name: "Panel", value: "var(--panel)", className: "bg-panel" },
+  { name: "Surface", value: "var(--surface)", className: "bg-surface" },
+  { name: "Border", value: "var(--border)", className: "bg-border" },
+];
+
+const statusPalette: PaletteSwatch[] = [
+  { name: "Success", value: "var(--success)", className: "bg-success" },
+  { name: "Warning", value: "var(--warning)", className: "bg-warning" },
+  { name: "Danger", value: "var(--danger)", className: "bg-danger" },
+  { name: "Info", value: "var(--info)", className: "bg-info" },
+];
+
+const accentPalette: PaletteSwatch[] = [
+  { name: "Home", value: "var(--accent-home)", className: "bg-accent-home", accent: true },
+  { name: "Todos", value: "var(--accent-todos)", className: "bg-accent-todos", accent: true },
+  { name: "Calendar", value: "var(--accent-calendar)", className: "bg-accent-calendar", accent: true },
+  { name: "GitHub", value: "var(--accent-github)", className: "bg-accent-github", accent: true },
+  { name: "Docker", value: "var(--accent-docker)", className: "bg-accent-docker", accent: true },
+  { name: "Servers", value: "var(--accent-servers)", className: "bg-accent-servers", accent: true },
+  { name: "Pi-hole", value: "var(--accent-pihole)", className: "bg-accent-pihole", accent: true },
+  { name: "Alerts", value: "var(--accent-alerts)", className: "bg-accent-alerts", accent: true },
 ];
 
 export default function SettingsPage() {
@@ -97,7 +121,9 @@ export default function SettingsPage() {
     <>
       <PageHeader
         title="Settings"
-        description="Sources, appearance, shortcuts and local data."
+        description="Themes, sources, shortcuts and local data."
+        accent="var(--accent-settings)"
+        actions={<ThemeSwitcher />}
       />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -149,31 +175,52 @@ export default function SettingsPage() {
         <SourceHealth />
 
         <div className="flex flex-col gap-4">
-          <Card>
+          <Card accent="var(--brand)" interactive>
             <CardHeader>
               <CardTitle>
                 <Palette className="text-subtle size-3.5" />
                 Appearance
               </CardTitle>
+              <ThemeSwitcher trigger="button" />
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
               <p className="text-muted text-xs">
-                Dark command-center theme. Tokens are defined once and every
-                component reads from them, so a light theme can be added
-                without touching components.
+                Pick a theme that re-tints every design token — surfaces, brand
+                gradient, and per-module accents. Themes are stored on this
+                device.
               </p>
-              <div className="grid grid-cols-4 gap-2">
-                {palette.map((color) => (
-                  <div key={color.name} className="flex flex-col gap-1">
-                    <span
-                      className={`h-8 rounded-md border border-white/10 ${color.className}`}
-                    />
-                    <span className="text-subtle text-[10px]">{color.name}</span>
-                    <span className="text-subtle font-mono text-[10px]">
-                      {color.value}
-                    </span>
-                  </div>
-                ))}
+
+              <div>
+                <p className="text-subtle mb-1.5 text-[10px] font-medium tracking-widest uppercase">
+                  Surfaces
+                </p>
+                <div className="grid grid-cols-4 gap-2">
+                  {basePalette.map((color) => (
+                    <PaletteTile key={color.name} color={color} />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-subtle mb-1.5 text-[10px] font-medium tracking-widest uppercase">
+                  Status
+                </p>
+                <div className="grid grid-cols-4 gap-2">
+                  {statusPalette.map((color) => (
+                    <PaletteTile key={color.name} color={color} />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-subtle mb-1.5 text-[10px] font-medium tracking-widest uppercase">
+                  Module accents
+                </p>
+                <div className="grid grid-cols-4 gap-2">
+                  {accentPalette.map((color) => (
+                    <PaletteTile key={color.name} color={color} />
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -212,6 +259,8 @@ export default function SettingsPage() {
         </div>
 
         <SyncStatus />
+
+        <BackupRestore />
 
         <Card>
           <CardHeader>
@@ -266,6 +315,17 @@ export default function SettingsPage() {
         </Card>
       </div>
     </>
+  );
+}
+
+function PaletteTile({ color }: { color: PaletteSwatch }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span
+        className={`h-8 rounded-md border border-white/10 ${color.className}`}
+      />
+      <span className="text-subtle text-[10px]">{color.name}</span>
+    </div>
   );
 }
 

@@ -50,13 +50,26 @@ export default function AlertsPage() {
       <PageHeader
         title="Alerts"
         description="Every signal in one place, ranked by what needs you first."
+        accent="var(--accent-alerts)"
       />
 
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Critical" value={summary.critical} />
-        <StatTile label="Warning" value={summary.warning} />
-        <StatTile label="Info" value={summary.info} />
-        <StatTile label="Success" value={summary.success} />
+        <StatTile
+          label="Critical"
+          value={summary.critical}
+          accent="var(--danger)"
+        />
+        <StatTile
+          label="Warning"
+          value={summary.warning}
+          accent="var(--warning)"
+        />
+        <StatTile label="Info" value={summary.info} accent="var(--info)" />
+        <StatTile
+          label="Success"
+          value={summary.success}
+          accent="var(--success)"
+        />
       </div>
 
       <div className="mb-4 flex gap-1 overflow-x-auto pb-1">

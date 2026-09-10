@@ -39,13 +39,19 @@ export function StatusDot({
       {pulse && status !== "unknown" ? (
         <span
           className={cn(
-            "absolute inline-flex size-full animate-ping rounded-full opacity-40",
+            "absolute inline-flex size-full animate-ping rounded-full opacity-50",
             style.dot,
           )}
         />
       ) : null}
       <span
-        className={cn("relative inline-flex size-2 rounded-full", style.dot)}
+        className={cn(
+          "relative inline-flex size-2 rounded-full shadow-[0_0_8px_currentColor] [color:var(--tw-shadow-color)]",
+          style.dot,
+        )}
+        style={{
+          boxShadow: `0 0 6px color-mix(in oklab, currentColor 60%, transparent)`,
+        }}
       />
     </span>
   );

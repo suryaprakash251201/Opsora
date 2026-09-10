@@ -23,8 +23,8 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { QueriesChart } from "@/components/viz/charts";
-import { useSourceSnapshot } from "@/hooks/use-snapshot";
+import { QueriesChart } from "@/components/viz/charts-lazy";
+import { REFETCH_INTERVALS, useSourceSnapshot } from "@/hooks/use-snapshot";
 import { formatNumber, formatPercent, timeAgo } from "@/lib/format";
 
 function TopList({
@@ -64,10 +64,7 @@ function TopList({
 }
 
 export default function PiholePage() {
-  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot(
-    "pihole",
-    60_000,
-  );
+  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot("pihole", REFETCH_INTERVALS.pihole);
 
   const snapshot = data?.data;
 
@@ -75,6 +72,7 @@ export default function PiholePage() {
     <>
       <PageHeader
         title="Pi-hole"
+        accent="var(--accent-pihole)"
         description={
           snapshot
             ? `${formatNumber(snapshot.summary.domains)} domains on blocklist · gravity updated ${timeAgo(snapshot.summary.gravityUpdatedAt)}`

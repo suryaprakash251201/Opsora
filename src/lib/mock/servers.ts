@@ -220,17 +220,9 @@ export function getServersSnapshot(): ServersSnapshot {
     (total, server) => total + server.memory.totalBytes,
     0,
   );
-  const diskAvg =
-    servers
-      .filter((server) => server.disks.length > 0)
-      .map((server) =>
-        server.disks.reduce(
-          (total, disk) =>
-            total + (disk.usedBytes / disk.totalBytes) * 100,
-          0,
-        ),
-      )
-      .reduce((a, b) => a + b, 0) / 2;
+  const diskPercents = servers.flatMap((server) =>
+    server.disks.map((disk) => (disk.usedBytes / disk.totalBytes) * 100),
+  );
 
   return {
     servers,
@@ -245,7 +237,12 @@ export function getServersSnapshot(): ServersSnapshot {
         : 0,
       memoryUsedBytes,
       memoryTotalBytes,
-      diskAvg: round(diskAvg),
+      diskAvg: diskPercents.length
+        ? round(
+            diskPercents.reduce((total, percent) => total + percent, 0) /
+              diskPercents.length,
+          )
+        : 0,
     },
     updatedAt: new Date(now).toISOString(),
   };

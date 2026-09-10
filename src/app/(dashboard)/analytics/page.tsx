@@ -18,7 +18,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { HistoryLineChart, QueriesChart } from "@/components/viz/charts";
+import {
+  HistoryLineChart,
+  QueriesChart,
+} from "@/components/viz/charts-lazy";
 import { generateInsights, type InsightTone } from "@/features/analytics/insights";
 import { useDashboardSnapshot } from "@/hooks/use-snapshot";
 import { timeAgo } from "@/lib/format";
@@ -56,6 +59,7 @@ export default function AnalyticsPage() {
     <>
       <PageHeader
         title="Analytics"
+        accent="var(--accent-analytics)"
         description={
           data
             ? `${insights.length} insights · derived ${timeAgo(data.fetchedAt)}`

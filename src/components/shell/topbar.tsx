@@ -1,6 +1,6 @@
 "use client";
 
-import { Menu, Search, Sun } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/viz/status-dot";
 import { useAttention } from "@/hooks/use-attention";
@@ -35,7 +35,7 @@ export function Topbar() {
         : { dot: "healthy" as const, text: "System healthy" };
 
   return (
-    <header className="border-border bg-background/80 sticky top-0 z-30 border-b backdrop-blur">
+    <header className="border-border bg-background/80 surface-glass sticky top-0 z-30 border-b">
       <div className="flex items-center justify-between gap-3 px-4 py-2.5 lg:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <Button
@@ -50,7 +50,8 @@ export function Topbar() {
 
           <div className="min-w-0">
             <p className="truncate text-sm font-medium tracking-tight">
-              {greetingFor(hour)}, Surya
+              <span className="text-muted">{greetingFor(hour)},</span>{" "}
+              <span className="text-gradient-brand">Surya</span>
             </p>
             <p className="text-subtle truncate text-xs">
               {now ? `${formatClock(now)} · ${formatLongDate(now)}` : "\u00a0"}
@@ -59,11 +60,6 @@ export function Topbar() {
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="text-muted border-border bg-panel hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs sm:flex">
-            <Sun className="text-warning size-3.5" />
-            <span className="metrics">32°C</span>
-          </span>
-
           {connected ? (
             <span className="text-muted border-border bg-panel hidden items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs md:flex">
               <StatusDot status="healthy" pulse />

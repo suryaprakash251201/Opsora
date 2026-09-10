@@ -2,7 +2,13 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { clamp } from "@/lib/format";
 
-type Tone = "default" | "info" | "success" | "warning" | "danger";
+export type Tone =
+  | "default"
+  | "info"
+  | "success"
+  | "warning"
+  | "danger"
+  | "brand";
 
 const toneStroke: Record<Tone, string> = {
   default: "stroke-foreground",
@@ -10,6 +16,7 @@ const toneStroke: Record<Tone, string> = {
   success: "stroke-success",
   warning: "stroke-warning",
   danger: "stroke-danger",
+  brand: "stroke-[var(--brand)]",
 };
 
 export function toneForValue(
@@ -29,6 +36,8 @@ interface RingProps {
   children?: ReactNode;
   className?: string;
   trackClassName?: string;
+  /** Animate the dash on mount. */
+  animate?: boolean;
 }
 
 export function Ring({
@@ -39,6 +48,7 @@ export function Ring({
   children,
   className,
   trackClassName,
+  animate = true,
 }: RingProps) {
   const clamped = clamp(value, 0, 100);
   const radius = (size - strokeWidth) / 2;
@@ -70,8 +80,8 @@ export function Ring({
           strokeLinecap="round"
           strokeDasharray={`${dash} ${circumference - dash}`}
           className={cn(
-            "transition-[stroke-dasharray] duration-700 ease-out",
             toneStroke[tone],
+            animate && "transition-[stroke-dasharray] duration-700 ease-out",
           )}
         />
       </svg>

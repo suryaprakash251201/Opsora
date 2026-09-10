@@ -1,16 +1,38 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+interface CardProps extends React.ComponentProps<"div"> {
+  /** Add a subtle multi-color halo in the corner of the card. */
+  accent?: string;
+  /** When true, slightly lift the card on hover (e.g. for clickable tiles). */
+  interactive?: boolean;
+}
+
+function Card({ className, accent, interactive, ...props }: CardProps) {
   return (
     <div
       data-slot="card"
       className={cn(
-        "border-border bg-panel rounded-card border shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset]",
+        "relative overflow-hidden rounded-[10px] border shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset]",
+        interactive &&
+          "transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_color-mix(in_oklab,var(--brand)_25%,transparent)]",
         className,
       )}
+      style={{
+        background: "var(--panel)",
+        borderColor: "var(--border)",
+      }}
       {...props}
-    />
+    >
+      {accent ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-16 -right-16 size-44 rounded-full opacity-30 blur-3xl"
+          style={{ background: accent }}
+        />
+      ) : null}
+      {props.children}
+    </div>
   );
 }
 

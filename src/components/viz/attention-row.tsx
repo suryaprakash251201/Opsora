@@ -23,17 +23,27 @@ export function AttentionRow({
     <Link
       href={item.href}
       className={cn(
-        "group hover:bg-surface/60 flex items-start gap-3 rounded-lg px-3 py-2.5 transition-colors",
+        "group hover:bg-surface/70 relative flex items-start gap-3 overflow-hidden rounded-lg px-3 py-2.5 transition-all",
         className,
       )}
     >
       <span
+        aria-hidden
         className={cn(
-          "mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md border",
+          "absolute inset-y-2 left-0 w-0.5 rounded-full opacity-0 transition-opacity group-hover:opacity-100",
+          meta.dot,
+        )}
+      />
+      <span
+        className={cn(
+          "relative mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border shadow-sm",
           meta.bg,
           meta.border,
           meta.text,
         )}
+        style={{
+          boxShadow: `0 0 0 1px color-mix(in oklab, currentColor 18%, transparent) inset`,
+        }}
       >
         <Icon className="size-3.5" />
       </span>
@@ -65,7 +75,9 @@ export function AttentionRow({
         </span>
       </span>
 
-      <ChevronRight className="text-subtle group-hover:text-muted mt-1 size-3.5 shrink-0 transition-colors" />
+      <ChevronRight
+        className="text-subtle group-hover:text-foreground mt-1 size-3.5 shrink-0 transition-all group-hover:translate-x-0.5"
+      />
     </Link>
   );
 }

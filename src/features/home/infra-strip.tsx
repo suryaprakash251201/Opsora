@@ -2,11 +2,7 @@
 
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
-import {
-  Container,
-  Server,
-  ShieldCheck,
-} from "lucide-react";
+import { Container, Server, ShieldCheck } from "lucide-react";
 import { GitHubIcon } from "@/components/icons/github";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkline } from "@/components/viz/sparkline";
@@ -24,6 +20,7 @@ interface TileProps {
   footer: string;
   spark?: number[];
   sparkClassName?: string;
+  accent: string;
 }
 
 function Tile({
@@ -35,21 +32,40 @@ function Tile({
   footer,
   spark,
   sparkClassName,
+  accent,
 }: TileProps) {
   return (
     <Link
       href={href}
-      className="border-border bg-panel rounded-card hover:border-border-strong flex flex-col gap-2 border p-3.5 transition-colors"
+      style={{ ["--accent" as string]: accent } as React.CSSProperties}
+      className="group relative overflow-hidden rounded-[10px] border p-3.5 transition-all"
     >
-      <div className="flex items-center justify-between gap-2">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-100"
+        style={{
+          background: `linear-gradient(180deg, color-mix(in oklab, ${accent} 6%, transparent) 0%, transparent 60%), var(--panel)`,
+          borderColor: "var(--border)",
+        }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-10 -right-10 size-28 rounded-full opacity-25 blur-2xl transition-opacity group-hover:opacity-45"
+        style={{ background: accent }}
+      />
+
+      <div className="relative flex items-center justify-between gap-2">
         <span className="text-muted flex items-center gap-1.5 text-xs">
-          <Icon className="text-subtle size-3.5" />
+          <Icon
+            className="size-3.5 transition-transform group-hover:scale-110"
+            style={{ color: accent }}
+          />
           {label}
         </span>
         <StatusDot status={status} />
       </div>
 
-      <div className="flex items-end justify-between gap-3">
+      <div className="relative flex items-end justify-between gap-3">
         <span className="metrics text-xl leading-none font-semibold tracking-tight">
           {value}
         </span>
@@ -57,12 +73,13 @@ function Tile({
           <Sparkline
             data={spark}
             height={24}
-            className={cn("text-subtle h-6 w-16 shrink-0", sparkClassName)}
+            stroke={accent}
+            className={cn("h-6 w-16 shrink-0", sparkClassName)}
           />
         ) : null}
       </div>
 
-      <p className="text-subtle truncate text-xs">{footer}</p>
+      <p className="text-subtle relative truncate text-xs">{footer}</p>
     </Link>
   );
 }
@@ -113,7 +130,7 @@ export function InfraStrip() {
         }
         footer={`CPU ${serverSnap.summary.cpuAvg}% · RAM ${formatBytes(serverSnap.summary.memoryUsedBytes)}`}
         spark={primaryServer?.history.cpu}
-        sparkClassName="text-info"
+        accent="var(--accent-servers)"
       />
 
       <Tile
@@ -130,7 +147,7 @@ export function InfraStrip() {
         }
         footer={`${piholeSnap.summary.blockRate}% blocked · ${formatNumber(piholeSnap.summary.blocked)} blocked`}
         spark={piholeSnap.history.map((point) => point.queries)}
-        sparkClassName="text-warning"
+        accent="var(--accent-pihole)"
       />
 
       <Tile
@@ -143,7 +160,7 @@ export function InfraStrip() {
         spark={dockerSnap.containers
           .filter((container) => container.state === "running")
           .map((container) => container.cpu)}
-        sparkClassName="text-success"
+        accent="var(--accent-docker)"
       />
 
       <Tile
@@ -153,6 +170,7 @@ export function InfraStrip() {
         value={`${githubSnap.stats.openPulls} open PRs`}
         status={worstCi}
         footer={`${githubSnap.stats.openIssues} issues · ${githubSnap.stats.commitsToday} commits today`}
+        accent="var(--accent-github)"
       />
     </div>
   );

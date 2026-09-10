@@ -12,6 +12,55 @@ import {
 import { Button } from "@/components/ui/button";
 import { useUiStore } from "@/stores/ui-store";
 
+interface ActionProps {
+  href?: string;
+  onClick?: () => void;
+  icon: typeof ListPlus;
+  label: string;
+  accent: string;
+}
+
+function Action({ href, onClick, icon: Icon, label, accent }: ActionProps) {
+  const content = (
+    <>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+        style={{
+          background: `radial-gradient(60% 60% at 50% 0%, color-mix(in oklab, ${accent} 25%, transparent), transparent 70%)`,
+        }}
+      />
+      <Icon
+        className="relative size-4 transition-transform group-hover:scale-110"
+        style={{ color: accent }}
+      />
+      <span className="relative text-xs">{label}</span>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Button
+        variant="secondary"
+        className="group relative h-16 flex-col gap-1.5 overflow-hidden"
+        asChild
+      >
+        <Link href={href}>{content}</Link>
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="secondary"
+      className="group relative h-16 flex-col gap-1.5 overflow-hidden"
+      onClick={onClick}
+    >
+      {content}
+    </Button>
+  );
+}
+
 export function QuickActions() {
   const queryClient = useQueryClient();
   const openTodoDialog = useUiStore((state) => state.openTodoDialog);
@@ -22,34 +71,26 @@ export function QuickActions() {
         <CardTitle>Quick actions</CardTitle>
       </CardHeader>
       <CardContent className="grid grid-cols-3 gap-2 pt-0">
-        <Button
-          variant="secondary"
-          className="h-16 flex-col gap-1.5 text-xs"
+        <Action
           onClick={() => openTodoDialog()}
-        >
-          <ListPlus className="size-4" />
-          New todo
-        </Button>
-        <Button
-          variant="secondary"
-          className="h-16 flex-col gap-1.5 text-xs"
-          asChild
-        >
-          <Link href="/calendar">
-            <CalendarPlus className="size-4" />
-            Calendar
-          </Link>
-        </Button>
-        <Button
-          variant="secondary"
-          className="h-16 flex-col gap-1.5 text-xs"
+          icon={ListPlus}
+          label="New todo"
+          accent="var(--accent-todos)"
+        />
+        <Action
+          href="/calendar"
+          icon={CalendarPlus}
+          label="Calendar"
+          accent="var(--accent-calendar)"
+        />
+        <Action
           onClick={() => {
             void queryClient.invalidateQueries();
           }}
-        >
-          <RefreshCw className="size-4" />
-          Refresh
-        </Button>
+          icon={RefreshCw}
+          label="Refresh"
+          accent="var(--accent-analytics)"
+        />
       </CardContent>
     </Card>
   );

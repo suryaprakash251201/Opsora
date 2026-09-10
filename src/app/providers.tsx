@@ -12,9 +12,14 @@ export function Providers({ children }: { children: ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 15_000,
+            gcTime: 5 * 60_000,
             retry: 1,
             refetchOnWindowFocus: false,
+            refetchOnReconnect: true,
             refetchIntervalInBackground: false,
+            // Structural sharing is on by default in v5; keep that and add
+            // network-mode "online" so failed requests don't pile up offline.
+            networkMode: "online",
           },
         },
       }),

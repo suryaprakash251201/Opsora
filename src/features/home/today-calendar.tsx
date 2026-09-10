@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowUpRight, CalendarDays } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { isToday, parseISO } from "date-fns";
 import {
   Card,
@@ -16,6 +16,16 @@ import { useDashboardSnapshot } from "@/hooks/use-snapshot";
 import { formatTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
+const ACCENT = "var(--accent-calendar)";
+
+const eventDotClass: Record<string, string> = {
+  info: "bg-info",
+  success: "bg-success",
+  warning: "bg-warning",
+  danger: "bg-danger",
+  muted: "bg-subtle",
+};
+
 export function TodayCalendar() {
   const { data, isLoading } = useDashboardSnapshot();
   const now = useClock(30_000);
@@ -25,10 +35,19 @@ export function TodayCalendar() {
     .slice(0, 6);
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="relative overflow-hidden">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -top-12 -right-10 size-36 rounded-full opacity-20 blur-3xl"
+        style={{ background: ACCENT }}
+      />
+      <CardHeader className="relative">
         <CardTitle>
-          <CalendarDays className="text-subtle size-3.5" />
+          <span
+            aria-hidden
+            className="inline-block size-1.5 rounded-full"
+            style={{ background: ACCENT }}
+          />
           Today&apos;s schedule
         </CardTitle>
         <Button variant="ghost" size="sm" asChild>
@@ -39,7 +58,7 @@ export function TodayCalendar() {
         </Button>
       </CardHeader>
 
-      <CardContent className="pt-0">
+      <CardContent className="relative pt-0">
         {isLoading ? (
           <div className="space-y-2 py-1">
             {[0, 1, 2].map((index) => (
@@ -57,28 +76,21 @@ export function TodayCalendar() {
               const end = parseISO(event.end);
               const current =
                 now !== null && start <= now && end > now && !event.allDay;
+              const dotClass =
+                eventDotClass[event.color ?? "muted"] ?? eventDotClass.muted;
 
               return (
                 <div
                   key={event.id}
                   className={cn(
-                    "flex items-center gap-3 rounded-md px-1 py-1.5",
-                    current && "bg-info/5",
+                    "flex items-center gap-3 rounded-md px-1 py-1.5 transition-colors",
+                    current && "bg-info/8",
                   )}
                 >
                   <span className="metrics text-subtle w-10 shrink-0 text-xs">
                     {event.allDay ? "all-day" : formatTime(event.start)}
                   </span>
-                  <span
-                    className={cn(
-                      "size-1.5 shrink-0 rounded-full",
-                      event.color === "info" && "bg-info",
-                      event.color === "success" && "bg-success",
-                      event.color === "warning" && "bg-warning",
-                      event.color === "danger" && "bg-danger",
-                      event.color === "muted" && "bg-subtle",
-                    )}
-                  />
+                  <span className={cn("size-1.5 shrink-0 rounded-full", dotClass)} />
                   <span className="min-w-0 flex-1">
                     <span
                       className={cn(
@@ -95,7 +107,13 @@ export function TodayCalendar() {
                     ) : null}
                   </span>
                   {current ? (
-                    <span className="text-info shrink-0 text-[11px] font-medium">
+                    <span
+                      className="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase"
+                      style={{
+                        color: "var(--info)",
+                        background: "color-mix(in oklab, var(--info) 12%, transparent)",
+                      }}
+                    >
                       now
                     </span>
                   ) : null}

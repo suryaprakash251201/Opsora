@@ -8,7 +8,7 @@ import { StatTile } from "@/components/viz/stat-tile";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSourceSnapshot } from "@/hooks/use-snapshot";
+import { REFETCH_INTERVALS, useSourceSnapshot } from "@/hooks/use-snapshot";
 import { formatBytes, formatDuration, timeAgo } from "@/lib/format";
 import type { DockerContainer } from "@/lib/mock/docker";
 import { cn } from "@/lib/utils";
@@ -27,10 +27,7 @@ function healthVariant(health: DockerContainer["health"]) {
 }
 
 export default function DockerPage() {
-  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot(
-    "docker",
-    45_000,
-  );
+  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot("docker", REFETCH_INTERVALS.docker);
 
   const snapshot = data?.data;
   const containers = snapshot
@@ -44,6 +41,7 @@ export default function DockerPage() {
     <>
       <PageHeader
         title="Docker"
+        accent="var(--accent-docker)"
         description={
           snapshot
             ? `${snapshot.summary.running} running · ${snapshot.summary.images} images · updated ${timeAgo(snapshot.updatedAt)}`

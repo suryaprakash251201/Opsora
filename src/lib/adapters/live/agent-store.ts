@@ -176,7 +176,7 @@ export async function ingestAgentMetrics(
     network: [...previous.network, metrics.network.rxMbps].slice(-HISTORY_LIMIT),
   });
 
-  void persist();
+  await persist();
   return metrics;
 }
 

@@ -61,13 +61,14 @@ export default function TodosPage() {
     <>
       <PageHeader
         title="Todos"
+        accent="var(--accent-todos)"
         description={
           stats.overdue > 0
             ? `${stats.open} open · ${stats.overdue} overdue · ${stats.completedToday} completed today`
             : `${stats.open} open · ${stats.dueToday} due today · ${stats.completedToday} completed today`
         }
         actions={
-          <Button onClick={() => openTodoDialog()}>
+          <Button onClick={() => openTodoDialog(undefined, view === "today" ? "today" : "inbox")}>
             <Plus />
             New task
           </Button>
@@ -173,7 +174,7 @@ export default function TodosPage() {
           title="Nothing here"
           description="No tasks match this view or filter. Create one to get started."
           action={
-            <Button size="sm" onClick={() => openTodoDialog()}>
+            <Button size="sm" onClick={() => openTodoDialog(undefined, view === "today" ? "today" : "inbox")}>
               <Plus />
               New task
             </Button>

@@ -15,13 +15,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RepoCard } from "@/features/github/repo-card";
 import { IssueList, PullList } from "@/features/github/lists";
-import { useSourceSnapshot } from "@/hooks/use-snapshot";
+import { REFETCH_INTERVALS, useSourceSnapshot } from "@/hooks/use-snapshot";
 
 export default function GithubPage() {
-  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot(
-    "github",
-    60_000,
-  );
+  const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot("github", REFETCH_INTERVALS.github);
 
   const snapshot = data?.data;
 
@@ -29,6 +26,7 @@ export default function GithubPage() {
     <>
       <PageHeader
         title="GitHub"
+        accent="var(--accent-github)"
         description={
           snapshot
             ? `@${snapshot.user.login} · ${snapshot.repos.length} repositories · ${snapshot.stats.openPulls} open PRs`
@@ -122,7 +120,7 @@ export default function GithubPage() {
               <SectionHeader
                 title="Pull requests"
                 icon={GitPullRequest}
-                description={`${snapshot.pulls.length} open`}
+                description={`${snapshot.pulls.length} recent`}
               />
               <PullList pulls={snapshot.pulls} />
             </section>
@@ -131,7 +129,7 @@ export default function GithubPage() {
               <SectionHeader
                 title="Issues"
                 icon={CircleAlert}
-                description={`${snapshot.issues.length} open`}
+                description={`${snapshot.issues.length} recent`}
               />
               <IssueList issues={snapshot.issues} />
             </section>

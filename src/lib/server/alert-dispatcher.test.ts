@@ -56,4 +56,16 @@ describe("selectFreshAlerts", () => {
     const { fresh } = selectFreshAlerts(items, ["a", "b"]);
     expect(fresh).toEqual([]);
   });
+
+  it("forgets resolved alerts so they can notify again", () => {
+    const { fresh, nextSeen } = selectFreshAlerts(items, ["a", "b", "stale"]);
+    expect(fresh).toEqual([]);
+    expect(nextSeen).toEqual(["a", "b"]);
+
+    const recurred = selectFreshAlerts(
+      [...items, item({ id: "stale", severity: "critical" })],
+      nextSeen,
+    );
+    expect(recurred.fresh.map((entry) => entry.id)).toEqual(["stale"]);
+  });
 });

@@ -155,7 +155,9 @@ export function ServerCard({ server }: { server: Server }) {
                 server.cpu.temperatureC >= 70 && "text-warning",
               )}
             >
-              {server.cpu.temperatureC}°C
+              {server.cpu.temperatureC > 0
+                ? `${server.cpu.temperatureC}°C`
+                : "—"}
             </p>
           </div>
         </div>

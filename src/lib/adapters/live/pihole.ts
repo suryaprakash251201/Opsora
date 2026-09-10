@@ -166,8 +166,12 @@ function createPiholeClient(baseUrl: string, password: string): PiholeClient {
 
   async function api<T>(path: string): Promise<T> {
     const active = await authenticate();
+    const headers = {
+      accept: "application/json",
+      "X-FTL-SID": active.sid,
+    };
     const response = await fetch(`${base}${path}`, {
-      headers: { accept: "application/json", sid: active.sid },
+      headers,
       cache: "no-store",
     });
 
@@ -175,7 +179,10 @@ function createPiholeClient(baseUrl: string, password: string): PiholeClient {
       session = null;
       const retried = await authenticate();
       const retryResponse = await fetch(`${base}${path}`, {
-        headers: { accept: "application/json", sid: retried.sid },
+        headers: {
+          accept: "application/json",
+          "X-FTL-SID": retried.sid,
+        },
         cache: "no-store",
       });
       if (!retryResponse.ok) {

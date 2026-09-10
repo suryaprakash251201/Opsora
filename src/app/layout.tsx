@@ -28,6 +28,25 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
+/**
+ * Inline pre-hydration script — reads the persisted theme from localStorage
+ * (if any) and applies it before React mounts, preventing a flash of the
+ * default dark theme when the user has chosen a different one.
+ */
+const themeBootstrapScript = `
+(function () {
+  try {
+    var raw = localStorage.getItem("opsora.theme");
+    if (!raw) return;
+    var parsed = JSON.parse(raw);
+    var theme = parsed && parsed.state && parsed.state.theme;
+    if (theme && /^(opsora|aurora|abyss|forest|solar)$/.test(theme)) {
+      document.documentElement.dataset.theme = theme;
+    }
+  } catch (e) {}
+})();
+`;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -35,6 +54,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} ${jetbrainsMono.variable} h-full`}
       suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: themeBootstrapScript }}
+        />
+      </head>
       <body className="bg-background text-foreground min-h-full antialiased">
         <Providers>{children}</Providers>
       </body>

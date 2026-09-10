@@ -18,9 +18,7 @@ export function SectionHeader({
   className,
 }: SectionHeaderProps) {
   return (
-    <div
-      className={cn("flex items-end justify-between gap-3", className)}
-    >
+    <div className={cn("flex items-end justify-between gap-3", className)}>
       <div className="flex flex-col gap-0.5">
         <h2 className="flex items-center gap-2 text-[13px] font-medium tracking-tight">
           {Icon ? <Icon className="text-subtle size-3.5" /> : null}
@@ -41,6 +39,7 @@ interface EmptyStateProps {
   description?: string;
   action?: ReactNode;
   className?: string;
+  accent?: string;
 }
 
 export function EmptyState({
@@ -49,6 +48,7 @@ export function EmptyState({
   description,
   action,
   className,
+  accent,
 }: EmptyStateProps) {
   return (
     <div
@@ -56,9 +56,20 @@ export function EmptyState({
         "border-border/70 flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed px-6 py-10 text-center",
         className,
       )}
+      style={
+        accent
+          ? ({
+              background:
+                "color-mix(in oklab, currentColor 6%, transparent)",
+              borderColor:
+                "color-mix(in oklab, currentColor 22%, var(--border))",
+              color: accent,
+            } as React.CSSProperties)
+          : undefined
+      }
     >
-      {Icon ? <Icon className="text-subtle size-5" /> : null}
-      <p className="text-sm font-medium">{title}</p>
+      {Icon ? <Icon className="size-5" /> : null}
+      <p className="text-foreground text-sm font-medium">{title}</p>
       {description ? (
         <p className="text-subtle max-w-xs text-xs">{description}</p>
       ) : null}

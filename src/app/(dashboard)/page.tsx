@@ -18,6 +18,7 @@ export default function HomePage() {
       <PageHeader
         title="Home"
         description="What needs your attention right now."
+        accent="var(--accent-home)"
       />
 
       <SourceWarnings />

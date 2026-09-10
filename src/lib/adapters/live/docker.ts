@@ -131,6 +131,67 @@ function parsePorts(container: DockerListContainer): string {
   return ports.length > 0 ? [...new Set(ports)].join(", ") : "-";
 }
 
+interface DockerEvent {
+  Action?: string;
+  Actor?: { ID?: string; Attributes?: { name?: string } };
+}
+
+/**
+ * Counts restart/die/oom events per container over the last 24h using the
+ * daemon's event buffer. Returns an empty map when unavailable — callers
+ * treat missing entries as zero.
+ */
+function fetchRestartCounts(socketPath: string): Promise<Map<string, number>> {
+  return new Promise((resolve) => {
+    const counts = new Map<string, number>();
+    const nowSeconds = Math.floor(Date.now() / 1000);
+    const filters = encodeURIComponent(
+      JSON.stringify({ event: ["restart", "die", "oom"] }),
+    );
+
+    const request = http.request(
+      {
+        socketPath,
+        path: `/events?since=${nowSeconds - 86_400}&until=${nowSeconds}&filters=${filters}`,
+        method: "GET",
+        headers: { Host: "docker" },
+      },
+      (response) => {
+        let body = "";
+        response.setEncoding("utf8");
+        response.on("data", (chunk: string) => {
+          body += chunk;
+          // Guard against huge buffers on busy hosts.
+          if (body.length > 2_000_000) request.destroy();
+        });
+        response.on("end", () => {
+          for (const line of body.split("\n")) {
+            if (!line.trim()) continue;
+            try {
+              const event = JSON.parse(line) as DockerEvent;
+              const name = (event.Actor?.Attributes?.name ?? "").replace(
+                /^\//,
+                "",
+              );
+              const id = (event.Actor?.ID ?? "").slice(0, 12);
+              const key = name || id;
+              if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
+            } catch {
+              // Ignore partial trailing lines.
+            }
+          }
+          resolve(counts);
+        });
+      },
+    );
+
+    request.setTimeout(8_000, () => request.destroy());
+    request.on("error", () => resolve(counts));
+    request.on("close", () => resolve(counts));
+    request.end();
+  });
+}
+
 async function fetchDockerSnapshot(socketPath: string): Promise<DockerSnapshot> {
   const list = await dockerGet<DockerListContainer[]>(
     socketPath,
@@ -138,16 +199,19 @@ async function fetchDockerSnapshot(socketPath: string): Promise<DockerSnapshot> 
   );
 
   const running = list.filter((container) => container.State === "running");
-  const statsResults = await Promise.allSettled(
-    running
-      .slice(0, STATS_LIMIT)
-      .map((container) =>
-        dockerGet<DockerStats>(
-          socketPath,
-          `/containers/${container.Id}/stats?stream=false`,
+  const [statsResults, restartCounts] = await Promise.all([
+    Promise.allSettled(
+      running
+        .slice(0, STATS_LIMIT)
+        .map((container) =>
+          dockerGet<DockerStats>(
+            socketPath,
+            `/containers/${container.Id}/stats?stream=false`,
+          ),
         ),
-      ),
-  );
+    ),
+    fetchRestartCounts(socketPath),
+  ]);
 
   const statsById = new Map<string, DockerStats>();
   running.slice(0, STATS_LIMIT).forEach((container, index) => {
@@ -167,10 +231,11 @@ async function fetchDockerSnapshot(socketPath: string): Promise<DockerSnapshot> 
         )
       : 0;
     const limit = stats?.memory_stats.limit ?? 0;
+    const shortName = (container.Names[0] ?? container.Id).replace(/^\//, "");
 
     return {
       id: container.Id.slice(0, 12),
-      name: (container.Names[0] ?? container.Id).replace(/^\//, ""),
+      name: shortName,
       image: container.Image,
       state:
         container.State === "running"
@@ -184,7 +249,10 @@ async function fetchDockerSnapshot(socketPath: string): Promise<DockerSnapshot> 
       memoryLimitMb: Math.round(limit / (1024 * 1024)),
       ports: parsePorts(container),
       uptimeSeconds: parseUptimeSeconds(container.Status),
-      restarts24h: 0,
+      restarts24h:
+        restartCounts.get(shortName) ??
+        restartCounts.get(container.Id.slice(0, 12)) ??
+        0,
     };
   });
 

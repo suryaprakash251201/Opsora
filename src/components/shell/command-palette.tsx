@@ -67,6 +67,12 @@ export function CommandPalette() {
 
       if (typing || event.metaKey || event.ctrlKey || event.altKey) return;
 
+      if (event.key === "\\") {
+        event.preventDefault();
+        useUiStore.getState().toggleSidebarCollapsed();
+        return;
+      }
+
       if (event.key === "/") {
         event.preventDefault();
         setCommandOpen(true);

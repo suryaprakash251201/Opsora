@@ -8,7 +8,7 @@ import { SourceWarning } from "@/components/viz/source-warning";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClock } from "@/hooks/use-clock";
-import { useSourceSnapshot } from "@/hooks/use-snapshot";
+import { REFETCH_INTERVALS, useSourceSnapshot } from "@/hooks/use-snapshot";
 import { formatDayLabel, formatTime } from "@/lib/format";
 import type { CalendarEvent } from "@/lib/mock/calendar";
 import { cn } from "@/lib/utils";
@@ -22,10 +22,7 @@ const colorClasses: Record<CalendarEvent["color"], string> = {
 };
 
 export default function CalendarPage() {
-  const { data, isLoading, isError, refetch } = useSourceSnapshot(
-    "calendar",
-    300_000,
-  );
+  const { data, isLoading, isError, refetch } = useSourceSnapshot("calendar", REFETCH_INTERVALS.calendar);
   const now = useClock(30_000);
 
   const events = data?.data.events ?? [];
@@ -43,6 +40,7 @@ export default function CalendarPage() {
     <>
       <PageHeader
         title="Calendar"
+        accent="var(--accent-calendar)"
         description={
           isLoading
             ? "Next seven days"

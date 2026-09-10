@@ -7,6 +7,7 @@ import type {
   SnapshotMap,
 } from "@/lib/adapters/types";
 import type { ActivityEvent } from "@/lib/mock/activity";
+import { useRealtimeStore } from "@/stores/realtime-store";
 
 export interface DashboardSnapshot {
   sources: { [K in AdapterSourceId]: Snapshot<SnapshotMap[K]> };
@@ -31,10 +32,14 @@ async function fetchJson<T>(url: string): Promise<T> {
 }
 
 export function useDashboardSnapshot(refetchInterval = 30_000) {
+  // The SSE stream pushes updates every 5s; polling is only the fallback
+  // for when the stream is disconnected or unsupported.
+  const connected = useRealtimeStore((state) => state.connected);
+
   return useQuery<DashboardSnapshot>({
     queryKey: ["snapshot"],
     queryFn: () => fetchJson<DashboardSnapshot>("/api/snapshot"),
-    refetchInterval,
+    refetchInterval: connected ? false : refetchInterval,
   });
 }
 
@@ -42,10 +47,12 @@ export function useSourceSnapshot<K extends AdapterSourceId>(
   source: K,
   refetchInterval: number,
 ) {
+  const connected = useRealtimeStore((state) => state.connected);
+
   return useQuery<Snapshot<SnapshotMap[K]>>({
     queryKey: ["source", source],
     queryFn: () => fetchJson<Snapshot<SnapshotMap[K]>>(`/api/sources/${source}`),
-    refetchInterval,
+    refetchInterval: connected ? false : refetchInterval,
   });
 }
 

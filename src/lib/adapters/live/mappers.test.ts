@@ -4,7 +4,13 @@ import {
   parseHealth,
   parseUptimeSeconds,
 } from "./docker";
-import { mapCi, mapLastCommit, mapPull, mapRepo } from "./github";
+import {
+  mapCi,
+  mapLastCommit,
+  mapPull,
+  mapRepo,
+  repoFullNameFromUrl,
+} from "./github";
 import {
   mapPiholeHistory,
   mapPiholeSummary,
@@ -76,6 +82,14 @@ describe("github mapping", () => {
     ).toBe("passing");
   });
 
+  it("extracts owner and repo from repository urls", () => {
+    expect(
+      repoFullNameFromUrl("https://api.github.com/repos/surya/cloud-dock"),
+    ).toBe("surya/cloud-dock");
+    expect(
+      repoFullNameFromUrl("https://api.github.com/repos/surya/cloud-dock/"),
+    ).toBe("surya/cloud-dock");
+  });
   it("falls back when a repo has no commits", () => {
     const lastCommit = mapLastCommit(undefined);
     expect(lastCommit.sha).toBe("-------");
