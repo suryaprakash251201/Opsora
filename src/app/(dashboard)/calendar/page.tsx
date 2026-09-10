@@ -4,6 +4,7 @@ import { CalendarDays, Clock, MapPin, Users } from "lucide-react";
 import { isToday, parseISO } from "date-fns";
 import { PageHeader } from "@/components/viz/page-header";
 import { ErrorState } from "@/components/viz/section";
+import { SourceWarning } from "@/components/viz/source-warning";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClock } from "@/hooks/use-clock";
@@ -54,6 +55,8 @@ export default function CalendarPage() {
           </Badge>
         }
       />
+
+      <SourceWarning snapshot={data} className="mb-4" />
 
       {isError ? (
         <ErrorState

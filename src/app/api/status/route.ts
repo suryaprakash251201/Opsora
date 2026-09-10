@@ -3,6 +3,7 @@ import {
   getAgentMetrics,
   isAgentOnline,
 } from "@/lib/adapters/live/agent-store";
+import { getChannelStatuses } from "@/lib/server/alert-channels";
 
 export async function GET() {
   const [statuses, snapshots, agents] = await Promise.all([
@@ -20,6 +21,7 @@ export async function GET() {
         description: status.description,
         mode: snapshot.mode,
         status: snapshot.status,
+        error: snapshot.error ?? null,
         latencyMs: snapshot.latencyMs,
         fetchedAt: snapshot.fetchedAt,
       };
@@ -33,5 +35,6 @@ export async function GET() {
     })),
     serverTime: new Date().toISOString(),
     uptimeSeconds: Math.round(process.uptime()),
+    channels: getChannelStatuses(),
   });
 }

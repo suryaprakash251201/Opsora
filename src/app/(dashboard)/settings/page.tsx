@@ -23,6 +23,7 @@ import { useTodoStore } from "@/features/todos/store";
 import { createSeedTodos } from "@/features/todos/seed";
 import { SourceHealth } from "@/features/settings/source-health";
 import { SyncStatus } from "@/features/settings/sync-status";
+import { AlertChannels } from "@/features/settings/alert-channels";
 import { useDashboardSnapshot } from "@/hooks/use-snapshot";
 
 const sources = [
@@ -207,6 +208,7 @@ export default function SettingsPage() {
           </Card>
 
           <NotificationSettings />
+          <AlertChannels />
         </div>
 
         <SyncStatus />
@@ -246,7 +248,7 @@ export default function SettingsPage() {
           <CardContent className="flex flex-col gap-1.5 text-xs">
             <div className="flex justify-between">
               <span className="text-muted">Version</span>
-              <span className="metrics">0.3.0</span>
+              <span className="metrics">0.4.0</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted">Framework</span>

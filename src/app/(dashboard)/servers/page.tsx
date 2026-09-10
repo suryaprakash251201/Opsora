@@ -3,6 +3,7 @@
 import { RefreshCw, Server } from "lucide-react";
 import { PageHeader } from "@/components/viz/page-header";
 import { ErrorState, SectionHeader } from "@/components/viz/section";
+import { SourceWarning } from "@/components/viz/source-warning";
 import { StatTile } from "@/components/viz/stat-tile";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -39,6 +40,8 @@ export default function ServersPage() {
           </Button>
         }
       />
+
+      <SourceWarning snapshot={data} className="mb-4" />
 
       {isError ? (
         <ErrorState

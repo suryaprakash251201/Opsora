@@ -55,6 +55,7 @@ export interface SourceStatusEntry {
   description: string;
   mode: "live" | "mock";
   status: "ok" | "stale" | "error";
+  error: string | null;
   latencyMs: number;
   fetchedAt: string;
 }
@@ -72,6 +73,12 @@ export interface StatusResponse {
   agents: AgentStatusEntry[];
   serverTime: string;
   uptimeSeconds: number;
+  channels: {
+    id: "telegram" | "discord";
+    label: string;
+    configured: boolean;
+    hint: string;
+  }[];
 }
 
 export function useSourceStatus(refetchInterval = 15_000) {

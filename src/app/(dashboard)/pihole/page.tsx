@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/viz/page-header";
 import { ErrorState } from "@/components/viz/section";
+import { SourceWarning } from "@/components/viz/source-warning";
 import { StatTile } from "@/components/viz/stat-tile";
 import { StatusDot } from "@/components/viz/status-dot";
 import { Badge } from "@/components/ui/badge";
@@ -91,6 +92,8 @@ export default function PiholePage() {
           </Button>
         }
       />
+
+      <SourceWarning snapshot={data} className="mb-4" />
 
       {isError ? (
         <ErrorState

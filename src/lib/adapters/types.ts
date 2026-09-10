@@ -22,6 +22,8 @@ export interface Snapshot<T> {
   status: "ok" | "stale" | "error";
   /** Whether the data came from a real integration or a mock adapter. */
   mode: "live" | "mock";
+  /** Present when a live source failed and the mock fallback was used. */
+  error?: string;
   latencyMs: number;
 }
 

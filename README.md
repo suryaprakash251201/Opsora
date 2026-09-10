@@ -7,10 +7,11 @@ about right now?_ It pulls life (todos, calendar) and infrastructure (Linux
 servers, Pi-hole, Docker, GitHub) into a single ranked attention feed instead of
 a wall of charts.
 
-> **Status: v0.3** — every module is fully interactive. Sources run on realistic
+> **Status: v0.4** — every module is fully interactive. Sources run on realistic
 > mock data until you configure a real integration, then switch to live
-> automatically. Metrics stream over SSE, and tasks sync to SQLite on the
-> server. The UI never changes; only the server-side adapter does.
+> automatically. Metrics stream over SSE, tasks sync to SQLite on the server,
+> and the server pushes alerts to Telegram/Discord. Failed live sources degrade
+> to demo data with a visible warning instead of breaking the page.
 
 ---
 
@@ -25,7 +26,7 @@ a wall of charts.
 | **Servers**  | CPU/RAM/disk/network, services, processes, history — **live via the agent**          |
 | **Pi-hole**  | 24h queries/blocks, top clients and domains — **live with `PIHOLE_URL`**             |
 | **Docker**   | Container table, health, CPU/memory, uptime — **live automatically from the socket** |
-| **Alerts**   | Every signal, filtered by severity + browser notifications                           |
+| **Alerts**   | Every signal, filtered by severity + browser and **Telegram/Discord** delivery     |
 | **Analytics**| Rule-based insights generated across all sources                                     |
 | **Live**     | SSE stream pushes updates every 5s; polling is the fallback                          |
 | **Command bar** | `⌘K` palette and single-key navigation (`N T C G D S P A`)                        |
@@ -90,6 +91,36 @@ PIHOLE_URL=http://pi.hole
 PIHOLE_PASSWORD=...
 ```
 
+### Google Calendar — OAuth
+
+```bash
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REFRESH_TOKEN=...
+GOOGLE_CALENDAR_ID=primary   # optional
+```
+
+Create an OAuth client of type "Desktop app" in Google Cloud, then let the
+helper script walk you through consent and print the refresh token:
+
+```bash
+GOOGLE_CLIENT_ID=... GOOGLE_CLIENT_SECRET=... node scripts/google-oauth.mjs
+```
+
+### Telegram / Discord alerts
+
+```bash
+TELEGRAM_BOT_TOKEN=...   # from @BotFather
+TELEGRAM_CHAT_ID=...
+DISCORD_WEBHOOK_URL=...
+```
+
+When configured, the server checks the attention feed every minute and pushes
+new critical/warning signals (set `OPSORA_ALERT_LEVEL=all` to include info,
+`OPSORA_ALERTS=0` to disable). The first run only records the current state, so
+you never get a startup flood. Use the "Send test" button in Settings to verify
+a channel.
+
 ## Stack
 
 - **Next.js (App Router) + React + TypeScript**
@@ -112,7 +143,7 @@ Other scripts:
 ```bash
 pnpm build        # production build (standalone output)
 pnpm start        # run the production server
-pnpm test         # vitest — attention rules, adapter mappings, todo repo (27 tests)
+pnpm test         # vitest — attention, adapters, calendar, alerts, SQLite (37 tests)
 pnpm typecheck    # tsc --noEmit
 pnpm lint         # eslint
 ```
@@ -140,6 +171,9 @@ Browser ── SSE /api/stream (5s) ──┐
                                      Adapter registry (server-side)
                                                 │
 Browser ◄── /api/todos ◄── SQLite (.data/opsora.db)
+
+Server startup ── instrumentation ──► alert dispatcher (60s)
+                                        └──► Telegram · Discord
                                              │
         ┌────────────┬────────────┬──────────┴─────────┬────────────┐
      servers       github       pihole       docker      calendar
@@ -190,7 +224,7 @@ src/
 - [x] v0.1 — shell, todos, attention engine, mock sources, all pages
 - [x] v0.2 — live Docker + agent ingest + GitHub + Pi-hole adapters, notifications
 - [x] v0.3 — SSE live stream, SQLite task sync, source health panel
-- [ ] v0.4 — Google Calendar OAuth, Telegram/Discord notifications
+- [x] v0.4 — Google Calendar OAuth, Telegram/Discord delivery, degrade-to-mock
 - [ ] v0.5 — AI daily summaries over the attention feed
 
 ## Design
