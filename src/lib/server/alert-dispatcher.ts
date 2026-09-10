@@ -18,7 +18,7 @@ const severityIcon: Record<Severity, string> = {
 
 export function formatAlertText(
   item: AttentionItem,
-  baseUrl = process.env.OPSORA_PUBLIC_URL ?? "http://localhost:3000",
+  baseUrl = process.env.OPSORA_PUBLIC_URL ?? "http://localhost:9942",
 ): string {
   const lines = [`${severityIcon[item.severity]} Opsora · ${item.title}`];
   if (item.detail) lines.push(item.detail);

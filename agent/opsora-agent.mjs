@@ -7,7 +7,7 @@
  *   OPSORA_INTERVAL=30 node agent/opsora-agent.mjs
  *
  * Environment:
- *   OPSORA_URL       dashboard base URL        (default http://localhost:3000)
+ *   OPSORA_URL       dashboard base URL        (default http://localhost:9942)
  *   OPSORA_INTERVAL  seconds between reports   (default 30, 0 = once)
  *   OPSORA_TOKEN     shared secret             (must match OPSORA_AGENT_TOKEN)
  *   OPSORA_ROLE      human label for this host (default "Monitored host")
@@ -22,7 +22,7 @@ import { promisify } from "node:util";
 
 const exec = promisify(execFile);
 
-const url = (process.env.OPSORA_URL ?? "http://localhost:3000").replace(/\/$/, "");
+const url = (process.env.OPSORA_URL ?? "http://localhost:9942").replace(/\/$/, "");
 const interval = Number(process.env.OPSORA_INTERVAL ?? 30);
 const token = process.env.OPSORA_TOKEN ?? "";
 const role = process.env.OPSORA_ROLE ?? "Monitored host";

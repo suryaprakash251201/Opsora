@@ -2,10 +2,16 @@ services:
   opsora:
     build: .
     container_name: opsora
+    image: opsora:latest
     ports:
-      - "3001:3000"
+      # Map host 9942 → container 9942 (matches PORT in Dockerfile).
+      # Change the host side (`9942:9942`) to expose Opsora on a different
+      # port without rebuilding the image.
+      - "9942:9942"
     environment:
       - NODE_ENV=production
+      - PORT=9942
+      - HOSTNAME=0.0.0.0
       # - GITHUB_TOKEN=${GITHUB_TOKEN}
       # - PIHOLE_URL=${PIHOLE_URL}
       # - PIHOLE_PASSWORD=${PIHOLE_PASSWORD}
@@ -15,6 +21,12 @@ services:
       # Mount the socket to monitor the host's containers:
       # - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9942/api/status"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
 
 volumes:
   opsora-data:

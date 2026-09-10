@@ -20,7 +20,7 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "relative mb-4 flex flex-wrap items-end justify-between gap-3 overflow-hidden",
+        "relative mb-2 flex flex-wrap items-end justify-between gap-3 overflow-hidden sm:mb-3",
         className,
       )}
     >
@@ -29,15 +29,17 @@ export function PageHeader({
         className="pointer-events-none absolute -top-12 left-0 h-32 w-72 rounded-full opacity-20 blur-3xl"
         style={{ background: accent }}
       />
-      <div className="relative flex flex-col gap-0.5">
+      <div className="relative flex min-w-0 flex-1 flex-col gap-1">
         <span
           aria-hidden
-          className="bg-foreground/70 mb-1 inline-block h-0.5 w-6 rounded-full"
-          style={{ background: accent }}
+          className="mb-1 inline-block h-0.5 w-8 rounded-full"
+          style={{ background: accent, boxShadow: `0 0 12px ${accent}` }}
         />
-        <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
+        <h1 className="text-[20px] leading-tight font-semibold tracking-tight">
+          {title}
+        </h1>
         {description ? (
-          <p className="text-subtle text-xs">{description}</p>
+          <p className="text-muted text-[13px] leading-snug">{description}</p>
         ) : null}
       </div>
       {actions ? (

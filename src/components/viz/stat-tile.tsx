@@ -38,7 +38,7 @@ export function StatTile({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-[10px] border p-3.5 transition-all",
+        "group relative overflow-hidden rounded-[10px] border p-4 transition-all",
         className,
       )}
       style={
@@ -49,7 +49,6 @@ export function StatTile({
         } as React.CSSProperties
       }
     >
-      {/* Accent gradient halo */}
       {accent ? (
         <span
           aria-hidden
@@ -59,12 +58,19 @@ export function StatTile({
       ) : null}
 
       <div className="relative flex items-center justify-between gap-2">
-        <span className="text-muted flex items-center gap-1.5 text-xs">
+        <span className="text-muted flex items-center gap-2 text-xs">
           {Icon ? (
-            <Icon
-              className="size-3.5"
-              style={accent ? { color: accent } : { color: "var(--subtle)" }}
-            />
+            <span
+              className="flex size-5 items-center justify-center rounded-md"
+              style={{
+                background: accent
+                  ? `color-mix(in oklab, ${accent} 14%, transparent)`
+                  : "color-mix(in oklab, var(--surface) 80%, transparent)",
+                color: accent ?? "var(--muted)",
+              }}
+            >
+              <Icon className="size-3.5" strokeWidth={2.2} />
+            </span>
           ) : null}
           {label}
         </span>
@@ -82,7 +88,7 @@ export function StatTile({
         ) : null}
       </div>
 
-      <div className="metrics relative flex items-baseline gap-1 text-xl leading-none font-semibold tracking-tight">
+      <div className="metrics relative mt-1 flex items-baseline gap-1 text-[22px] leading-none font-semibold tracking-tight">
         {value}
         {unit ? (
           <span className="text-subtle text-xs font-normal">{unit}</span>
@@ -92,9 +98,9 @@ export function StatTile({
       {spark && spark.length > 1 ? (
         <Sparkline
           data={spark}
-          height={24}
+          height={28}
           className={cn(
-            "relative h-6 w-full",
+            "relative mt-2 h-7 w-full",
             accent ? "" : "text-subtle",
             sparkClassName,
           )}
@@ -102,7 +108,7 @@ export function StatTile({
         />
       ) : null}
 
-      {footer ? <div className="text-subtle text-xs">{footer}</div> : null}
+      {footer ? <div className="text-subtle mt-1 text-xs">{footer}</div> : null}
     </div>
   );
 }

@@ -12,6 +12,9 @@ interface UiState {
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
   toggleSidebarCollapsed: () => void;
+  /** Expanded sidebar width in pixels (persisted). */
+  sidebarWidth: number;
+  setSidebarWidth: (width: number) => void;
 
   commandOpen: boolean;
   setCommandOpen: (open: boolean) => void;
@@ -34,6 +37,9 @@ export const useUiStore = create<UiState>()(
       toggleSidebarCollapsed: () =>
         set({ sidebarCollapsed: !get().sidebarCollapsed }),
 
+      sidebarWidth: 244,
+      setSidebarWidth: (sidebarWidth) => set({ sidebarWidth }),
+
       commandOpen: false,
       setCommandOpen: (commandOpen) => set({ commandOpen }),
 
@@ -52,8 +58,11 @@ export const useUiStore = create<UiState>()(
     {
       name: "opsora.ui",
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ sidebarCollapsed: state.sidebarCollapsed }),
-      version: 1,
+      partialize: (state) => ({
+        sidebarCollapsed: state.sidebarCollapsed,
+        sidebarWidth: state.sidebarWidth,
+      }),
+      version: 2,
     },
   ),
 );

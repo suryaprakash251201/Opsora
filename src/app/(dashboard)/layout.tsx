@@ -10,8 +10,9 @@ import { GlobalTodoDialog } from "@/features/todos/global-todo-dialog";
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="relative flex min-h-dvh">
-      {/* Ambient multi-color background that responds to the active theme. */}
+    <div className="bg-background relative min-h-dvh text-foreground">
+      {/* Ambient gradient background — gives the dashboard depth without
+          competing with the content. */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 -z-10"
@@ -19,7 +20,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       />
       <div
         aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 opacity-[0.35]"
+        className="pointer-events-none fixed inset-0 -z-10 opacity-40"
         style={{
           background:
             "radial-gradient(1200px 600px at 0% -10%, color-mix(in oklab, var(--brand) 22%, transparent), transparent 60%), radial-gradient(900px 500px at 100% 0%, color-mix(in oklab, var(--brand-2) 18%, transparent), transparent 60%), radial-gradient(800px 400px at 50% 110%, color-mix(in oklab, var(--accent-home) 14%, transparent), transparent 60%)",
@@ -30,8 +31,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />
-        <main className="mx-auto w-full max-w-[1500px] flex-1 px-4 py-5 lg:px-6">
-          {children}
+        <main
+          className="mx-auto w-full max-w-[1500px] flex-1 px-4 pt-4 pb-8 sm:px-5 lg:px-6 lg:pt-5"
+          style={{ paddingTop: undefined }}
+        >
+          <div className="flex flex-col gap-4 sm:gap-5">{children}</div>
         </main>
       </div>
 

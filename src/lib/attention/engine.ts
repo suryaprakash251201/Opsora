@@ -6,6 +6,17 @@ import {
   parseISO,
   startOfDay,
 } from "date-fns";
+
+/** Defensive parseISO — returns null for empty / invalid input. */
+function safeParseISO(value: string | null | undefined): Date | null {
+  if (typeof value !== "string" || value.trim() === "") return null;
+  try {
+    const parsed = parseISO(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  } catch {
+    return null;
+  }
+}
 import type { CalendarSnapshot } from "@/lib/mock/calendar";
 import type { DockerSnapshot } from "@/lib/mock/docker";
 import type { GithubSnapshot } from "@/lib/mock/github";
@@ -329,7 +340,8 @@ function piholeItems(snapshot: PiholeSnapshot, now: Date): DraftItem[] {
     }
   }
 
-  const gravityAge = differenceInHours(now, parseISO(summary.gravityUpdatedAt));
+  const gravityDate = safeParseISO(summary.gravityUpdatedAt);
+  const gravityAge = gravityDate ? differenceInHours(now, gravityDate) : 0;
   if (gravityAge > 7 * 24) {
     items.push({
       id: "pihole-gravity-stale",

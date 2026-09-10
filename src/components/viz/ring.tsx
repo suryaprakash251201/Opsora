@@ -69,7 +69,7 @@ export function Ring({
           r={radius}
           fill="none"
           strokeWidth={strokeWidth}
-          className={cn("stroke-surface", trackClassName)}
+          className={cn("stroke-border", trackClassName)}
         />
         <circle
           cx={size / 2}
@@ -83,11 +83,12 @@ export function Ring({
             toneStroke[tone],
             animate && "transition-[stroke-dasharray] duration-700 ease-out",
           )}
+          style={{ filter: `drop-shadow(0 0 6px currentColor)` }}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
         {children ?? (
-          <span className="metrics text-xs font-medium">
+          <span className="metrics text-xs font-semibold">
             {Math.round(clamped)}%
           </span>
         )}

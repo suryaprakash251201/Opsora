@@ -38,11 +38,11 @@ function Tile({
     <Link
       href={href}
       style={{ ["--accent" as string]: accent } as React.CSSProperties}
-      className="group relative overflow-hidden rounded-[10px] border p-3.5 transition-all"
+      className="group relative flex min-h-[112px] flex-col gap-2 overflow-hidden rounded-[12px] border p-4 transition-all hover:-translate-y-0.5"
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-100"
+        className="pointer-events-none absolute inset-0"
         style={{
           background: `linear-gradient(180deg, color-mix(in oklab, ${accent} 6%, transparent) 0%, transparent 60%), var(--panel)`,
           borderColor: "var(--border)",
@@ -55,31 +55,36 @@ function Tile({
       />
 
       <div className="relative flex items-center justify-between gap-2">
-        <span className="text-muted flex items-center gap-1.5 text-xs">
-          <Icon
-            className="size-3.5 transition-transform group-hover:scale-110"
-            style={{ color: accent }}
-          />
+        <span className="text-muted flex items-center gap-2 text-xs">
+          <span
+            className="flex size-6 items-center justify-center rounded-md"
+            style={{
+              background: `color-mix(in oklab, ${accent} 14%, transparent)`,
+              color: accent,
+            }}
+          >
+            <Icon className="size-3.5" strokeWidth={2.2} />
+          </span>
           {label}
         </span>
         <StatusDot status={status} />
       </div>
 
       <div className="relative flex items-end justify-between gap-3">
-        <span className="metrics text-xl leading-none font-semibold tracking-tight">
+        <span className="metrics text-[22px] leading-none font-semibold tracking-tight">
           {value}
         </span>
         {spark && spark.length > 1 ? (
           <Sparkline
             data={spark}
-            height={24}
+            height={28}
             stroke={accent}
-            className={cn("h-6 w-16 shrink-0", sparkClassName)}
+            className={cn("h-7 w-20 shrink-0", sparkClassName)}
           />
         ) : null}
       </div>
 
-      <p className="text-subtle relative truncate text-xs">{footer}</p>
+      <p className="text-subtle relative truncate text-[11px]">{footer}</p>
     </Link>
   );
 }
@@ -129,7 +134,13 @@ export function InfraStrip() {
             : "critical"
         }
         footer={`CPU ${serverSnap.summary.cpuAvg}% · RAM ${formatBytes(serverSnap.summary.memoryUsedBytes)}`}
-        spark={primaryServer?.history.cpu}
+        spark={
+          primaryServer
+            ? primaryServer.history.cpu.length > 1
+              ? primaryServer.history.cpu
+              : primaryServer.history.memory
+            : undefined
+        }
         accent="var(--accent-servers)"
       />
 

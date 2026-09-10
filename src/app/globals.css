@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* =========================================================
-   OPSORA — Multi-theme color system
+   OPSORA — Multi-theme design system
    ------------------------------------------------------------
    Tokens are grouped into:
      • Base surfaces & text   (theme-dependent)
@@ -15,18 +15,20 @@
 [data-theme="opsora"] {
   color-scheme: dark;
 
-  /* Surfaces */
-  --background: #09090b;
-  --panel: #111113;
-  --surface: #18181b;
-  --surface-hover: #1f1f23;
-  --border: #27272a;
-  --border-strong: #3f3f46;
+  /* Surfaces — slightly warmer dark so the rail feels less clinical */
+  --background: #08080b;
+  --panel: #0e0e12;
+  --panel-elevated: #15151b;
+  --surface: #1b1b22;
+  --surface-hover: #23232c;
+  --border: #2a2a35;
+  --border-strong: #3b3b48;
 
   /* Text */
   --foreground: #f4f4f5;
   --muted: #a1a1aa;
-  --subtle: #71717a;
+  --subtle: #6f6f7a;
+  --disabled: #4a4a55;
 
   /* Brand */
   --brand: #818cf8;
@@ -54,18 +56,18 @@
   /* Effects */
   --ring: 0 0 0 1px color-mix(in oklab, var(--brand) 40%, transparent);
   --glow: 0 0 24px color-mix(in oklab, var(--brand) 18%, transparent);
-  --gradient-hero: radial-gradient(
-      1200px 600px at 0% -10%,
-      color-mix(in oklab, var(--brand) 18%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      900px 500px at 100% 0%,
-      color-mix(in oklab, var(--brand-2) 14%, transparent),
-      transparent 60%
-    );
+  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.02) inset;
+  --shadow-pop: 0 8px 32px -12px color-mix(in oklab, var(--brand) 25%, transparent),
+    0 2px 8px -2px rgba(0, 0, 0, 0.4);
 
+  /* Layout */
   --radius: 0.625rem;
+  --sidebar-collapsed: 72px;
+  --sidebar-expanded: 244px;
+  --sidebar-max: 320px;
+  --rail-radius: 18px;
+  --header-h: 56px;
+  --content-pad: 1.25rem;
 }
 
 /* -------- Theme: Midnight Aurora (richer indigo/teal) -------- */
@@ -74,14 +76,16 @@
 
   --background: #06070d;
   --panel: #0d1018;
-  --surface: #141826;
-  --surface-hover: #1c2236;
-  --border: #232a40;
-  --border-strong: #34406b;
+  --panel-elevated: #131a2b;
+  --surface: #181f33;
+  --surface-hover: #1f2944;
+  --border: #2a3458;
+  --border-strong: #3b4a7a;
 
   --foreground: #f1f5fb;
   --muted: #aab4ce;
   --subtle: #7682a4;
+  --disabled: #4b5470;
 
   --brand: #7c3aed;
   --brand-2: #06b6d4;
@@ -92,16 +96,9 @@
   --danger: #f43f5e;
   --info: #38bdf8;
 
-  --accent-home: #f472b6;
-  --accent-todos: #fbbf24;
-  --accent-calendar: #34d399;
-  --accent-github: #a78bfa;
-  --accent-docker: #38bdf8;
-  --accent-servers: #fb7185;
-  --accent-pihole: #4ade80;
-  --accent-alerts: #fb923c;
-  --accent-analytics: #60a5fa;
-  --accent-settings: #94a3b8;
+  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset;
+  --shadow-pop: 0 10px 36px -16px color-mix(in oklab, var(--brand) 35%, transparent),
+    0 2px 8px -2px rgba(0, 0, 0, 0.55);
 }
 
 /* -------- Theme: Solar Light (warm, high-contrast) -------- */
@@ -110,6 +107,7 @@
 
   --background: #f7f6f2;
   --panel: #ffffff;
+  --panel-elevated: #fafaf7;
   --surface: #f1efe9;
   --surface-hover: #e7e4dc;
   --border: #e2dfd5;
@@ -118,6 +116,7 @@
   --foreground: #1c1917;
   --muted: #57534e;
   --subtle: #78716c;
+  --disabled: #a8a29e;
 
   --brand: #ea580c;
   --brand-2: #d97706;
@@ -128,16 +127,8 @@
   --danger: #dc2626;
   --info: #0284c7;
 
-  --accent-home: #db2777;
-  --accent-todos: #ca8a04;
-  --accent-calendar: #059669;
-  --accent-github: #7c3aed;
-  --accent-docker: #0369a1;
-  --accent-servers: #be123c;
-  --accent-pihole: #15803d;
-  --accent-alerts: #c2410c;
-  --accent-analytics: #1d4ed8;
-  --accent-settings: #64748b;
+  --shadow-card: 0 1px 2px rgba(28, 25, 23, 0.06), 0 4px 12px rgba(28, 25, 23, 0.05);
+  --shadow-pop: 0 8px 28px -12px rgba(28, 25, 23, 0.18);
 }
 
 /* -------- Theme: Abyss (cool, deep ocean) -------- */
@@ -146,14 +137,16 @@
 
   --background: #050913;
   --panel: #0a1220;
-  --surface: #0f1a2e;
-  --surface-hover: #14223b;
-  --border: #1c2c4a;
-  --border-strong: #2c4470;
+  --panel-elevated: #10203b;
+  --surface: #142740;
+  --surface-hover: #1b3150;
+  --border: #233e62;
+  --border-strong: #355886;
 
   --foreground: #e2e8f5;
   --muted: #8ea1c2;
   --subtle: #5d7196;
+  --disabled: #3a4a68;
 
   --brand: #2dd4bf;
   --brand-2: #3b82f6;
@@ -163,17 +156,6 @@
   --warning: #fbbf24;
   --danger: #f87171;
   --info: #60a5fa;
-
-  --accent-home: #f472b6;
-  --accent-todos: #fbbf24;
-  --accent-calendar: #34d399;
-  --accent-github: #a78bfa;
-  --accent-docker: #38bdf8;
-  --accent-servers: #fb7185;
-  --accent-pihole: #4ade80;
-  --accent-alerts: #fb923c;
-  --accent-analytics: #60a5fa;
-  --accent-settings: #94a3b8;
 }
 
 /* -------- Theme: Forest (organic green/violet) -------- */
@@ -182,14 +164,16 @@
 
   --background: #08120e;
   --panel: #0e1a14;
-  --surface: #14241c;
-  --surface-hover: #1c2f25;
-  --border: #21392e;
-  --border-strong: #355546;
+  --panel-elevated: #14241c;
+  --surface: #1a2e23;
+  --surface-hover: #233b2d;
+  --border: #2a4335;
+  --border-strong: #3d6050;
 
   --foreground: #ecfdf5;
   --muted: #9bb6a6;
   --subtle: #6a8478;
+  --disabled: #3f5448;
 
   --brand: #34d399;
   --brand-2: #a78bfa;
@@ -199,35 +183,12 @@
   --warning: #f59e0b;
   --danger: #ef4444;
   --info: #38bdf8;
-
-  --accent-home: #f472b6;
-  --accent-todos: #fbbf24;
-  --accent-calendar: #34d399;
-  --accent-github: #a78bfa;
-  --accent-docker: #38bdf8;
-  --accent-servers: #fb7185;
-  --accent-pihole: #4ade80;
-  --accent-alerts: #fb923c;
-  --accent-analytics: #60a5fa;
-  --accent-settings: #94a3b8;
-}
-
-/* High-contrast tweak for Solar Light */
-[data-theme="solar"] {
-  --shadow-card: 0 1px 2px rgba(28, 25, 23, 0.06), 0 4px 12px rgba(28, 25, 23, 0.05);
-}
-
-:root,
-[data-theme="opsora"],
-[data-theme="aurora"],
-[data-theme="abyss"],
-[data-theme="forest"] {
-  --shadow-card: 0 1px 0 0 rgba(255, 255, 255, 0.02) inset;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-panel: var(--panel);
+  --color-panel-elevated: var(--panel-elevated);
   --color-surface: var(--surface);
   --color-surface-hover: var(--surface-hover);
   --color-border: var(--border);
@@ -235,6 +196,7 @@
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-subtle: var(--subtle);
+  --color-disabled: var(--disabled);
   --color-success: var(--success);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
@@ -355,15 +317,20 @@
       "cv11" 1,
       "ss01" 1;
     text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   ::selection {
     background: color-mix(in oklab, var(--brand) 35%, transparent);
   }
 
+  /* App-wide scrollbars: thin, brand-tinted on hover, always visible
+     inside scrollable regions so users can scan long lists. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--border-strong) transparent;
+    scrollbar-color: color-mix(in oklab, var(--border-strong) 60%, transparent)
+      transparent;
   }
 
   ::-webkit-scrollbar {
@@ -376,12 +343,19 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--border-strong);
+    background: color-mix(in oklab, var(--border-strong) 60%, transparent);
     border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in oklab, var(--border-strong) 70%, var(--brand) 30%);
+    background: color-mix(in oklab, var(--brand) 55%, var(--border-strong) 45%);
+    background-clip: padding-box;
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
 
   :focus-visible {
@@ -410,7 +384,6 @@
   letter-spacing: -0.01em;
 }
 
-/* Brand gradient text */
 @utility text-gradient-brand {
   background-image: linear-gradient(
     120deg,
@@ -425,7 +398,6 @@
   animation: gradient-shift 12s ease infinite;
 }
 
-/* Soft brand glow used behind hero tiles */
 @utility bg-glow-brand {
   background:
     radial-gradient(
@@ -440,7 +412,6 @@
     );
 }
 
-/* Shimmering placeholder used by skeletons */
 @utility bg-shimmer {
   background: linear-gradient(
     90deg,
@@ -452,14 +423,12 @@
   animation: shimmer 2.4s linear infinite;
 }
 
-/* Glass surface (used in command palette, modals) */
 @utility surface-glass {
   background: color-mix(in oklab, var(--panel) 90%, transparent);
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
 }
 
-/* Hide scrollbars without affecting scroll behaviour */
 @utility scrollbar-hidden {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -468,7 +437,14 @@
   }
 }
 
-/* Accent text helpers driven by the per-module accents */
+@utility card-pop {
+  box-shadow: var(--shadow-pop);
+}
+
+@utility panel-shadow {
+  box-shadow: var(--shadow-card);
+}
+
 @utility text-accent-home {
   color: var(--accent-home);
 }

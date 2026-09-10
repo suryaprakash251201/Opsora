@@ -41,20 +41,43 @@ export function formatDuration(totalSeconds: number): string {
   return `${minutes}m`;
 }
 
-export function timeAgo(iso: string): string {
-  return formatDistanceToNowStrict(parseISO(iso), { addSuffix: true });
+/**
+ * Defensive `parseISO` — returns `null` for empty / invalid input instead of
+ * throwing `RangeError: Invalid time value`. The formatter helpers below
+ * fall back to a safe placeholder string when given `null`.
+ */
+function safeParseISO(value: unknown): Date | null {
+  if (typeof value !== "string" || value.trim() === "") return null;
+  try {
+    const parsed = parseISO(value);
+    // date-fns returns an Invalid Date for malformed strings; detect it.
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  } catch {
+    return null;
+  }
 }
 
-export function formatTime(iso: string): string {
-  return format(parseISO(iso), "HH:mm");
+export function timeAgo(iso: string | null | undefined): string {
+  const date = safeParseISO(iso);
+  if (!date) return "—";
+  return formatDistanceToNowStrict(date, { addSuffix: true });
 }
 
-export function formatDate(iso: string): string {
-  return format(parseISO(iso), "d MMM yyyy");
+export function formatTime(iso: string | null | undefined): string {
+  const date = safeParseISO(iso);
+  if (!date) return "—";
+  return format(date, "HH:mm");
 }
 
-export function formatDayLabel(iso: string): string {
-  const date = parseISO(iso);
+export function formatDate(iso: string | null | undefined): string {
+  const date = safeParseISO(iso);
+  if (!date) return "—";
+  return format(date, "d MMM yyyy");
+}
+
+export function formatDayLabel(iso: string | null | undefined): string {
+  const date = safeParseISO(iso);
+  if (!date) return "—";
   if (isToday(date)) return "Today";
   if (isTomorrow(date)) return "Tomorrow";
   return format(date, "EEE d MMM");

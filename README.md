@@ -52,7 +52,7 @@ If `/var/run/docker.sock` exists, Docker data is live. Opt out with
 The agent is a single dependency-free Node script:
 
 ```bash
-OPSORA_URL=http://localhost:3000 \
+OPSORA_URL=http://localhost:9942 \
 OPSORA_ROLE="Primary homelab server" \
 OPSORA_SERVICES=docker,ssh,caddy \
 node agent/opsora-agent.mjs
@@ -72,7 +72,7 @@ Description=Opsora agent
 After=network-online.target
 
 [Service]
-Environment=OPSORA_URL=http://localhost:3000
+Environment=OPSORA_URL=http://localhost:9942
 Environment=OPSORA_ROLE=Primary homelab server
 ExecStart=/usr/bin/node /opt/opsora/agent/opsora-agent.mjs
 Restart=always
@@ -141,7 +141,7 @@ a channel.
 ```bash
 pnpm install
 cp .env.example .env.local   # optional: configure live sources
-pnpm dev                     # http://localhost:3000
+pnpm dev                     # http://localhost:9942
 ```
 
 Other scripts:
@@ -161,7 +161,7 @@ Pull the prebuilt image (CI publishes it on every release tag):
 ```bash
 docker run -d \
   --name opsora \
-  -p 3000:3000 \
+  -p 9942:9942 \
   -v opsora-data:/app/.data \
   # -v /var/run/docker.sock:/var/run/docker.sock:ro  # monitor host containers
   ghcr.io/suryaprakash251201/opsora:latest
