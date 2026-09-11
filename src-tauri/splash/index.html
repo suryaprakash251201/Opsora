@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Opsora</title>
+    <style>
+      :root {
+        --background: #08080b;
+        --panel: #0e0e12;
+        --panel-elevated: #15151b;
+        --surface: #1b1b22;
+        --border: #2a2a35;
+        --border-strong: #3b3b48;
+        --foreground: #f4f4f5;
+        --muted: #a1a1aa;
+        --subtle: #6f6f7a;
+        --brand: #818cf8;
+        --brand-2: #c084fc;
+        --danger: #ef4444;
+        --warning: #f59e0b;
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--background);
+        color: var(--foreground);
+        font-family:
+          ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        overflow: hidden;
+        user-select: none;
+      }
+
+      /* Faint PCB-style grid + brand aura, echoing the dashboard shell. */
+      .grid {
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(to right, rgba(59, 59, 72, 0.28) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(59, 59, 72, 0.28) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: radial-gradient(60% 60% at 50% 50%, #000 20%, transparent 100%);
+        -webkit-mask-image: radial-gradient(60% 60% at 50% 50%, #000 20%, transparent 100%);
+      }
+
+      .aura {
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(600px 320px at 20% 0%, rgba(129, 140, 248, 0.16), transparent 65%),
+          radial-gradient(520px 300px at 85% 15%, rgba(192, 132, 252, 0.13), transparent 65%),
+          radial-gradient(560px 320px at 50% 110%, rgba(244, 114, 182, 0.1), transparent 65%);
+      }
+
+      .stage {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 22px;
+        padding: 40px;
+        text-align: center;
+        animation: rise 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+
+      .logo {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 74px;
+        height: 74px;
+        border-radius: 20px;
+        color: #fff;
+        background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%);
+        box-shadow:
+          0 18px 50px -18px rgba(129, 140, 248, 0.65),
+          0 2px 8px -2px rgba(0, 0, 0, 0.6);
+      }
+
+      .logo::after {
+        content: "";
+        position: absolute;
+        inset: -7px;
+        border-radius: 26px;
+        border: 1px solid rgba(129, 140, 248, 0.35);
+        animation: halo 2.8s ease-in-out infinite;
+      }
+
+      .logo svg {
+        width: 40px;
+        height: 40px;
+      }
+
+      .halo-spin {
+        transform-origin: 12px 12px;
+        animation: spin 14s linear infinite;
+      }
+
+      .led {
+        animation: blink 2.4s ease-in-out infinite;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 650;
+        letter-spacing: -0.02em;
+      }
+
+      .tagline {
+        margin: 4px 0 0;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--subtle);
+      }
+
+      .status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 20px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .spinner {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        border: 2px solid rgba(129, 140, 248, 0.25);
+        border-top-color: var(--brand);
+        animation: spin 0.8s linear infinite;
+      }
+
+      .footnote {
+        position: fixed;
+        bottom: 22px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        font-size: 11px;
+        color: var(--subtle);
+        letter-spacing: 0.04em;
+      }
+
+      .kbd {
+        font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        font-size: 10px;
+        padding: 1px 5px;
+        border-radius: 5px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--muted);
+      }
+
+      /* ————— error state ————— */
+      body.failed .grid,
+      body.failed .aura {
+        opacity: 0.35;
+      }
+
+      body.failed .spinner {
+        display: none;
+      }
+
+      body.failed .logo {
+        background: linear-gradient(135deg, #7f1d1d, #ef4444);
+        box-shadow: 0 18px 50px -18px rgba(239, 68, 68, 0.65);
+      }
+
+      body.failed .logo::after {
+        border-color: rgba(239, 68, 68, 0.4);
+      }
+
+      .error-body {
+        display: none;
+        max-width: 460px;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+
+      body.failed .error-body {
+        display: flex;
+      }
+
+      body.failed .status {
+        color: var(--danger);
+      }
+
+      .error-message {
+        white-space: pre-line;
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: var(--muted);
+      }
+
+      .retry {
+        margin-top: 4px;
+        padding: 8px 16px;
+        font: inherit;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--foreground);
+        background: var(--surface);
+        border: 1px solid var(--border-strong);
+        border-radius: 9px;
+        cursor: pointer;
+        transition: background 150ms ease, transform 150ms ease;
+      }
+
+      .retry:hover {
+        background: #23232c;
+        transform: translateY(-1px);
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.25;
+        }
+      }
+
+      @keyframes halo {
+        0%,
+        100% {
+          opacity: 0.35;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.85;
+          transform: scale(1.04);
+        }
+      }
+
+      @keyframes rise {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="grid" aria-hidden="true"></div>
+    <div class="aura" aria-hidden="true"></div>
+
+    <main class="stage">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle class="halo-spin" cx="12" cy="12" r="10.4" stroke-dasharray="2.5 4.5" opacity="0.7" />
+          <path d="M12 4.6 19.4 12 12 19.4 4.6 12 12 4.6Z" />
+          <path d="M12 8.2 15.8 12 12 15.8 8.2 12 12 8.2Z" opacity="0.55" />
+          <circle class="led" cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
+        </svg>
+      </div>
+
+      <div>
+        <h1>Opsora</h1>
+        <p class="tagline">Command Center</p>
+      </div>
+
+      <div class="status">
+        <span class="spinner" aria-hidden="true"></span>
+        <span id="status-text" role="status">Starting the local server…</span>
+      </div>
+
+      <div class="error-body">
+        <p class="error-message" id="error-message"></p>
+        <button type="button" class="retry" onclick="location.reload()">Try again</button>
+      </div>
+    </main>
+
+    <p class="footnote">
+      Press <span class="kbd">⌘ \</span> / <span class="kbd">Ctrl \</span> in the app to toggle the sidebar
+    </p>
+
+    <script>
+      // Bridge used by the Rust shell: window.opsora.status("…") and
+      // window.opsora.fail("…") update this page while the server boots.
+      (function () {
+        var statusText = document.getElementById("status-text");
+        var errorMessage = document.getElementById("error-message");
+
+        window.opsora = {
+          status: function (text) {
+            if (typeof text === "string" && text) statusText.textContent = text;
+          },
+          fail: function (text) {
+            document.body.classList.add("failed");
+            statusText.textContent = "The local server could not be reached";
+            errorMessage.textContent = text || "Unknown startup error.";
+          },
+        };
+      })();
+    </script>
+  </body>
+</html>

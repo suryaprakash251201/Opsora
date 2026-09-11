@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Opsora",
+  "version": "0.6.0",
+  "identifier": "com.opsora.app",
+  "build": {
+    "devUrl": "http://localhost:9942",
+    "frontendDist": "splash",
+    "beforeDevCommand": "pnpm dev",
+    "beforeBuildCommand": "node scripts/desktop-stage.mjs"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "resources": ["bundled-server"],
+    "category": "Utility",
+    "shortDescription": "Personal command center — what needs your attention now.",
+    "longDescription": "Opsora is a self-hosted dashboard that pulls todos, calendar, servers, Pi-hole, Docker and GitHub into a single ranked attention feed. The desktop app bundles the Opsora server and Node.js runtime and opens it in a native window.",
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  }
+}
