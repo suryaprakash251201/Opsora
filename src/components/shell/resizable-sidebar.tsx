@@ -90,7 +90,7 @@ export function ResizableSidebar({
      */
     <div
       ref={railRef}
-      className="relative h-full shrink-0 transition-[width] duration-200 ease-out"
+      className="relative h-full shrink-0 transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
       style={{ width: state.width }}
     >
       <div

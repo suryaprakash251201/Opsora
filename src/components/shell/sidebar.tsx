@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -143,7 +144,7 @@ function NavLinkItem({
           : undefined
       }
       className={cn(
-        "group relative flex items-center rounded-xl text-[13px] font-medium transition-all duration-200",
+        "group relative flex items-center rounded-xl text-[13px] font-medium transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
         collapsed
           ? "mx-auto size-11 justify-center"
           : "h-10 gap-3 px-3",
@@ -162,7 +163,7 @@ function NavLinkItem({
         <>
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-xl"
+            className="animate-[nav-indicator-in_240ms_ease-out] pointer-events-none absolute inset-0 rounded-xl"
             style={{
               background: `linear-gradient(135deg, color-mix(in oklab, ${accent} 16%, transparent) 0%, color-mix(in oklab, ${accent} 6%, transparent) 100%)`,
             }}
@@ -170,7 +171,7 @@ function NavLinkItem({
           <span
             aria-hidden
             className={cn(
-              "absolute rounded-full transition-all",
+              "animate-[nav-indicator-in_280ms_ease-out] absolute rounded-full",
               collapsed
                 ? "inset-x-2 -bottom-0.5 h-0.5"
                 : "-left-px top-1/2 h-5 w-[3px] -translate-y-1/2",
@@ -184,7 +185,7 @@ function NavLinkItem({
       ) : null}
       <Icon
         className={cn(
-          "relative shrink-0 transition-transform duration-200 group-hover:scale-110",
+          "relative shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.34,1.4,0.64,1)] group-hover:scale-110",
           collapsed ? "size-[22px]" : "size-5",
         )}
         strokeWidth={2}
@@ -192,8 +193,10 @@ function NavLinkItem({
       />
       <span
         className={cn(
-          "relative truncate whitespace-nowrap transition-all duration-200",
-          collapsed ? "pointer-events-none w-0 opacity-0" : "opacity-100",
+          "relative truncate whitespace-nowrap transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+          collapsed
+            ? "pointer-events-none w-0 -translate-x-1 opacity-0"
+            : "translate-x-0 opacity-100",
         )}
       >
         {item.label}
@@ -213,7 +216,7 @@ function NavLinkItem({
       {link}
       <span
         role="tooltip"
-        className="bg-foreground text-background pointer-events-none absolute top-1/2 left-full z-50 ml-3 -translate-y-1/2 whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-medium opacity-0 shadow-lg transition-opacity duration-150 group-hover/tooltip:opacity-100"
+        className="bg-foreground text-background pointer-events-none absolute top-1/2 left-full z-50 ml-3 -translate-y-1/2 translate-x-1 whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-medium opacity-0 shadow-lg transition-all duration-200 ease-out group-hover/tooltip:translate-x-0 group-hover/tooltip:opacity-100"
       >
         {item.label}
         {item.shortcut ? (
@@ -237,78 +240,150 @@ function NavLinks({
   const openTodoDialog = useUiStore((state) => state.openTodoDialog);
   const setCommandOpen = useUiStore((state) => state.setCommandOpen);
 
-  return (
-    <nav
-      data-scrollable
-      className={cn(
-        "flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain py-3 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent]",
-        collapsed ? "px-2.5" : "px-3",
-      )}
-    >
-      {navGroups.map((group, groupIndex) => (
-        <div key={group.label ?? groupIndex} className="flex flex-col gap-1">
-          {group.label ? (
-            collapsed ? (
-              <div className="bg-border/50 mx-3 mt-1 mb-0.5 h-px" aria-hidden />
-            ) : (
-              <p className="text-subtle mt-2 flex items-center gap-2 px-3 text-[10px] font-semibold tracking-widest uppercase first:mt-0">
-                {group.label}
-                <span
-                  aria-hidden
-                  className="bg-border/60 h-px flex-1"
-                />
-              </p>
-            )
-          ) : null}
-          {group.items.map((item) => (
-            <NavLinkItem
-              key={item.href}
-              item={item}
-              active={isActivePath(pathname, item.href)}
-              collapsed={collapsed}
-              onClick={onNavigate}
-            />
-          ))}
-        </div>
-      ))}
+  const scrollRef = useRef<HTMLElement | null>(null);
+  const [overflow, setOverflow] = useState({ top: false, bottom: false });
 
-      <button
-        type="button"
-        onClick={() => {
-          openTodoDialog();
-          setCommandOpen(false);
-          onNavigate?.();
-        }}
-        title={collapsed ? "New todo · N" : undefined}
-        aria-label="New todo"
+  // Track whether there is content above/below so we can show soft edge
+  // fades instead of a visible scrollbar.
+  useEffect(() => {
+    const element = scrollRef.current;
+    if (!element) return;
+    const update = () => {
+      const top = element.scrollTop > 4;
+      const bottom =
+        element.scrollTop + element.clientHeight < element.scrollHeight - 4;
+      setOverflow((previous) =>
+        previous.top === top && previous.bottom === bottom
+          ? previous
+          : { top, bottom },
+      );
+    };
+    update();
+    element.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => {
+      element.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, []);
+
+  const totalItems = navGroups.reduce(
+    (sum, group) => sum + group.items.length,
+    0,
+  );
+  const delayFor = (index: number) => `${Math.min(index * 24, 240)}ms`;
+
+  return (
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      {/* Edge fades: scroll affordance without a visible scrollbar. */}
+      <span
+        aria-hidden
         className={cn(
-          "border-border/60 text-subtle hover:border-border-strong hover:text-muted relative mt-1.5 flex items-center overflow-hidden rounded-xl border border-dashed text-xs transition-colors",
-          collapsed
-            ? "mx-auto size-11 justify-center"
-            : "h-10 gap-2.5 px-3",
+          "pointer-events-none absolute inset-x-0 top-0 z-20 h-5 transition-opacity duration-300",
+          overflow.top ? "opacity-100" : "opacity-0",
+        )}
+        style={{
+          background: "linear-gradient(to bottom, var(--panel), transparent)",
+        }}
+      />
+
+      <nav
+        ref={scrollRef}
+        data-scrollable
+        className={cn(
+          "scrollbar-hidden flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain py-3",
+          collapsed ? "px-2.5" : "px-3",
         )}
       >
-        <Plus
-          className={cn("shrink-0", collapsed ? "size-5" : "size-4")}
-          strokeWidth={2.4}
-        />
-        <span
+        {navGroups.map((group, groupIndex) => {
+          const baseIndex = navGroups
+            .slice(0, groupIndex)
+            .reduce((sum, previous) => sum + previous.items.length, 0);
+
+          return (
+            <div key={group.label ?? groupIndex} className="flex flex-col gap-1">
+              {group.label ? (
+                collapsed ? (
+                  <div className="bg-border/50 mx-3 mt-1 mb-0.5 h-px" aria-hidden />
+                ) : (
+                  <p className="text-subtle mt-2 flex items-center gap-2 px-3 text-[10px] font-semibold tracking-widest uppercase first:mt-0">
+                    {group.label}
+                    <span aria-hidden className="bg-border/60 h-px flex-1" />
+                  </p>
+                )
+              ) : null}
+              {group.items.map((item, itemIndex) => (
+                <div
+                  key={item.href}
+                  className="animate-[nav-item-in_380ms_cubic-bezier(0.16,1,0.3,1)_both]"
+                  style={{ animationDelay: delayFor(baseIndex + itemIndex) }}
+                >
+                  <NavLinkItem
+                    item={item}
+                    active={isActivePath(pathname, item.href)}
+                    collapsed={collapsed}
+                    onClick={onNavigate}
+                  />
+                </div>
+              ))}
+            </div>
+          );
+        })}
+
+        <button
+          type="button"
+          onClick={() => {
+            openTodoDialog();
+            setCommandOpen(false);
+            onNavigate?.();
+          }}
+          title={collapsed ? "New todo · N" : undefined}
+          aria-label="New todo"
           className={cn(
-            "whitespace-nowrap transition-all duration-200",
+            "group animate-[nav-item-in_380ms_cubic-bezier(0.16,1,0.3,1)_both] border-border/60 text-subtle hover:border-border-strong hover:text-muted relative mt-1.5 flex items-center overflow-hidden rounded-xl border border-dashed text-xs transition-colors duration-300",
             collapsed
-              ? "pointer-events-none w-0 overflow-hidden opacity-0"
-              : "opacity-100",
+              ? "mx-auto size-11 justify-center"
+              : "h-10 gap-2.5 px-3",
           )}
+          style={{ animationDelay: delayFor(totalItems) }}
         >
-          New todo
-        </span>
-        {!collapsed ? (
-          <kbd className="border-border bg-background/50 ml-auto rounded border px-1 font-mono text-[10px]">
-            N
-          </kbd>
-        ) : null}
-      </button>
-    </nav>
+          <Plus
+            className={cn(
+              "shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.34,1.4,0.64,1)] group-hover:rotate-90",
+              collapsed ? "size-5" : "size-4",
+            )}
+            strokeWidth={2.4}
+          />
+          <span
+            className={cn(
+              "whitespace-nowrap transition-[opacity,transform,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+              collapsed
+                ? "pointer-events-none w-0 -translate-x-1 opacity-0"
+                : "translate-x-0 opacity-100",
+            )}
+          >
+            New todo
+          </span>
+          {!collapsed ? (
+            <kbd className="border-border bg-background/50 ml-auto rounded border px-1 font-mono text-[10px]">
+              N
+            </kbd>
+          ) : null}
+        </button>
+      </nav>
+
+      <span
+        aria-hidden
+        className={cn(
+          "pointer-events-none absolute inset-x-0 bottom-0 z-20 h-5 transition-opacity duration-300",
+          overflow.bottom ? "opacity-100" : "opacity-0",
+        )}
+        style={{
+          background: "linear-gradient(to top, var(--panel), transparent)",
+        }}
+      />
+    </div>
   );
 }
 
@@ -363,7 +438,7 @@ function SidebarHeader({ collapsed }: { collapsed: boolean }) {
       </span>
       <span
         className={cn(
-          "min-w-0 overflow-hidden whitespace-nowrap transition-all duration-200",
+          "min-w-0 overflow-hidden whitespace-nowrap transition-[opacity,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
           collapsed ? "pointer-events-none w-0 opacity-0" : "opacity-100",
         )}
       >
@@ -406,7 +481,7 @@ export function Sidebar() {
     <>
       {/* Desktop: floating resizable rail, pinned to the viewport */}
       <aside
-        className="sticky top-0 hidden h-dvh shrink-0 self-start transition-[width,padding] duration-200 ease-out lg:flex lg:py-4 lg:pl-4"
+        className="sticky top-0 hidden h-dvh shrink-0 self-start transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:flex lg:py-4 lg:pl-4"
         aria-label="Primary navigation"
       >
         <ResizableSidebar>
