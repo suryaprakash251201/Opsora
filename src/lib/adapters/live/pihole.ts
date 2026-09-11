@@ -1,5 +1,5 @@
 import type { Snapshot, SourceAdapter } from "@/lib/adapters/types";
-import type { PiholeHistoryPoint, PiholeSnapshot } from "@/lib/mock/pihole";
+import type { PiholeHistoryPoint, PiholeSnapshot } from "@/lib/types/pihole";
 
 const CACHE_TTL_MS = 30_000;
 
@@ -35,7 +35,14 @@ function unwrap(
 
   const record = payload as Record<string, unknown>;
   for (const key of keys) {
-    if (Array.isArray(record[key])) return list(record[key]);
+    const value = record[key];
+    if (Array.isArray(value)) return list(value);
+    if (typeof value === "object" && value !== null) {
+      return Object.entries(value).map(([k, v]) => ({
+        name: k,
+        count: v,
+      }));
+    }
   }
   return [];
 }

@@ -37,6 +37,20 @@ yarn-error.log*
 # agent metrics + local data
 /.data/
 
+# tauri desktop
+/src-tauri/target/
+/src-tauri/gen/
+src-tauri/bundled-server/*
+!src-tauri/bundled-server/.gitkeep
+# downloaded Node.js runtime bundled into desktop installers
+/.node-runtime/
+*.AppImage
+*.deb
+*.rpm
+*.dmg
+*.msi
+*.nsis.zip
+
 # vercel
 .vercel
 

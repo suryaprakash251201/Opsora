@@ -159,11 +159,11 @@ export function createJsonRepository(file: string): TodoRepository {
         const parsed = JSON.parse(readFileSync(file, "utf8")) as {
           todos?: unknown;
           updatedAt?: unknown;
-        };
+        } | null;
         return {
-          todos: normalizeTodoList(parsed.todos),
+          todos: normalizeTodoList(parsed?.todos),
           updatedAt:
-            typeof parsed.updatedAt === "string" ? parsed.updatedAt : null,
+            typeof parsed?.updatedAt === "string" ? parsed.updatedAt : null,
         };
       } catch {
         return { todos: [], updatedAt: null };

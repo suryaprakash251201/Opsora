@@ -9,7 +9,7 @@ import {
   GitFork,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { GithubRepo } from "@/lib/mock/github";
+import type { GithubRepo } from "@/lib/types/github";
 import { timeAgo } from "@/lib/format";
 import { cn } from "@/lib/utils";
 

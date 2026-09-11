@@ -6,28 +6,46 @@ interface CardProps extends React.ComponentProps<"div"> {
   accent?: string;
   /** When true, slightly lift the card on hover (e.g. for clickable tiles). */
   interactive?: boolean;
+  /** Use the glassmorphism background. Defaults to true. */
+  glass?: boolean;
+  /** Use the animated gradient border. Defaults to true. */
+  gradientBorder?: boolean;
+  /** Trigger the shine-on-hover sweep. Defaults to true. */
+  shine?: boolean;
 }
 
-function Card({ className, accent, interactive, ...props }: CardProps) {
+function Card({
+  className,
+  accent,
+  interactive,
+  glass = true,
+  gradientBorder = true,
+  shine = true,
+  ...props
+}: CardProps) {
   return (
     <div
       data-slot="card"
       className={cn(
-        "relative overflow-hidden rounded-[10px] border shadow-[0_1px_0_0_rgba(255,255,255,0.02)_inset]",
+        "group/card relative overflow-hidden rounded-xl border shadow-[inset_0_1px_0_0_color-mix(in_oklab,var(--foreground)_4%,transparent)]",
+        "transition-[border-color,box-shadow,transform] duration-300 ease-out",
+        glass && "card-glass",
+        gradientBorder && "gradient-border",
+        shine && "shine-on-hover",
         interactive &&
-          "transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_24px_-12px_color-mix(in_oklab,var(--brand)_25%,transparent)]",
+          "hover:-translate-y-0.5 hover:shadow-[0_18px_44px_-22px_color-mix(in_oklab,var(--brand)_45%,transparent)]",
         className,
       )}
       style={{
-        background: "var(--panel)",
-        borderColor: "var(--border)",
+        borderColor: "color-mix(in oklab, var(--border) 70%, transparent)",
+        ...props.style,
       }}
       {...props}
     >
       {accent ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute -top-16 -right-16 size-44 rounded-full opacity-30 blur-3xl"
+          className="pointer-events-none absolute -top-16 -right-16 size-44 rounded-full opacity-30 blur-3xl transition-opacity duration-500 group-hover/card:opacity-55"
           style={{ background: accent }}
         />
       ) : null}
@@ -87,7 +105,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-footer"
       className={cn(
-        "border-border/70 flex items-center gap-2 border-t px-4 py-2.5",
+        "border-border/60 flex items-center gap-2 border-t px-4 py-2.5",
         className,
       )}
       {...props}

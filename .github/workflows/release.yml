@@ -81,16 +81,29 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  desktop:
+    name: Desktop installers
+    needs: test
+    uses: ./.github/workflows/desktop.yml
+
   github-release:
     name: Create GitHub release
-    needs: docker
+    needs: [docker, desktop]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Download desktop installers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: opsora-*
+          merge-multiple: true
+          path: installers
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           make_latest: true
+          files: installers/**/*

@@ -34,19 +34,20 @@ export function AttentionFeed({ limit = 6 }: { limit?: number }) {
     .slice(0, 2);
 
   return (
-    <Card className="relative overflow-hidden">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-16 -right-16 size-44 rounded-full opacity-25 blur-3xl"
-        style={{ background: ACCENT }}
-      />
+    <Card accent={ACCENT}>
       <CardHeader className="relative">
         <CardTitle>
           <span
             aria-hidden
-            className="inline-block size-1.5 rounded-full"
+            className="relative inline-block size-1.5 rounded-full"
             style={{ background: ACCENT }}
-          />
+          >
+            <span
+              aria-hidden
+              className="absolute inset-0 animate-[ping_2.4s_ease-in-out_infinite] rounded-full opacity-70"
+              style={{ background: ACCENT }}
+            />
+          </span>
           Attention required
           {!isLoading && summary.needsAttention > 0 ? (
             <Badge variant={summary.critical > 0 ? "danger" : "warning"}>

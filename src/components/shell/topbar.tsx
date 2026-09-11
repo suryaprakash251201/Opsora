@@ -1,14 +1,16 @@
 "use client";
 
 import { Menu, Search } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/viz/status-dot";
+import { navItemForPath, accentVar } from "@/components/shell/nav";
+import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { useAttention } from "@/hooks/use-attention";
 import { useClock } from "@/hooks/use-clock";
 import { formatClock, formatLongDate } from "@/lib/format";
 import { useRealtimeStore } from "@/stores/realtime-store";
 import { useUiStore } from "@/stores/ui-store";
-import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { cn } from "@/lib/utils";
 
 function greetingFor(hour: number): string {
@@ -18,11 +20,39 @@ function greetingFor(hour: number): string {
   return "Good evening";
 }
 
+/** Current page chip — live icon tinted with the page's module accent. */
+function PageChip() {
+  const pathname = usePathname();
+  const item = navItemForPath(pathname);
+  if (!item) return null;
+  const Icon = item.icon;
+  const accent = accentVar[item.accent];
+
+  return (
+    <span
+      className="border-border/70 bg-panel/60 hidden items-center gap-2 rounded-full border py-1 pr-3 pl-1.5 sm:flex"
+      aria-current="page"
+    >
+      <span
+        className="flex size-6 items-center justify-center rounded-full"
+        style={{
+          color: accent,
+          background: `color-mix(in oklab, ${accent} 14%, transparent)`,
+          boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${accent} 30%, transparent)`,
+        }}
+      >
+        <Icon className="size-3.5" strokeWidth={2} />
+      </span>
+      <span className="text-xs font-medium">{item.label}</span>
+    </span>
+  );
+}
+
 export function Topbar() {
   const now = useClock();
   const { health, summary, isLoading } = useAttention();
   const connected = useRealtimeStore((state) => state.connected);
-  const { setSidebarOpen, setCommandOpen, sidebarCollapsed } = useUiStore();
+  const { setSidebarOpen, setCommandOpen } = useUiStore();
 
   const hour = now?.getHours() ?? 12;
   const status =
@@ -45,7 +75,7 @@ export function Topbar() {
           };
 
   return (
-    <header className="border-border bg-background/70 surface-glass sticky top-0 z-30 border-b">
+    <header className="border-border/70 bg-background/60 surface-glass sticky top-0 z-30 border-b">
       {/* Animated health stripe — mirrors the system health. */}
       <div
         aria-hidden
@@ -56,12 +86,9 @@ export function Topbar() {
         }}
       />
 
-      <div
-        className="flex h-14 items-center justify-between gap-3 px-3 lg:px-5"
-        style={{ minHeight: "var(--header-h)" }}
-      >
+      <div className="flex h-14 items-center justify-between gap-3 px-3 lg:px-5">
         {/* LEFT */}
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2.5">
           <Button
             variant="ghost"
             size="icon-sm"
@@ -78,18 +105,13 @@ export function Topbar() {
               <span className="text-gradient-brand">Surya</span>
             </p>
             <p className="text-subtle metrics truncate text-[11px]">
-              {now ? `${formatClock(now)} · ${formatLongDate(now)}` : "\u00a0"}
+              {now ? `${formatClock(now)} · ${formatLongDate(now)}` : " "}
             </p>
           </div>
 
           <span aria-hidden className="bg-border hidden h-6 w-px sm:block" />
-          <span className="text-subtle hidden items-center gap-1.5 text-[10px] font-medium tracking-widest uppercase sm:flex">
-            <span
-              className="size-1.5 rounded-full"
-              style={{ background: sidebarCollapsed ? "var(--brand-2)" : "var(--brand)" }}
-            />
-            {sidebarCollapsed ? "Compact" : "Full layout"}
-          </span>
+
+          <PageChip />
         </div>
 
         {/* CENTER */}
@@ -97,8 +119,7 @@ export function Topbar() {
           type="button"
           onClick={() => setCommandOpen(true)}
           className={cn(
-            "border-border bg-panel/60 text-muted hover:bg-surface-hover hover:text-foreground group hidden h-9 max-w-md flex-1 items-center gap-2.5 rounded-lg border px-3 text-xs transition-all lg:flex",
-            "mx-2",
+            "border-border bg-panel/60 text-muted hover:bg-surface-hover hover:text-foreground group mx-2 hidden h-9 max-w-md flex-1 items-center gap-2.5 rounded-lg border px-3 text-xs transition-all lg:flex",
           )}
           aria-label="Open command palette"
         >

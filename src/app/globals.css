@@ -127,8 +127,62 @@
   --danger: #dc2626;
   --info: #0284c7;
 
+  /* Module accents re-tinted darker for legibility on light surfaces */
+  --accent-home: #db2777;
+  --accent-todos: #b45309;
+  --accent-calendar: #059669;
+  --accent-github: #7c3aed;
+  --accent-docker: #0284c7;
+  --accent-servers: #e11d48;
+  --accent-pihole: #15803d;
+  --accent-alerts: #c2410c;
+  --accent-analytics: #2563eb;
+  --accent-settings: #475569;
+
   --shadow-card: 0 1px 2px rgba(28, 25, 23, 0.06), 0 4px 12px rgba(28, 25, 23, 0.05);
   --shadow-pop: 0 8px 28px -12px rgba(28, 25, 23, 0.18);
+}
+
+/* -------- Theme: Porcelain (cool, indigo-tinted light) -------- */
+[data-theme="porcelain"] {
+  color-scheme: light;
+
+  --background: #f4f5f8;
+  --panel: #ffffff;
+  --panel-elevated: #f8f9fc;
+  --surface: #eef0f5;
+  --surface-hover: #e3e6ee;
+  --border: #dcdfe8;
+  --border-strong: #c2c7d4;
+
+  --foreground: #18181f;
+  --muted: #52565e;
+  --subtle: #71757f;
+  --disabled: #a4a8b3;
+
+  --brand: #4f46e5;
+  --brand-2: #7c3aed;
+  --brand-soft: color-mix(in oklab, var(--brand) 14%, transparent);
+
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #dc2626;
+  --info: #0369a1;
+
+  /* Module accents re-tinted darker for legibility on light surfaces */
+  --accent-home: #db2777;
+  --accent-todos: #b45309;
+  --accent-calendar: #059669;
+  --accent-github: #6d28d9;
+  --accent-docker: #0369a1;
+  --accent-servers: #e11d48;
+  --accent-pihole: #15803d;
+  --accent-alerts: #c2410c;
+  --accent-analytics: #1d4ed8;
+  --accent-settings: #475569;
+
+  --shadow-card: 0 1px 2px rgba(24, 24, 31, 0.05), 0 4px 12px rgba(24, 24, 31, 0.04);
+  --shadow-pop: 0 8px 28px -12px rgba(24, 24, 31, 0.16);
 }
 
 /* -------- Theme: Abyss (cool, deep ocean) -------- */
@@ -217,6 +271,16 @@
   --animate-sweep: sweep 2.4s linear infinite;
   --animate-float: float 6s ease-in-out infinite;
   --animate-gradient: gradient-shift 12s ease infinite;
+  --animate-orbit: orbit 18s linear infinite;
+  --animate-orbit-slow: orbit 28s linear infinite;
+  --animate-orbit-reverse: orbit-reverse 22s linear infinite;
+  --animate-rise-fade: rise-fade 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-rise-fade-2: rise-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
+  --animate-rise-fade-3: rise-fade 800ms cubic-bezier(0.16, 1, 0.3, 1) 160ms both;
+  --animate-rise-fade-4: rise-fade 900ms cubic-bezier(0.16, 1, 0.3, 1) 240ms both;
+  --animate-mesh: mesh 16s ease-in-out infinite;
+  --animate-spotlight: spotlight 12s ease-in-out infinite;
+  --animate-border-flow: border-flow 4s linear infinite;
 
   @keyframes overlay-in {
     from {
@@ -293,6 +357,66 @@
       background-position: 100% 50%;
     }
   }
+
+  @keyframes orbit {
+    from {
+      transform: rotate(0deg) translateX(var(--orbit-r, 120px)) rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg) translateX(var(--orbit-r, 120px)) rotate(-360deg);
+    }
+  }
+
+  @keyframes orbit-reverse {
+    from {
+      transform: rotate(0deg) translateX(var(--orbit-r, 100px)) rotate(0deg);
+    }
+    to {
+      transform: rotate(-360deg) translateX(var(--orbit-r, 100px)) rotate(360deg);
+    }
+  }
+
+  @keyframes rise-fade {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes mesh {
+    0%,
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(2%, -1%) scale(1.04);
+    }
+    66% {
+      transform: translate(-1.5%, 1.5%) scale(0.98);
+    }
+  }
+
+  @keyframes spotlight {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: translate(3%, -2%) scale(1.1);
+    }
+  }
+
+  @keyframes border-flow {
+    to {
+      background-position: 200% 0;
+    }
+  }
 }
 
 @layer base {
@@ -300,9 +424,13 @@
     border-color: var(--border);
   }
 
+  /* `clip` (not `hidden`) — `hidden` turns html/body into a scroll
+     container and silently breaks `position: sticky` for the sidebar rail.
+     The `hidden` line is kept as a fallback for very old browsers. */
   html,
   body {
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   html {
@@ -429,6 +557,112 @@
   -webkit-backdrop-filter: blur(12px) saturate(140%);
 }
 
+/* Stronger glass used by the hero — thicker blur + tint */
+@utility surface-glass-strong {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--panel) 70%, transparent) 0%,
+      color-mix(in oklab, var(--panel-elevated) 60%, transparent) 100%
+    );
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+/* Animated brand-tinted gradient used for hero / buttons */
+@utility bg-mesh-brand {
+  background:
+    radial-gradient(
+      50% 50% at 15% 20%,
+      color-mix(in oklab, var(--brand) 35%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      45% 45% at 85% 25%,
+      color-mix(in oklab, var(--brand-2) 30%, transparent) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      55% 55% at 50% 90%,
+      color-mix(in oklab, var(--accent-home) 22%, transparent) 0%,
+      transparent 65%
+    ),
+    linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--panel) 92%, transparent) 0%,
+      color-mix(in oklab, var(--panel-elevated) 88%, transparent) 100%
+    );
+}
+
+/* Multi-stop animated mesh gradient for the hero spotlight backdrop */
+@utility bg-hero-mesh {
+  background:
+    radial-gradient(
+      38% 30% at 12% 18%,
+      color-mix(in oklab, var(--brand) 55%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      32% 28% at 88% 22%,
+      color-mix(in oklab, var(--brand-2) 50%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      30% 26% at 78% 82%,
+      color-mix(in oklab, var(--accent-home) 45%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      28% 24% at 18% 78%,
+      color-mix(in oklab, var(--accent-alerts) 38%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(
+      160deg,
+      color-mix(in oklab, var(--background) 90%, transparent) 0%,
+      color-mix(in oklab, var(--panel) 85%, transparent) 100%
+    );
+}
+
+/* Subtle gradient overlay used on top of cards */
+@utility bg-card-shine {
+  background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--foreground) 5%, transparent) 0%,
+      transparent 40%,
+      transparent 60%,
+      color-mix(in oklab, var(--brand) 6%, transparent) 100%
+    );
+}
+
+/* Card surface (glassmorphism) */
+@utility surface-card {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--panel-elevated) 85%, transparent) 0%,
+      color-mix(in oklab, var(--panel) 90%, transparent) 100%
+    );
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+}
+
+/* Star/dust for the hero */
+@utility hero-grid {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in oklab, var(--border-strong) 30%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--border-strong) 30%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 32px 32px;
+}
+
 @utility scrollbar-hidden {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -505,4 +739,400 @@
 }
 @utility bg-accent-settings {
   background-color: var(--accent-settings);
+}
+
+/* =========================================================
+   Circuit background — animated PCB layer behind the shell
+   ========================================================= */
+
+@keyframes circuit-dash {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes circuit-via-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+}
+
+@layer components {
+  .circuit-grid {
+    opacity: 0.5;
+  }
+
+  .circuit-grid-line {
+    stroke: color-mix(in oklab, var(--border) 65%, transparent);
+  }
+
+  .circuit-trace {
+    stroke: color-mix(in oklab, var(--border-strong) 62%, transparent);
+    stroke-linecap: round;
+    fill: none;
+  }
+
+  .circuit-pulse {
+    stroke: color-mix(in oklab, var(--brand) 85%, var(--brand-2) 15%);
+    stroke-linecap: round;
+    fill: none;
+    stroke-dasharray: 7 93;
+    filter: drop-shadow(
+      0 0 5px color-mix(in oklab, var(--brand) 75%, transparent)
+    );
+    animation: circuit-dash 9s linear infinite;
+    opacity: 0.9;
+  }
+
+  .circuit-via {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: circuit-via-pulse 3.4s ease-in-out infinite;
+  }
+
+  .circuit-via-ring {
+    fill: var(--panel);
+    stroke: color-mix(in oklab, var(--brand) 55%, transparent);
+    stroke-width: 1;
+  }
+
+  .circuit-via-core {
+    fill: color-mix(in oklab, var(--brand) 80%, var(--brand-2) 20%);
+  }
+
+  .circuit-aura {
+    background:
+      radial-gradient(
+        1100px 550px at 0% -10%,
+        color-mix(in oklab, var(--brand) 16%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        850px 450px at 100% 0%,
+        color-mix(in oklab, var(--brand-2) 13%, transparent),
+        transparent 60%
+      ),
+      radial-gradient(
+        750px 400px at 50% 110%,
+        color-mix(in oklab, var(--accent-home) 10%, transparent),
+        transparent 60%
+      );
+  }
+
+  /* Light themes: soften the circuit layer so it reads as texture,
+     not noise. */
+  [data-theme="solar"],
+  [data-theme="porcelain"] {
+    .circuit-grid {
+      opacity: 0.35;
+    }
+    .circuit-trace {
+      stroke: color-mix(in oklab, var(--border-strong) 48%, transparent);
+    }
+    .circuit-pulse {
+      opacity: 0.65;
+      filter: none;
+    }
+    .circuit-aura {
+      opacity: 0.7;
+    }
+  }
+
+  /* =========================================================
+     Glassmorphism + gradient border card variants
+     ========================================================= */
+
+  .card-glass {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in oklab, var(--panel-elevated) 70%, transparent) 0%,
+        color-mix(in oklab, var(--panel) 78%, transparent) 100%
+      );
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+  }
+
+  .gradient-border {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .gradient-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--brand) 65%, transparent),
+      color-mix(in oklab, var(--brand-2) 55%, transparent) 50%,
+      color-mix(in oklab, var(--accent-home) 50%, transparent)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.45;
+    transition: opacity 0.4s ease;
+  }
+
+  .gradient-border:hover::before,
+  .gradient-border:focus-within::before {
+    opacity: 1;
+  }
+
+  .gradient-border-strong::before {
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--brand) 80%, transparent),
+      color-mix(in oklab, var(--brand-2) 70%, transparent) 50%,
+      color-mix(in oklab, var(--accent-home) 65%, transparent)
+    );
+    opacity: 0.75;
+  }
+
+  /* Subtle shine that animates across on hover */
+  .shine-on-hover {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shine-on-hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      115deg,
+      transparent 30%,
+      color-mix(in oklab, var(--foreground) 8%, transparent) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+
+  .shine-on-hover:hover::after {
+    transform: translateX(100%);
+  }
+
+  /* Reveal-on-scroll helper — wrapped in an IntersectionObserver */
+  .reveal {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 700ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal[data-delay="1"] {
+    transition-delay: 60ms;
+  }
+  .reveal[data-delay="2"] {
+    transition-delay: 120ms;
+  }
+  .reveal[data-delay="3"] {
+    transition-delay: 180ms;
+  }
+  .reveal[data-delay="4"] {
+    transition-delay: 240ms;
+  }
+  .reveal[data-delay="5"] {
+    transition-delay: 300ms;
+  }
+  .reveal[data-delay="6"] {
+    transition-delay: 360ms;
+  }
+
+  /* Orbital particle wrapper */
+  .orbit-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Reduce motion overrides for reveal/orbital */
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+}
+
+/* =========================================================
+   Live icons — animated SVG icon system
+   Each icon part runs a subtle idle loop ("live") and the
+   parent `.group` hover adds extra motion.
+   ========================================================= */
+
+@keyframes li-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes li-ping {
+  0% {
+    opacity: 0.7;
+    transform: scale(0.55);
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes li-swing {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(11deg);
+  }
+  45% {
+    transform: rotate(-9deg);
+  }
+  70% {
+    transform: rotate(4deg);
+  }
+}
+
+@keyframes li-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-1.3px);
+  }
+}
+
+@keyframes li-bars {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.62);
+  }
+}
+
+@keyframes li-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+
+@keyframes li-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@layer components {
+  .live-icon {
+    overflow: visible;
+  }
+
+  .live-icon :where(.li-led, .li-ping, .li-bob, .li-bar, .li-spin-slow) {
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  /* Blinking status LEDs (server, docker) */
+  .li-led {
+    animation: li-blink 2.6s ease-in-out infinite;
+  }
+  .li-led-delay {
+    animation-delay: -1.3s;
+  }
+
+  /* Expanding pulse ring (home, shield, alerts) */
+  .li-ping {
+    animation: li-ping 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  /* Gentle float (docker container stack) */
+  .li-bob {
+    animation: li-bob 3.2s ease-in-out infinite;
+  }
+
+  /* Equalizer bars (analytics) */
+  .li-bar {
+    animation: li-bars 2.8s ease-in-out infinite;
+  }
+  .li-bar-2 {
+    animation-delay: -0.9s;
+  }
+  .li-bar-3 {
+    animation-delay: -1.8s;
+  }
+
+  /* Data flow along a wire (github, calendar hangers) */
+  .li-flow {
+    stroke-dasharray: 3.5 10.5;
+    animation: li-flow 1.4s linear infinite;
+  }
+
+  /* Slow perpetual rotation (settings gear, logo halo) */
+  .li-spin-slow {
+    animation: li-spin 14s linear infinite;
+  }
+
+  /* Hover extras, triggered from the surrounding .group */
+  .group:hover .li-gear {
+    transform: rotate(100deg);
+  }
+  .li-gear {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.7s cubic-bezier(0.34, 1.4, 0.64, 1);
+  }
+
+  .group:hover .li-bell-body {
+    animation: li-swing 0.9s ease;
+  }
+  .li-bell-body {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+  }
+
+  .group:hover .li-draw {
+    stroke-dashoffset: 0;
+  }
+  .li-draw {
+    stroke-dasharray: 26;
+    stroke-dashoffset: 26;
+    transition: stroke-dashoffset 0.55s ease 0.05s;
+  }
 }

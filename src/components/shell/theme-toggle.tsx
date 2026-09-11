@@ -2,42 +2,26 @@
 
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useThemeStore, type ThemeId } from "@/stores/theme-store";
+import { themeMode, useThemeStore } from "@/stores/theme-store";
 import { cn } from "@/lib/utils";
 
-const DARK_THEMES: ThemeId[] = ["opsora", "aurora", "abyss", "forest"];
-const LIGHT_THEMES: ThemeId[] = ["solar"];
-
-type Mode = "dark" | "light";
-
-function modeFor(theme: ThemeId): Mode {
-  return LIGHT_THEMES.includes(theme) ? "light" : "dark";
-}
-
 /**
- * Quick dark/light toggle. Picks the user's current theme's *family*
- * (dark → first dark variant, light → Solar) so the swap respects their
- * overall vibe but stays one-click. For granular theme choice use the
- * ThemeSwitcher (palette icon in the sidebar / settings).
+ * Quick dark/light toggle. Remembers the user's last theme per mode, so
+ * flipping to dark restores e.g. "Abyss" rather than resetting to default.
+ * For granular theme choice use the ThemeSwitcher (palette in the sidebar).
  */
 export function ThemeToggle({ className }: { className?: string }) {
   const theme = useThemeStore((state) => state.theme);
-  const setTheme = useThemeStore((state) => state.setTheme);
+  const toggleMode = useThemeStore((state) => state.toggleMode);
 
-  const mode = modeFor(theme);
-
-  const toggle = () => {
-    const next: Mode = mode === "dark" ? "light" : "dark";
-    setTheme(next === "dark" ? DARK_THEMES[0] : LIGHT_THEMES[0]);
-  };
-
+  const mode = themeMode(theme);
   const label = mode === "dark" ? "Switch to light theme" : "Switch to dark theme";
 
   return (
     <Button
       variant="secondary"
       size="sm"
-      onClick={toggle}
+      onClick={toggleMode}
       aria-label={label}
       title={`${label} (⌘⇧L)`}
       className={cn("group gap-2", className)}
@@ -67,10 +51,7 @@ export function ThemeToggle({ className }: { className?: string }) {
   );
 }
 
-/**
- * A wider 3-state segmented toggle for dark / light. Default
- * implementation picks dark ↔ light.
- */
+/** Segmented dark / light control for settings surfaces. */
 export function ThemeSegmented({
   className,
 }: {
@@ -78,7 +59,8 @@ export function ThemeSegmented({
 }) {
   const theme = useThemeStore((state) => state.theme);
   const setTheme = useThemeStore((state) => state.setTheme);
-  const mode = modeFor(theme);
+  const toggleMode = useThemeStore((state) => state.toggleMode);
+  const mode = themeMode(theme);
 
   return (
     <div
@@ -91,7 +73,7 @@ export function ThemeSegmented({
     >
       <SegmentButton
         active={mode === "dark"}
-        onClick={() => setTheme(DARK_THEMES[0])}
+        onClick={() => (mode === "dark" ? setTheme(theme) : toggleMode())}
         ariaLabel="Dark theme"
       >
         <Moon className="size-3.5" />
@@ -99,7 +81,7 @@ export function ThemeSegmented({
       </SegmentButton>
       <SegmentButton
         active={mode === "light"}
-        onClick={() => setTheme(LIGHT_THEMES[0])}
+        onClick={() => (mode === "light" ? setTheme(theme) : toggleMode())}
         ariaLabel="Light theme"
       >
         <Sun className="size-3.5" />

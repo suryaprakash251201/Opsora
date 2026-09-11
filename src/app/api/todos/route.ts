@@ -2,12 +2,19 @@ import {
   getTodoRepository,
   normalizeTodoList,
 } from "@/lib/server/todo-repository";
+import { noStoreJson, apiError } from "@/lib/server/api";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const repository = getTodoRepository();
-  const snapshot = await repository.read();
+  try {
+    const repository = getTodoRepository();
+    const snapshot = await repository.read();
 
-  return Response.json({ ...snapshot, mode: repository.kind });
+    return noStoreJson({ ...snapshot, mode: repository.kind });
+  } catch (error) {
+    return apiError(error);
+  }
 }
 
 export async function PUT(request: Request) {
@@ -15,7 +22,7 @@ export async function PUT(request: Request) {
   try {
     payload = await request.json();
   } catch {
-    return Response.json({ error: "Body must be valid JSON" }, { status: 400 });
+    return noStoreJson({ error: "Body must be valid JSON" }, { status: 400 });
   }
 
   const todos = normalizeTodoList(
@@ -24,8 +31,12 @@ export async function PUT(request: Request) {
       : undefined,
   );
 
-  const repository = getTodoRepository();
-  const { updatedAt } = await repository.replace(todos);
+  try {
+    const repository = getTodoRepository();
+    const { updatedAt } = await repository.replace(todos);
 
-  return Response.json({ todos, updatedAt, mode: repository.kind });
+    return noStoreJson({ todos, updatedAt, mode: repository.kind });
+  } catch (error) {
+    return apiError(error);
+  }
 }

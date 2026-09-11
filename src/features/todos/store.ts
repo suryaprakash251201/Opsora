@@ -2,7 +2,6 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { createSeedTodos } from "./seed";
 import type { Todo, TodoPriority, TodoStatus } from "./types";
 
 export interface NewTodoInput {
@@ -35,7 +34,8 @@ function newId(): string {
 export const useTodoStore = create<TodoStore>()(
   persist(
     (set) => ({
-      todos: createSeedTodos(),
+      // Starts empty — real tasks hydrate from the server via startTodoSync().
+      todos: [],
 
       addTodo: (input) => {
         const id = newId();
@@ -66,9 +66,17 @@ export const useTodoStore = create<TodoStore>()(
           todos: state.todos.map((todo) => {
             if (todo.id !== id) return todo;
             const done = todo.status === "done";
+            // When reopening, fall back to the status the task held before
+            // completion (or "today" if that is no longer a valid state).
+            const previousStatus = (todo as Todo & { _previousStatus?: TodoStatus })
+              ._previousStatus;
             return {
               ...todo,
-              status: done ? "inbox" : "done",
+              status: done
+                ? (previousStatus && previousStatus !== "done"
+                    ? previousStatus
+                    : "today")
+                : "done",
               completedAt: done ? undefined : new Date().toISOString(),
             };
           }),

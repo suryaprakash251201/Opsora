@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronLeft, ChevronsRight } from "lucide-react";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 
@@ -82,37 +82,51 @@ export function ResizableSidebar({
   };
 
   return (
+    /*
+     * The rail is wrapped in a non-clipping shell so the collapse handle can
+     * sit half outside the rail's rounded edge. Previously the handle lived
+     * inside the `overflow-hidden` rail, so its clickable centre was clipped
+     * away and the button could not be pressed.
+     */
     <div
       ref={railRef}
-      className={cn(
-        "bg-panel border-border relative flex h-full flex-col overflow-hidden rounded-2xl border shadow-[0_8px_32px_-12px_color-mix(in_oklab,var(--brand)_25%,transparent),0_2px_8px_-2px_rgba(0,0,0,0.4)]",
-        "transition-[width] duration-200 ease-out",
-      )}
+      className="relative h-full shrink-0 transition-[width] duration-200 ease-out"
       style={{ width: state.width }}
     >
-      {children(state)}
+      <div
+        className={cn(
+          "surface-glass border-border relative flex h-full w-full flex-col overflow-hidden rounded-2xl border shadow-[0_8px_32px_-12px_color-mix(in_oklab,var(--brand)_25%,transparent),0_2px_8px_-2px_color-mix(in_oklab,var(--foreground)_22%,transparent)]",
+        )}
+      >
+        {children(state)}
 
-      {/* Resize handle — only meaningful when expanded. */}
-      {!collapsed ? (
-        <div
-          role="separator"
-          aria-orientation="vertical"
-          aria-label="Resize sidebar"
-          onPointerDown={(event) => {
-            if (event.button !== 0) return;
-            setDrag({
-              startX: event.clientX,
-              startWidth: state.width,
-            });
-          }}
-          className="group/resize absolute top-0 right-0 z-30 h-full w-1.5 cursor-col-resize"
-        >
-          <span className="pointer-events-none absolute inset-y-0 right-0 w-px bg-transparent transition-colors group-hover/resize:bg-[var(--brand)]/60" />
-          <span className="bg-background border-border/70 absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 rounded-md border p-0.5 opacity-0 shadow-sm transition-opacity group-hover/resize:opacity-100">
-            <ChevronsRight className="text-subtle size-3" />
-          </span>
-        </div>
-      ) : null}
+        {/* Resize handle — only meaningful when expanded. */}
+        {!collapsed ? (
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize sidebar"
+            onPointerDown={(event) => {
+              if (event.button !== 0) return;
+              setDrag({
+                startX: event.clientX,
+                startWidth: state.width,
+              });
+            }}
+            className="group/resize absolute top-0 right-0 z-30 h-full w-1.5 cursor-col-resize"
+          >
+            <span className="pointer-events-none absolute inset-y-0 right-0 w-px bg-transparent transition-colors group-hover/resize:bg-[var(--brand)]/60" />
+            <span className="bg-background border-border/70 absolute top-1/2 right-0 -translate-y-1/2 translate-x-1/2 rounded-md border p-0.5 opacity-0 shadow-sm transition-opacity group-hover/resize:opacity-100">
+              <ChevronsRight className="text-subtle size-3" />
+            </span>
+          </div>
+        ) : null}
+      </div>
+
+      <SidebarCollapseHandle
+        collapsed={collapsed}
+        onToggle={toggleCollapsed}
+      />
     </div>
   );
 }
@@ -120,36 +134,48 @@ export function ResizableSidebar({
 export function SidebarCollapseHandle({
   collapsed,
   onToggle,
-  size = "md",
 }: {
   collapsed: boolean;
   onToggle: () => void;
-  size?: "sm" | "md";
 }) {
-  const Icon = size === "sm" ? ChevronLeft : ChevronsLeft;
   return (
     <button
       type="button"
       onClick={onToggle}
       aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      title={collapsed ? "Expand (⌘\\)" : "Collapse (⌘\\)"}
+      title={collapsed ? "Expand sidebar (⌘\\)" : "Collapse sidebar (⌘\\)"}
       className={cn(
-        "text-subtle hover:text-foreground absolute -right-3 top-12 z-20 flex items-center justify-center rounded-full border bg-[var(--panel)] shadow-lg transition-all",
-        "hover:scale-110 hover:shadow-xl",
-        "active:scale-95",
-        size === "sm" ? "size-6" : "size-7",
+        "group/rail-handle absolute top-1/2 right-0 z-40 flex size-8 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border outline-none",
+        "transition-[transform,border-color,box-shadow] duration-200 ease-out",
+        "hover:scale-[1.12] hover:border-[color-mix(in_oklab,var(--brand)_65%,var(--border-strong))] active:scale-95",
+        "focus-visible:ring-2 focus-visible:ring-[var(--brand)]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]",
       )}
       style={{
-        borderColor: "var(--border-strong)",
+        borderColor:
+          "color-mix(in oklab, var(--brand) 32%, var(--border-strong))",
+        background:
+          "linear-gradient(160deg, var(--panel-elevated) 0%, var(--panel) 100%)",
         boxShadow:
-          "0 6px 20px -6px color-mix(in oklab, var(--brand) 30%, transparent), 0 0 0 1px var(--border-strong)",
+          "0 6px 18px -6px color-mix(in oklab, var(--foreground) 32%, transparent), inset 0 1px 0 0 color-mix(in oklab, var(--foreground) 6%, transparent), 0 0 0 3px color-mix(in oklab, var(--background) 92%, transparent)",
       }}
     >
-      {collapsed ? (
-        <ChevronRight className={size === "sm" ? "size-3" : "size-3.5"} />
-      ) : (
-        <Icon className={size === "sm" ? "size-3" : "size-3.5"} />
-      )}
+      <span
+        aria-hidden
+        className="absolute inset-0 rounded-full opacity-0 transition-opacity duration-300 group-hover/rail-handle:opacity-100"
+        style={{
+          background:
+            "radial-gradient(circle at 30% 25%, color-mix(in oklab, var(--brand) 45%, transparent) 0%, transparent 70%)",
+        }}
+      />
+      <ChevronLeft
+        strokeWidth={2.6}
+        className={cn(
+          "text-muted group-hover/rail-handle:text-foreground relative size-4 transition-all duration-200",
+          collapsed
+            ? "rotate-180 group-hover/rail-handle:translate-x-0.5"
+            : "group-hover/rail-handle:-translate-x-0.5",
+        )}
+      />
     </button>
   );
 }

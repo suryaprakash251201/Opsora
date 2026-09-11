@@ -108,7 +108,7 @@ function adapterFor<K extends AdapterSourceId>(
       data: meta.empty,
       fetchedAt: now,
       status: "stale",
-      mode: "live",
+      mode: "empty" as const,
       latencyMs: 0,
     };
   };
@@ -117,7 +117,7 @@ function adapterFor<K extends AdapterSourceId>(
     id: source,
     label: meta.label,
     description: meta.description,
-    mode: "live",
+    mode: "empty" as const,
     getSnapshot: async () => emptySnapshot(),
   };
 }
@@ -131,7 +131,7 @@ function degradedSnapshot<K extends AdapterSourceId>(
     data: SOURCE_META[source].empty,
     fetchedAt: new Date().toISOString(),
     status: "error",
-    mode: "live",
+    mode: "live" as const,
     error:
       error instanceof Error
         ? error.message
@@ -189,7 +189,7 @@ export interface SourceStatus {
   id: AdapterSourceId;
   label: string;
   description: string;
-  mode: "live" | "mock";
+  mode: "live" | "empty";
 }
 
 export async function getSourceStatuses(): Promise<SourceStatus[]> {

@@ -13,7 +13,7 @@ import { Meter } from "@/components/viz/meter";
 import { Ring, toneForValue } from "@/components/viz/ring";
 import { Sparkline } from "@/components/viz/sparkline";
 import { StatusDot } from "@/components/viz/status-dot";
-import type { Server } from "@/lib/mock/servers";
+import type { Server } from "@/lib/types/servers";
 import {
   formatBytes,
   formatDuration,

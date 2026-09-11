@@ -1,6 +1,6 @@
 {
   "name": "opsora",
-  "version": "0.4.0",
+  "version": "0.6.0",
   "private": true,
   "scripts": {
     "dev": "next dev -H 0.0.0.0 -p 9942",
@@ -9,7 +9,12 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "tauri": "tauri",
+    "desktop:dev": "tauri dev",
+    "desktop:stage": "node scripts/desktop-stage.mjs",
+    "desktop:runtime": "node scripts/fetch-node-runtime.mjs",
+    "desktop:build": "tauri build"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.3.11",
@@ -36,6 +41,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tauri-apps/cli": "^2.11.4",
     "@types/node": "^22.20.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",

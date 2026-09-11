@@ -13,7 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { PiholeHistoryPoint } from "@/lib/mock/pihole";
+import type { PiholeHistoryPoint } from "@/lib/types/pihole";
 
 const tooltipStyle = {
   background: "var(--panel)",
@@ -25,7 +25,31 @@ const tooltipStyle = {
 
 const axisTick = { fill: "var(--subtle)", fontSize: 11 } as const;
 
+/** Placeholder shown when a chart has no samples yet (e.g. server restart,
+ *  offline agent, or an unconfigured source) instead of a blank grid. */
+function ChartEmpty({ height, message }: { height: number; message: string }) {
+  return (
+    <div
+      className="border-border/60 text-subtle flex items-center justify-center rounded-lg border border-dashed px-4 text-center text-xs leading-relaxed"
+      style={{ height }}
+      role="img"
+      aria-label={message}
+    >
+      {message}
+    </div>
+  );
+}
+
 export function QueriesChart({ data }: { data: PiholeHistoryPoint[] }) {
+  if (data.length === 0) {
+    return (
+      <ChartEmpty
+        height={230}
+        message="No DNS history yet — the chart fills in as queries arrive."
+      />
+    );
+  }
+
   const chartData = data.map((point) => ({
     ...point,
     label: format(parseISO(point.time), "HH:mm"),
@@ -86,6 +110,15 @@ export function HistoryLineChart({
   unit?: string;
   max?: number;
 }) {
+  if (data.length === 0) {
+    return (
+      <ChartEmpty
+        height={180}
+        message="No samples yet — trends build while the agent is online."
+      />
+    );
+  }
+
   const chartData = data.map((value, index) => ({ index, value }));
 
   return (

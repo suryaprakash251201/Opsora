@@ -24,6 +24,7 @@ const THEME_SWATCHES: Record<ThemeId, { bg: string; accent: string; accent2: str
   abyss: { bg: "#050913", accent: "#2dd4bf", accent2: "#3b82f6", fg: "#e2e8f5" },
   forest: { bg: "#08120e", accent: "#34d399", accent2: "#a78bfa", fg: "#ecfdf5" },
   solar: { bg: "#f7f6f2", accent: "#ea580c", accent2: "#d97706", fg: "#1c1917" },
+  porcelain: { bg: "#f4f5f8", accent: "#4f46e5", accent2: "#7c3aed", fg: "#18181f" },
 };
 
 export function ThemeSwitcher({ className, trigger = "button" }: ThemeSwitcherProps) {
@@ -92,7 +93,8 @@ export function ThemeSwitcher({ className, trigger = "button" }: ThemeSwitcherPr
                   aria-pressed={active}
                 >
                   <div
-                    className="relative h-20 w-full overflow-hidden rounded-lg border border-white/5"
+                    aria-hidden
+                    className="relative h-20 w-full overflow-hidden rounded-lg border border-black/5"
                     style={{
                       background: `linear-gradient(135deg, ${swatch.accent} 0%, ${swatch.accent2} 100%), ${swatch.bg}`,
                     }}
@@ -118,7 +120,7 @@ export function ThemeSwitcher({ className, trigger = "button" }: ThemeSwitcherPr
                         className="metrics rounded-md px-1.5 py-0.5 text-[10px] font-semibold"
                         style={{
                           color: swatch.fg,
-                          background: "rgba(0,0,0,0.35)",
+                          background: "color-mix(in oklab, var(--foreground) 35%, transparent)",
                         }}
                       >
                         Aa

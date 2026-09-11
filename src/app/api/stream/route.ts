@@ -1,6 +1,6 @@
 import { getAllSnapshots } from "@/lib/adapters";
 import type { SnapshotBundle } from "@/lib/adapters/types";
-import { getActivityFeed, type ActivityEvent } from "@/lib/mock/activity";
+import { getActivityFeed, type ActivityEvent } from "@/lib/activity";
 
 const TICK_MS = 5_000;
 const SHARE_WINDOW_MS = 4_000;
@@ -86,6 +86,10 @@ export async function GET(request: Request) {
         }
       };
 
+      if (request.signal.aborted) {
+        closed = true;
+        return;
+      }
       request.signal.addEventListener("abort", abort);
 
       await tick();

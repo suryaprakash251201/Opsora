@@ -1,5 +1,5 @@
 import type { AdapterSourceId, SnapshotMap } from "@/lib/adapters/types";
-import type { ServersSnapshot } from "@/lib/mock/servers";
+import type { ServersSnapshot } from "@/lib/types/servers";
 
 /**
  * Per-source metadata and empty payloads. Unconfigured sources resolve to

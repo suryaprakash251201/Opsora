@@ -24,7 +24,7 @@ const exec = promisify(execFile);
 
 const url = (process.env.OPSORA_URL ?? "http://localhost:9942").replace(/\/$/, "");
 const interval = Number(process.env.OPSORA_INTERVAL ?? 30);
-const token = process.env.OPSORA_TOKEN ?? "";
+const token = process.env.OPSORA_AGENT_TOKEN ?? process.env.OPSORA_TOKEN ?? "";
 const role = process.env.OPSORA_ROLE ?? "Monitored host";
 const hostname = process.env.OPSORA_HOSTNAME ?? os.hostname();
 const services = (process.env.OPSORA_SERVICES ?? "")

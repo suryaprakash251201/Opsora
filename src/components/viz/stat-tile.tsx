@@ -1,6 +1,6 @@
-import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import type { AnyIcon } from "@/components/viz/section";
 import { Sparkline } from "@/components/viz/sparkline";
 import { cn } from "@/lib/utils";
 
@@ -8,7 +8,7 @@ interface StatTileProps {
   label: string;
   value: ReactNode;
   unit?: string;
-  icon?: LucideIcon;
+  icon?: AnyIcon;
   delta?: number;
   deltaSuffix?: string;
   spark?: number[];
@@ -38,21 +38,20 @@ export function StatTile({
   return (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-[10px] border p-4 transition-all",
+        "group card-glass gradient-border relative overflow-hidden rounded-[10px] p-4 transition-all duration-300 ease-out",
         className,
       )}
       style={
         {
-          background:
-            "linear-gradient(180deg, color-mix(in oklab, var(--panel) 92%, var(--surface) 8%) 0%, var(--panel) 100%)",
-          borderColor: "var(--border)",
+          borderColor:
+            "color-mix(in oklab, var(--border) 70%, transparent)",
         } as React.CSSProperties
       }
     >
       {accent ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute -top-12 -right-12 size-32 rounded-full opacity-25 blur-2xl transition-opacity group-hover:opacity-40"
+          className="pointer-events-none absolute -top-12 -right-12 size-32 rounded-full opacity-30 blur-2xl transition-opacity duration-500 group-hover:opacity-55"
           style={{ background: accent }}
         />
       ) : null}

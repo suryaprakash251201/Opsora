@@ -16,6 +16,10 @@ const eslintConfig = defineConfig([
     "agent/**",
     "scripts/**",
     ".data/**",
+    // Tauri desktop shell: staged Next standalone server (generated at
+    // `desktop:stage` time) and Rust build artifacts are not lintable JS.
+    "src-tauri/bundled-server/**",
+    "src-tauri/target/**",
   ]),
 ]);
 

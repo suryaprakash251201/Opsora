@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import type { ReactNode } from "react";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "./providers";
+import { THEMES, THEME_COLORS } from "@/lib/theme-config";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,14 +26,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#09090b",
-  colorScheme: "dark",
+  themeColor: THEME_COLORS.opsora,
+  colorScheme: "dark light",
 };
 
 /**
  * Inline pre-hydration script — reads the persisted theme from localStorage
  * (if any) and applies it before React mounts, preventing a flash of the
- * default dark theme when the user has chosen a different one.
+ * wrong theme. Theme IDs and colors are injected from the shared theme
+ * catalog (src/lib/theme-config.ts), so adding a theme never means editing
+ * this script by hand. Also fixes color-scheme and the theme-color meta so
+ * light themes boot correctly.
  */
 const themeBootstrapScript = `
 (function () {
@@ -40,14 +45,21 @@ const themeBootstrapScript = `
     if (!raw) return;
     var parsed = JSON.parse(raw);
     var theme = parsed && parsed.state && parsed.state.theme;
-    if (theme && /^(opsora|aurora|abyss|forest|solar)$/.test(theme)) {
-      document.documentElement.dataset.theme = theme;
-    }
+    var modes = ${JSON.stringify(
+      Object.fromEntries(THEMES.map((t) => [t.id, t.mode])),
+    )};
+    var colors = ${JSON.stringify(THEME_COLORS)};
+    if (!(theme in modes)) return;
+    var root = document.documentElement;
+    root.dataset.theme = theme;
+    root.style.colorScheme = modes[theme];
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta && colors[theme]) meta.setAttribute("content", colors[theme]);
   } catch (e) {}
 })();
 `;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"

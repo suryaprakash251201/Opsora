@@ -3,7 +3,7 @@
 import { CircleAlert } from "lucide-react";
 import type { Snapshot } from "@/lib/adapters/types";
 
-/** Shows a warning when a live source failed and mock data is being shown. */
+/** Shows a warning when a configured live source is failing. */
 export function SourceWarning({
   snapshot,
   className,
@@ -23,7 +23,7 @@ export function SourceWarning({
           Live {snapshot.source} unavailable.
         </span>{" "}
         <span className="text-muted">
-          Showing demo data until it recovers.
+          Showing an empty state until it recovers.
           {snapshot.error ? ` (${snapshot.error})` : ""}
         </span>
       </p>

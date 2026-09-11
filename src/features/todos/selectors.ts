@@ -77,7 +77,10 @@ export function filterTodos(todos: Todo[], view: TodoView): Todo[] {
         .filter((todo) => todo.status === "done")
         .sort((a, b) => (b.completedAt ?? "").localeCompare(a.completedAt ?? ""));
     case "projects":
+      return [...open].sort(sortOpen);
     case "all":
+      // "All" genuinely means everything — open first, then completed.
+      return [...todos].sort(sortOpen);
     default:
       return [...open].sort(sortOpen);
   }

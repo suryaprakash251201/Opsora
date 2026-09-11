@@ -1,6 +1,7 @@
 "use client";
 
-import { RefreshCw, Server, Terminal } from "lucide-react";
+import { RefreshCw, Terminal } from "lucide-react";
+import { LiveServer } from "@/components/icons/live";
 import { PageHeader } from "@/components/viz/page-header";
 import { EmptyConfigHint, ErrorState, SectionHeader } from "@/components/viz/section";
 import { SourceWarning } from "@/components/viz/source-warning";
@@ -19,7 +20,7 @@ export default function ServersPage() {
 
   const snapshot = data?.data;
   const isUnconfigured =
-    data?.mode === "live" && snapshot !== undefined && snapshot.servers.length === 0;
+    data?.mode === "empty" && snapshot !== undefined && snapshot.servers.length === 0;
 
   return (
     <>
@@ -90,7 +91,7 @@ export default function ServersPage() {
           <section className="flex flex-col gap-3">
             <SectionHeader
               title="Machines"
-              icon={Server}
+              icon={LiveServer}
               description="Metrics refresh every 30 seconds"
             />
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">

@@ -133,12 +133,21 @@ export default function AnalyticsPage() {
               {atlas ? (
                 <Card>
                   <CardHeader>
-                    <CardTitle>CPU · {atlas.name} (48 samples)</CardTitle>
+                    <CardTitle>CPU · {atlas.name}</CardTitle>
                     <span className="text-subtle metrics text-xs">
-                      {atlas.cpu.usage}% now
+                      {atlas.history.cpu.length > 0
+                        ? `${atlas.history.cpu.length} samples`
+                        : atlas.online
+                          ? "collecting samples…"
+                          : "no samples"}
                     </span>
                   </CardHeader>
                   <CardContent className="pt-2">
+                    <p className="text-subtle mb-2 text-[11px]">
+                      {atlas.online
+                        ? `${atlas.cpu.usage}% now`
+                        : `offline · last known ${atlas.cpu.usage}%`}
+                    </p>
                     <HistoryLineChart
                       data={atlas.history.cpu}
                       color="var(--info)"

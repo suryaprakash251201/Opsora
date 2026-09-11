@@ -22,7 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { RepoCard } from "@/features/github/repo-card";
 import { IssueList, PullList } from "@/features/github/lists";
 import { REFETCH_INTERVALS, useSourceSnapshot } from "@/hooks/use-snapshot";
-import { GitHubIcon } from "@/components/icons/github";
+import { LiveGithub } from "@/components/icons/live";
 
 export default function GithubPage() {
   const { data, isLoading, isError, refetch, isFetching } = useSourceSnapshot(
@@ -32,7 +32,7 @@ export default function GithubPage() {
 
   const snapshot = data?.data;
   const isUnconfigured =
-    data?.mode === "live" && snapshot !== undefined && snapshot.repos.length === 0;
+    data?.mode === "empty" && snapshot !== undefined && snapshot.repos.length === 0;
 
   return (
     <>
@@ -82,7 +82,7 @@ export default function GithubPage() {
             <StatTile label="Commits today" value={0} icon={GitCommitHorizontal} />
           </div>
           <EmptyConfigHint
-            icon={GitHubIcon}
+            icon={LiveGithub}
             accent="var(--accent-github)"
             title="Connect a GitHub personal access token"
             description="Repos, PRs, issues, Actions runs, and review requests will appear here once Opsora can reach the GitHub API on your behalf. Use a read-only classic or fine-grained token — it stays on the server, never in the browser."

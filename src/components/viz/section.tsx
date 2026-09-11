@@ -1,13 +1,20 @@
-import type { LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ArrowRight, CircleAlert, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** Any renderable icon — lucide or animated live icon. */
+export type AnyIcon = ComponentType<{
+  className?: string;
+  style?: React.CSSProperties;
+  strokeWidth?: number | string;
+}>;
+
 interface SectionHeaderProps {
   title: string;
   description?: string;
-  icon?: LucideIcon;
+  icon?: AnyIcon;
   action?: ReactNode;
   className?: string;
 }
@@ -36,7 +43,7 @@ export function SectionHeader({
 }
 
 interface EmptyStateProps {
-  icon?: LucideIcon;
+  icon?: AnyIcon;
   title: string;
   description?: string;
   action?: ReactNode;
@@ -141,7 +148,7 @@ export function EmptyConfigHint({
   title: string;
   description: string;
   env: string[];
-  icon?: LucideIcon | ((props: { className?: string }) => ReactNode);
+  icon?: AnyIcon;
   accent?: string;
   docs?: { label: string; href: string };
 }) {

@@ -17,11 +17,11 @@ function safeParseISO(value: string | null | undefined): Date | null {
     return null;
   }
 }
-import type { CalendarSnapshot } from "@/lib/mock/calendar";
-import type { DockerSnapshot } from "@/lib/mock/docker";
-import type { GithubSnapshot } from "@/lib/mock/github";
-import type { PiholeSnapshot } from "@/lib/mock/pihole";
-import type { ServersSnapshot } from "@/lib/mock/servers";
+import type { CalendarSnapshot } from "@/lib/types/calendar";
+import type { DockerSnapshot } from "@/lib/types/docker";
+import type { GithubSnapshot } from "@/lib/types/github";
+import type { PiholeSnapshot } from "@/lib/types/pihole";
+import type { ServersSnapshot } from "@/lib/types/servers";
 import type { Todo } from "@/features/todos/types";
 import { formatBytes, formatNumber } from "@/lib/format";
 import type { AttentionItem, Severity } from "./types";
@@ -476,16 +476,14 @@ function todoItems(todos: Todo[], now: Date): DraftItem[] {
   const today = startOfDay(now);
 
   const overdue = open.filter(
-    (todo) => todo.dueDate && parseISO(todo.dueDate) < today,
+    (todo) => todo.dueDate && safeParseISO(todo.dueDate) && safeParseISO(todo.dueDate)! < today,
   );
   if (overdue.length > 0) {
     const maxDays = Math.max(
-      ...overdue.map((todo) =>
-        Math.max(
-          0,
-          differenceInDays(now, parseISO(todo.dueDate ?? now.toISOString())),
-        ),
-      ),
+      ...overdue.map((todo) => {
+        const dueDate = safeParseISO(todo.dueDate) ?? now;
+        return Math.max(0, differenceInDays(now, dueDate));
+      }),
     );
     items.push({
       id: "todos-overdue",
@@ -504,9 +502,10 @@ function todoItems(todos: Todo[], now: Date): DraftItem[] {
     });
   }
 
-  const dueToday = open.filter(
-    (todo) => todo.dueDate && isToday(parseISO(todo.dueDate)),
-  );
+  const dueToday = open.filter((todo) => {
+    const date = safeParseISO(todo.dueDate);
+    return date && isToday(date);
+  });
   if (dueToday.length > 0) {
     const weight = Math.max(
       ...dueToday.map((todo) => PRIORITY_WEIGHT[todo.priority]),
@@ -528,11 +527,11 @@ function todoItems(todos: Todo[], now: Date): DraftItem[] {
     });
   }
 
-  const waiting = open.filter(
-    (todo) =>
-      todo.status === "waiting" &&
-      differenceInDays(now, parseISO(todo.createdAt)) >= 3,
-  );
+  const waiting = open.filter((todo) => {
+    if (todo.status !== "waiting") return false;
+    const date = safeParseISO(todo.createdAt);
+    return date && differenceInDays(now, date) >= 3;
+  });
   if (waiting.length > 0) {
     items.push({
       id: "todos-waiting",
@@ -550,12 +549,11 @@ function todoItems(todos: Todo[], now: Date): DraftItem[] {
     });
   }
 
-  const completedToday = todos.filter(
-    (todo) =>
-      todo.status === "done" &&
-      todo.completedAt &&
-      parseISO(todo.completedAt) >= today,
-  );
+  const completedToday = todos.filter((todo) => {
+    if (todo.status !== "done" || !todo.completedAt) return false;
+    const date = safeParseISO(todo.completedAt);
+    return date && date >= today;
+  });
   if (completedToday.length > 0) {
     items.push({
       id: "todos-completed",

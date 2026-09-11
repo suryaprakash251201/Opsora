@@ -69,7 +69,7 @@ export default function PiholePage() {
 
   const snapshot = data?.data;
   const isUnconfigured =
-    data?.mode === "live" &&
+    data?.mode === "empty" &&
     snapshot !== undefined &&
     snapshot.summary.queries === 0 &&
     snapshot.history.length === 0;

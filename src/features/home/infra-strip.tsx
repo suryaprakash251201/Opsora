@@ -1,9 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
-import { Container, Server, ShieldCheck } from "lucide-react";
-import { GitHubIcon } from "@/components/icons/github";
+import type { ComponentType } from "react";
+import {
+  LiveDocker,
+  LiveGithub,
+  LiveServer,
+  LiveShield,
+  type LiveIconProps,
+} from "@/components/icons/live";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Sparkline } from "@/components/viz/sparkline";
 import { StatusDot, type DotStatus } from "@/components/viz/status-dot";
@@ -13,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 interface TileProps {
   href: string;
-  icon: LucideIcon | typeof GitHubIcon;
+  icon: ComponentType<LiveIconProps>;
   label: string;
   value: string;
   status: DotStatus;
@@ -38,19 +43,14 @@ function Tile({
     <Link
       href={href}
       style={{ ["--accent" as string]: accent } as React.CSSProperties}
-      className="group relative flex min-h-[112px] flex-col gap-2 overflow-hidden rounded-[12px] border p-4 transition-all hover:-translate-y-0.5"
+      className={cn(
+        "group card-glass gradient-border shine-on-hover relative flex min-h-[112px] flex-col gap-2 overflow-hidden rounded-[12px] p-4",
+        "transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_18px_44px_-22px_color-mix(in_oklab,var(--accent)_45%,transparent)]",
+      )}
     >
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: `linear-gradient(180deg, color-mix(in oklab, ${accent} 6%, transparent) 0%, transparent 60%), var(--panel)`,
-          borderColor: "var(--border)",
-        }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-10 -right-10 size-28 rounded-full opacity-25 blur-2xl transition-opacity group-hover:opacity-45"
+        className="pointer-events-none absolute -top-10 -right-10 size-28 rounded-full opacity-30 blur-2xl transition-opacity duration-500 group-hover:opacity-60"
         style={{ background: accent }}
       />
 
@@ -61,6 +61,7 @@ function Tile({
             style={{
               background: `color-mix(in oklab, ${accent} 14%, transparent)`,
               color: accent,
+              boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${accent} 25%, transparent)`,
             }}
           >
             <Icon className="size-3.5" strokeWidth={2.2} />
@@ -90,7 +91,9 @@ function Tile({
 }
 
 function TileSkeleton() {
-  return <Skeleton className="h-[104px] rounded-[10px]" />;
+  return (
+    <Skeleton className="card-glass h-[104px] rounded-[12px] border border-[var(--border)]/60" />
+  );
 }
 
 export function InfraStrip() {
@@ -125,7 +128,7 @@ export function InfraStrip() {
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <Tile
         href="/servers"
-        icon={Server}
+        icon={LiveServer}
         label="Linux"
         value={`${serverSnap.summary.online}/${serverSnap.summary.total}`}
         status={
@@ -146,7 +149,7 @@ export function InfraStrip() {
 
       <Tile
         href="/pihole"
-        icon={ShieldCheck}
+        icon={LiveShield}
         label="Pi-hole"
         value={formatNumber(piholeSnap.summary.queries)}
         status={
@@ -163,7 +166,7 @@ export function InfraStrip() {
 
       <Tile
         href="/docker"
-        icon={Container}
+        icon={LiveDocker}
         label="Docker"
         value={`${dockerSnap.summary.running} running`}
         status={dockerSnap.summary.unhealthy > 0 ? "critical" : "healthy"}
@@ -176,7 +179,7 @@ export function InfraStrip() {
 
       <Tile
         href="/github"
-        icon={GitHubIcon}
+        icon={LiveGithub}
         label="GitHub"
         value={`${githubSnap.stats.openPulls} open PRs`}
         status={worstCi}

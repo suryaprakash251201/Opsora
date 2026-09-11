@@ -1,12 +1,19 @@
 import { getAllSnapshots } from "@/lib/adapters";
-import { getActivityFeed } from "@/lib/mock/activity";
+import { getActivityFeed } from "@/lib/activity";
+import { noStoreJson, apiError } from "@/lib/server/api";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const sources = await getAllSnapshots();
+  try {
+    const sources = await getAllSnapshots();
 
-  return Response.json({
-    sources,
-    activity: getActivityFeed(sources),
-    fetchedAt: new Date().toISOString(),
-  });
+    return noStoreJson({
+      sources,
+      activity: getActivityFeed(sources),
+      fetchedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    return apiError(error);
+  }
 }

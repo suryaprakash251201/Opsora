@@ -19,6 +19,14 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useTodoStore } from "@/features/todos/store";
 import type { Todo } from "@/features/todos/types";
 import { useThemeStore } from "@/stores/theme-store";
@@ -51,15 +59,6 @@ interface RestorePreset {
   build: () => BackupFile;
 }
 
-function buildSeedBackup(): BackupFile {
-  return {
-    schemaVersion: 1,
-    exportedAt: new Date().toISOString(),
-    exportedBy: "opsora",
-    todos: defaultSeedTodos(),
-  };
-}
-
 function buildEmptyBackup(): BackupFile {
   return {
     schemaVersion: 1,
@@ -70,13 +69,6 @@ function buildEmptyBackup(): BackupFile {
 }
 
 const RESTORE_PRESETS: (RestorePreset & { build: () => BackupFile })[] = [
-  {
-    id: "fresh",
-    label: "Reset to demo tasks",
-    description: "Replace everything with the bundled seed data.",
-    accent: "var(--accent-todos)",
-    build: buildSeedBackup,
-  },
   {
     id: "inbox",
     label: "Start with empty inbox",
@@ -91,6 +83,9 @@ export function BackupRestore() {
   const fileInput = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<"download" | "restore" | null>(null);
   const [lastBackup, setLastBackup] = useState<string | null>(null);
+  const [pendingPreset, setPendingPreset] = useState<"fresh" | "inbox" | null>(
+    null,
+  );
   const [restorePreview, setRestorePreview] = useState<{
     file: BackupFile;
     summary: RestoreSummary;
@@ -375,7 +370,7 @@ export function BackupRestore() {
                 key={preset.id}
                 preset={preset}
                 disabled={busy !== null}
-                onClick={() => void applyRestore(preset.id as "fresh" | "inbox")}
+                onClick={() => setPendingPreset(preset.id)}
               />
             ))}
           </div>
@@ -395,6 +390,48 @@ export function BackupRestore() {
           </p>
         </div>
       </CardContent>
+
+      {/* Preset confirmation — wiping tasks is destructive, so ask first. */}
+      <Dialog
+        open={pendingPreset !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingPreset(null);
+        }}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Start with an empty inbox?</DialogTitle>
+            <DialogDescription>
+              This deletes all {todoCount} task{todoCount === 1 ? "" : "s"} on
+              this device and the server. Your theme and sidebar preferences are
+              kept. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setPendingPreset(null)}
+              disabled={busy !== null}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              disabled={busy !== null}
+              onClick={() => {
+                const preset = pendingPreset;
+                setPendingPreset(null);
+                if (preset) void applyRestore(preset);
+              }}
+            >
+              <RotateCcw />
+              {busy === "restore" ? "Clearing…" : "Clear all tasks"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
@@ -458,46 +495,4 @@ function isValidTodoShape(value: unknown): value is Todo {
   return typeof v.id === "string" && typeof v.title === "string";
 }
 
-/** Mirror of the seed function used by the todo store for the demo preset. */
-function defaultSeedTodos(): Todo[] {
-  const now = new Date();
-  const iso = (offsetDays = 0) => {
-    const d = new Date(now);
-    d.setDate(d.getDate() + offsetDays);
-    return d.toISOString();
-  };
-  return [
-    {
-      id: "seed-1",
-      title: "Review pull requests",
-      status: "today",
-      priority: "high",
-      tags: ["github"],
-      createdAt: iso(0),
-    },
-    {
-      id: "seed-2",
-      title: "Rotate API keys",
-      status: "inbox",
-      priority: "critical",
-      tags: ["security"],
-      createdAt: iso(-1),
-    },
-    {
-      id: "seed-3",
-      title: "Plan next sprint",
-      status: "waiting",
-      priority: "medium",
-      tags: ["planning"],
-      createdAt: iso(-3),
-    },
-    {
-      id: "seed-4",
-      title: "Update README",
-      status: "in_progress",
-      priority: "low",
-      tags: ["docs"],
-      createdAt: iso(-5),
-    },
-  ];
-}
+

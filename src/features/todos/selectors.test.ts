@@ -68,4 +68,25 @@ describe("filterTodos", () => {
     const [first] = filterTodos(todos, "done");
     expect(first.completedAt).toContain(new Date().toISOString().slice(0, 10));
   });
+
+  it("includes completed tasks in the all view", () => {
+    const todos = [
+      todo({ status: "inbox" }),
+      todo({ status: "in_progress" }),
+      todo({ status: "done", completedAt: new Date().toISOString() }),
+    ];
+
+    const all = filterTodos(todos, "all");
+    expect(all).toHaveLength(3);
+    expect(all.some((item) => item.status === "done")).toBe(true);
+  });
+
+  it("keeps projects focused on open work", () => {
+    const todos = [
+      todo({ status: "inbox", project: "Opsora" }),
+      todo({ status: "done", project: "Opsora" }),
+    ];
+
+    expect(filterTodos(todos, "projects")).toHaveLength(1);
+  });
 });

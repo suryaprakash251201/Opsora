@@ -1,7 +1,20 @@
 import { ingestAgentMetrics } from "@/lib/adapters/live/agent-store";
+import { timingSafeEqual } from "node:crypto";
 
 function unauthorized(): Response {
   return Response.json({ error: "Invalid agent token" }, { status: 401 });
+}
+
+/** Length-independent string comparison so token checks don't leak timing. */
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, "utf8");
+  const bufB = Buffer.from(b, "utf8");
+  if (bufA.length !== bufB.length) {
+    // Still burn a comparison on equal-length dummies to keep timing flat.
+    timingSafeEqual(bufA, bufA);
+    return false;
+  }
+  return timingSafeEqual(bufA, bufB);
 }
 
 export async function POST(request: Request) {
@@ -11,7 +24,7 @@ export async function POST(request: Request) {
       request.headers.get("x-opsora-token") ??
       request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
 
-    if (provided !== expected) return unauthorized();
+    if (!provided || !safeEqual(provided, expected)) return unauthorized();
   }
 
   let payload: unknown;

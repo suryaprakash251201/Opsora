@@ -1,16 +1,17 @@
+import type { ComponentType } from "react";
 import {
-  Bell,
-  CalendarDays,
-  ChartNoAxesColumn,
-  Container,
-  House,
-  ListTodo,
-  Server,
-  Settings,
-  ShieldCheck,
-  type LucideIcon,
-} from "lucide-react";
-import { GitHubIcon } from "@/components/icons/github";
+  LiveAnalytics,
+  LiveBell,
+  LiveCalendar,
+  LiveDocker,
+  LiveGithub,
+  LiveHome,
+  LiveServer,
+  LiveSettings,
+  LiveShield,
+  LiveTodo,
+  type LiveIconProps,
+} from "@/components/icons/live";
 
 export type NavAccent =
   | "home"
@@ -24,10 +25,13 @@ export type NavAccent =
   | "analytics"
   | "settings";
 
+/** Any icon the shell can render — live animated icons or lucide icons. */
+export type NavIcon = ComponentType<LiveIconProps>;
+
 export interface NavItem {
   href: string;
   label: string;
-  icon: LucideIcon | typeof GitHubIcon;
+  icon: NavIcon;
   shortcut?: string;
   accent: NavAccent;
 }
@@ -40,12 +44,12 @@ export interface NavGroup {
 export const navGroups: NavGroup[] = [
   {
     items: [
-      { href: "/", label: "Home", icon: House, shortcut: "H", accent: "home" },
-      { href: "/todos", label: "Todos", icon: ListTodo, shortcut: "T", accent: "todos" },
+      { href: "/", label: "Home", icon: LiveHome, shortcut: "H", accent: "home" },
+      { href: "/todos", label: "Todos", icon: LiveTodo, shortcut: "T", accent: "todos" },
       {
         href: "/calendar",
         label: "Calendar",
-        icon: CalendarDays,
+        icon: LiveCalendar,
         shortcut: "C",
         accent: "calendar",
       },
@@ -57,14 +61,14 @@ export const navGroups: NavGroup[] = [
       {
         href: "/github",
         label: "GitHub",
-        icon: GitHubIcon,
+        icon: LiveGithub,
         shortcut: "G",
         accent: "github",
       },
       {
         href: "/docker",
         label: "Docker",
-        icon: Container,
+        icon: LiveDocker,
         shortcut: "D",
         accent: "docker",
       },
@@ -76,14 +80,14 @@ export const navGroups: NavGroup[] = [
       {
         href: "/servers",
         label: "Servers",
-        icon: Server,
+        icon: LiveServer,
         shortcut: "S",
         accent: "servers",
       },
       {
         href: "/pihole",
         label: "Pi-hole",
-        icon: ShieldCheck,
+        icon: LiveShield,
         shortcut: "P",
         accent: "pihole",
       },
@@ -95,13 +99,13 @@ export const navGroups: NavGroup[] = [
       {
         href: "/analytics",
         label: "Analytics",
-        icon: ChartNoAxesColumn,
+        icon: LiveAnalytics,
         accent: "analytics",
       },
       {
         href: "/alerts",
         label: "Alerts",
-        icon: Bell,
+        icon: LiveBell,
         shortcut: "A",
         accent: "alerts",
       },
@@ -110,7 +114,7 @@ export const navGroups: NavGroup[] = [
 ];
 
 export const bottomNav: NavItem[] = [
-  { href: "/settings", label: "Settings", icon: Settings, accent: "settings" },
+  { href: "/settings", label: "Settings", icon: LiveSettings, accent: "settings" },
 ];
 
 export function isActivePath(pathname: string, href: string): boolean {
@@ -131,3 +135,9 @@ export const accentVar: Record<NavAccent, string> = {
   analytics: "var(--accent-analytics)",
   settings: "var(--accent-settings)",
 };
+
+/** Pathname → nav item, used by the topbar to show the current page. */
+export function navItemForPath(pathname: string): NavItem | undefined {
+  const all = [...navGroups.flatMap((g) => g.items), ...bottomNav];
+  return all.find((item) => isActivePath(pathname, item.href));
+}

@@ -7,7 +7,8 @@ import type {
   SnapshotBundle,
   SnapshotMap,
 } from "@/lib/adapters/types";
-import type { ActivityEvent } from "@/lib/mock/activity";import { useRealtimeStore } from "@/stores/realtime-store";
+import type { ActivityEvent } from "@/lib/activity";
+import { useRealtimeStore } from "@/stores/realtime-store";
 
 export interface DashboardSnapshot {
   sources: SnapshotBundle;
@@ -60,7 +61,7 @@ export interface SourceStatusEntry {
   id: AdapterSourceId;
   label: string;
   description: string;
-  mode: "live" | "mock";
+  mode: "live" | "empty";
   status: "ok" | "stale" | "error";
   error: string | null;
   latencyMs: number;
@@ -80,6 +81,12 @@ export interface StatusResponse {
   agents: AgentStatusEntry[];
   serverTime: string;
   uptimeSeconds: number;
+  version: string;
+  desktop: {
+    active: boolean;
+    dataDir: string | null;
+    configFile: string | null;
+  };
   channels: {
     id: "telegram" | "discord";
     label: string;

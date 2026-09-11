@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ListTodo, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
+import { LiveTodo } from "@/components/icons/live";
 import { PageHeader } from "@/components/viz/page-header";
 import { EmptyState } from "@/components/viz/section";
 import { Button } from "@/components/ui/button";
@@ -139,7 +140,7 @@ export default function TodosPage() {
       {view === "projects" ? (
         projects.length === 0 ? (
           <EmptyState
-            icon={ListTodo}
+            icon={LiveTodo}
             title="No projects yet"
             description="Assign a project when creating a task and it will show up here."
           />
@@ -170,7 +171,7 @@ export default function TodosPage() {
         )
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon={ListTodo}
+          icon={LiveTodo}
           title="Nothing here"
           description="No tasks match this view or filter. Create one to get started."
           action={

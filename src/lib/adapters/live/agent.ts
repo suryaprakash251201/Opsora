@@ -2,7 +2,7 @@ import type {
   Snapshot,
   SourceAdapter,
 } from "@/lib/adapters/types";
-import type { Server, ServersSnapshot } from "@/lib/mock/servers";
+import type { Server, ServersSnapshot } from "@/lib/types/servers";
 import {
   getAgentHistory,
   getAgentMetrics,
@@ -42,8 +42,19 @@ export function createAgentAdapter(): SourceAdapter<ServersSnapshot> {
       const servers = metrics.map(toServer);
       const online = servers.filter((server) => server.online);
 
-      const diskPercents = servers.flatMap((server) =>
+      // Disk averages should describe the same set of machines as the CPU
+      // average (online only), otherwise an offline host's stale disks skew
+      // the summary.
+      const diskPercents = online.flatMap((server) =>
         server.disks.map((disk) => (disk.usedBytes / disk.totalBytes) * 100),
+      );
+
+      // Freshness means "newest heartbeat", not "when this function ran" —
+      // otherwise an offline agent looks like it just reported.
+      const newestHeartbeat = servers.reduce(
+        (latest, server) =>
+          server.updatedAt > latest ? server.updatedAt : latest,
+        "",
       );
 
       const data: ServersSnapshot = {
@@ -75,7 +86,7 @@ export function createAgentAdapter(): SourceAdapter<ServersSnapshot> {
               )
             : 0,
         },
-        updatedAt: new Date().toISOString(),
+        updatedAt: newestHeartbeat || new Date().toISOString(),
       };
 
       return {

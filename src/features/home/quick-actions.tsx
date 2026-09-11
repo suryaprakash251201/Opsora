@@ -25,13 +25,20 @@ function Action({ href, onClick, icon: Icon, label, accent }: ActionProps) {
     <>
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
         style={{
-          background: `radial-gradient(60% 60% at 50% 0%, color-mix(in oklab, ${accent} 25%, transparent), transparent 70%)`,
+          background: `radial-gradient(60% 60% at 50% 0%, color-mix(in oklab, ${accent} 30%, transparent), transparent 70%)`,
+        }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-md opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{
+          boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${accent} 30%, transparent)`,
         }}
       />
       <Icon
-        className="relative size-4 transition-transform group-hover:scale-110"
+        className="relative size-4 transition-transform duration-300 group-hover:scale-110"
         style={{ color: accent }}
       />
       <span className="relative text-xs">{label}</span>
@@ -42,7 +49,7 @@ function Action({ href, onClick, icon: Icon, label, accent }: ActionProps) {
     return (
       <Button
         variant="secondary"
-        className="group relative h-16 flex-col gap-1.5 overflow-hidden"
+        className="group relative h-16 flex-col gap-1.5 overflow-hidden border-[var(--border)]/60"
         asChild
       >
         <Link href={href}>{content}</Link>
@@ -53,7 +60,7 @@ function Action({ href, onClick, icon: Icon, label, accent }: ActionProps) {
   return (
     <Button
       variant="secondary"
-      className="group relative h-16 flex-col gap-1.5 overflow-hidden"
+      className="group relative h-16 flex-col gap-1.5 overflow-hidden border-[var(--border)]/60"
       onClick={onClick}
     >
       {content}

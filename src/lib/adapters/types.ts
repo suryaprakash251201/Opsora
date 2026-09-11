@@ -1,8 +1,8 @@
-import type { CalendarSnapshot } from "@/lib/mock/calendar";
-import type { DockerSnapshot } from "@/lib/mock/docker";
-import type { GithubSnapshot } from "@/lib/mock/github";
-import type { PiholeSnapshot } from "@/lib/mock/pihole";
-import type { ServersSnapshot } from "@/lib/mock/servers";
+import type { CalendarSnapshot } from "@/lib/types/calendar";
+import type { DockerSnapshot } from "@/lib/types/docker";
+import type { GithubSnapshot } from "@/lib/types/github";
+import type { PiholeSnapshot } from "@/lib/types/pihole";
+import type { ServersSnapshot } from "@/lib/types/servers";
 import type { SourceId } from "@/lib/attention/types";
 
 export type AdapterSourceId = Exclude<SourceId, "todos">;
@@ -20,9 +20,9 @@ export interface Snapshot<T> {
   data: T;
   fetchedAt: string;
   status: "ok" | "stale" | "error";
-  /** Whether the data came from a real integration or a mock adapter. */
-  mode: "live" | "mock";
-  /** Present when a live source failed and the mock fallback was used. */
+  /** "live" = real integration; "empty" = source not configured yet. */
+  mode: "live" | "empty";
+  /** Present when a configured live source failed. */
   error?: string;
   latencyMs: number;
 }
@@ -31,7 +31,7 @@ export interface SourceAdapter<T> {
   id: AdapterSourceId;
   label: string;
   description: string;
-  mode: "live" | "mock";
+  mode: "live" | "empty";
   getSnapshot(): Promise<Snapshot<T>>;
 }
 

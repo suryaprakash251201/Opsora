@@ -100,6 +100,11 @@ export function AlertChannels() {
             size="sm"
             onClick={() => void sendTest()}
             disabled={sending || configuredCount === 0}
+            title={
+              configuredCount === 0
+                ? "Add channel credentials to .env.local and restart the server"
+                : undefined
+            }
           >
             <Send />
             {sending ? "Sending…" : "Send test"}

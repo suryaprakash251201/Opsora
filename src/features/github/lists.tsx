@@ -2,7 +2,7 @@
 
 import { GitPullRequest, MessageSquare } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import type { GithubIssue, GithubPull } from "@/lib/mock/github";
+import type { GithubIssue, GithubPull } from "@/lib/types/github";
 import { timeAgo } from "@/lib/format";
 
 const checkVariant = {

@@ -30,7 +30,7 @@ export function MiniBars({
         return (
           <div
             key={index}
-            className="relative flex h-full flex-1 items-end overflow-hidden rounded-[2px] bg-white/[0.03]"
+            className="bg-foreground/[0.04] relative flex h-full flex-1 items-end overflow-hidden rounded-[2px]"
           >
             <div
               className={cn("relative w-full rounded-[2px]", barClassName)}

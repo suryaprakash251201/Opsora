@@ -5,7 +5,7 @@ import type {
   GithubPull,
   GithubRepo,
   GithubSnapshot,
-} from "@/lib/mock/github";
+} from "@/lib/types/github";
 
 const API = "https://api.github.com";
 const REPO_LIMIT = 6;

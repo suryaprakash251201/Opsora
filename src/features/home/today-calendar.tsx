@@ -35,12 +35,7 @@ export function TodayCalendar() {
     .slice(0, 6);
 
   return (
-    <Card className="relative overflow-hidden">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-12 -right-10 size-36 rounded-full opacity-20 blur-3xl"
-        style={{ background: ACCENT }}
-      />
+    <Card accent={ACCENT}>
       <CardHeader className="relative">
         <CardTitle>
           <span

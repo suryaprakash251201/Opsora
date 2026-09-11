@@ -1,6 +1,7 @@
 "use client";
 
-import { Boxes, Container, Plug, RefreshCw, RotateCw, TriangleAlert } from "lucide-react";
+import { Boxes, Plug, RefreshCw, RotateCw, TriangleAlert } from "lucide-react";
+import { LiveDocker } from "@/components/icons/live";
 import { PageHeader } from "@/components/viz/page-header";
 import { EmptyConfigHint, ErrorState } from "@/components/viz/section";
 import { SourceWarning } from "@/components/viz/source-warning";
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { REFETCH_INTERVALS, useSourceSnapshot } from "@/hooks/use-snapshot";
 import { formatBytes, formatDuration, timeAgo } from "@/lib/format";
-import type { DockerContainer } from "@/lib/mock/docker";
+import type { DockerContainer } from "@/lib/types/docker";
 import { cn } from "@/lib/utils";
 
 function stateVariant(container: DockerContainer) {
@@ -78,7 +79,7 @@ export default function DockerPage() {
           icon={Plug}
           accent="var(--accent-docker)"
           title="Connect the Docker socket"
-          description="Opsora talks directly to the Docker Engine via its unix socket. Make sure /var/run/docker.sock is reachable (Opsora's user must be in the docker group) and that OPSORA_DOCKER isn't set to mock. Inside the Docker image, mount the socket at /var/run/docker.sock."
+          description="Opsora talks directly to the Docker Engine via its unix socket. Make sure /var/run/docker.sock is reachable (Opsora's user must be in the docker group) and that OPSORA_DOCKER isn't set to 0. Inside the Docker image, mount the socket at /var/run/docker.sock."
           env={["DOCKER_SOCKET", "OPSORA_DOCKER"]}
         />
       ) : (
@@ -87,7 +88,7 @@ export default function DockerPage() {
             <StatTile
               label="Running"
               value={snapshot.summary.running}
-              icon={Container}
+              icon={LiveDocker}
             />
             <StatTile
               label="Stopped"

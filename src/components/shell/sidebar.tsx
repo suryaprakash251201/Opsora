@@ -7,8 +7,8 @@ import {
   CircleCheck,
   Plus,
   TriangleAlert,
-  Wifi,
 } from "lucide-react";
+import { LiveLogo } from "@/components/icons/live";
 import { useAttention } from "@/hooks/use-attention";
 import {
   accentVar,
@@ -19,7 +19,6 @@ import {
 } from "@/components/shell/nav";
 import {
   ResizableSidebar,
-  SidebarCollapseHandle,
   type SidebarState,
 } from "@/components/shell/resizable-sidebar";
 import { ThemeSwitcher } from "@/components/shell/theme-switcher";
@@ -59,18 +58,18 @@ function HealthCard({ collapsed }: { collapsed: boolean }) {
         href="/alerts"
         aria-label={meta.label}
         title={meta.label}
-        className="group border-border/60 bg-surface/40 hover:bg-surface relative flex size-10 items-center justify-center rounded-xl border transition-colors"
+        className="group border-border/60 bg-surface/40 hover:bg-surface hover:border-border-strong relative mx-auto flex size-11 items-center justify-center rounded-xl border transition-all"
       >
         <Icon
           className={cn(
-            "size-4.5 shrink-0 transition-transform group-hover:scale-110",
+            "size-5 shrink-0 transition-transform group-hover:scale-110",
             isLoading ? "text-subtle" : meta.text,
           )}
           strokeWidth={2.2}
         />
         <span
           className={cn(
-            "absolute -right-0.5 -bottom-0.5 size-2 rounded-full ring-2",
+            "absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full ring-2 ring-[var(--panel)]",
             health === "critical"
               ? "bg-danger"
               : health === "warning"
@@ -100,7 +99,7 @@ function HealthCard({ collapsed }: { collapsed: boolean }) {
       />
       <Icon
         className={cn(
-          "size-4 shrink-0 transition-transform group-hover:scale-110",
+          "size-4.5 shrink-0 transition-transform group-hover:scale-110",
           isLoading ? "text-subtle" : meta.text,
         )}
         strokeWidth={2.2}
@@ -144,49 +143,56 @@ function NavLinkItem({
           : undefined
       }
       className={cn(
-        "group relative flex items-center rounded-lg py-2 text-[13px] font-medium transition-all",
-        collapsed ? "justify-center" : "gap-2.5 pl-2.5 pr-2",
+        "group relative flex items-center rounded-xl text-[13px] font-medium transition-all duration-200",
+        collapsed
+          ? "mx-auto size-11 justify-center"
+          : "h-10 gap-3 px-3",
         active
           ? cn(
               "text-foreground",
-              "bg-[var(--surface)]",
-              "shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--accent)_18%,transparent)]",
+              "shadow-[inset_0_0_0_1px_color-mix(in_oklab,var(--accent)_24%,transparent)]",
             )
-          : "text-muted hover:text-foreground hover:bg-[var(--surface)]/60",
+          : cn(
+              "text-muted hover:text-foreground hover:bg-[var(--surface)]/70",
+              !collapsed && "hover:translate-x-0.5",
+            ),
       )}
     >
       {active ? (
         <>
           <span
             aria-hidden
-            className={cn(
-              "absolute rounded-full transition-all",
-              collapsed
-                ? "inset-x-1.5 top-1.5 h-0.5"
-                : "inset-y-1.5 left-0 w-0.5",
-            )}
-            style={{ background: accent }}
+            className="pointer-events-none absolute inset-0 rounded-xl"
+            style={{
+              background: `linear-gradient(135deg, color-mix(in oklab, ${accent} 16%, transparent) 0%, color-mix(in oklab, ${accent} 6%, transparent) 100%)`,
+            }}
           />
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-lg opacity-50"
+            className={cn(
+              "absolute rounded-full transition-all",
+              collapsed
+                ? "inset-x-2 -bottom-0.5 h-0.5"
+                : "-left-px top-1/2 h-5 w-[3px] -translate-y-1/2",
+            )}
             style={{
-              background: `color-mix(in oklab, ${accent} 8%, transparent)`,
+              background: accent,
+              boxShadow: `0 0 10px color-mix(in oklab, ${accent} 75%, transparent)`,
             }}
           />
         </>
       ) : null}
       <Icon
         className={cn(
-          "shrink-0 transition-transform duration-200 group-hover:scale-110",
-          collapsed ? "size-[20px]" : "size-[18px]",
+          "relative shrink-0 transition-transform duration-200 group-hover:scale-110",
+          collapsed ? "size-[22px]" : "size-5",
         )}
-        strokeWidth={1.8}
+        strokeWidth={2}
         style={active ? { color: accent } : { color: "var(--subtle)" }}
       />
       <span
         className={cn(
-          "truncate whitespace-nowrap transition-all duration-200",
+          "relative truncate whitespace-nowrap transition-all duration-200",
           collapsed ? "pointer-events-none w-0 opacity-0" : "opacity-100",
         )}
       >
@@ -203,7 +209,7 @@ function NavLinkItem({
   if (!collapsed) return link;
 
   return (
-    <span className="group/tooltip relative">
+    <span className="group/tooltip relative block">
       {link}
       <span
         role="tooltip"
@@ -234,17 +240,25 @@ function NavLinks({
   return (
     <nav
       data-scrollable
-      className="flex flex-1 min-h-0 flex-col gap-1.5 overflow-y-auto overscroll-contain px-3 py-3 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent]"
+      className={cn(
+        "flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain py-3 [scrollbar-width:thin] [scrollbar-color:var(--border-strong)_transparent]",
+        collapsed ? "px-2.5" : "px-3",
+      )}
     >
       {navGroups.map((group, groupIndex) => (
-        <div
-          key={group.label ?? groupIndex}
-          className="flex flex-col gap-0.5"
-        >
-          {group.label && !collapsed ? (
-            <p className="text-subtle mt-1 mb-0.5 px-2.5 text-[10px] font-semibold tracking-widest uppercase first:mt-0">
-              {group.label}
-            </p>
+        <div key={group.label ?? groupIndex} className="flex flex-col gap-1">
+          {group.label ? (
+            collapsed ? (
+              <div className="bg-border/50 mx-3 mt-1 mb-0.5 h-px" aria-hidden />
+            ) : (
+              <p className="text-subtle mt-2 flex items-center gap-2 px-3 text-[10px] font-semibold tracking-widest uppercase first:mt-0">
+                {group.label}
+                <span
+                  aria-hidden
+                  className="bg-border/60 h-px flex-1"
+                />
+              </p>
+            )
           ) : null}
           {group.items.map((item) => (
             <NavLinkItem
@@ -268,20 +282,22 @@ function NavLinks({
         title={collapsed ? "New todo · N" : undefined}
         aria-label="New todo"
         className={cn(
-          "border-border/60 text-subtle hover:border-border-strong hover:text-muted relative flex items-center overflow-hidden rounded-lg border border-dashed text-xs transition-colors",
+          "border-border/60 text-subtle hover:border-border-strong hover:text-muted relative mt-1.5 flex items-center overflow-hidden rounded-xl border border-dashed text-xs transition-colors",
           collapsed
-            ? "mt-2 h-9 justify-center"
-            : "mt-2 gap-2 px-2.5 py-2",
+            ? "mx-auto size-11 justify-center"
+            : "h-10 gap-2.5 px-3",
         )}
       >
         <Plus
-          className={cn("shrink-0", collapsed ? "size-4" : "size-3.5")}
+          className={cn("shrink-0", collapsed ? "size-5" : "size-4")}
           strokeWidth={2.4}
         />
         <span
           className={cn(
             "whitespace-nowrap transition-all duration-200",
-            collapsed ? "pointer-events-none w-0 overflow-hidden opacity-0" : "opacity-100",
+            collapsed
+              ? "pointer-events-none w-0 overflow-hidden opacity-0"
+              : "opacity-100",
           )}
         >
           New todo
@@ -302,8 +318,8 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   return (
     <div
       className={cn(
-        "border-border/70 flex flex-col gap-2 border-t",
-        collapsed ? "items-center px-2 py-3" : "px-3 py-3",
+        "border-border/70 flex shrink-0 flex-col gap-1.5 border-t",
+        collapsed ? "items-center px-2.5 py-3" : "px-3 py-3",
       )}
     >
       <HealthCard collapsed={collapsed} />
@@ -323,22 +339,16 @@ function SidebarFooter({ collapsed }: { collapsed: boolean }) {
   );
 }
 
-function SidebarHeader({
-  collapsed,
-  toggleCollapsed,
-}: {
-  collapsed: boolean;
-  toggleCollapsed: () => void;
-}) {
+function SidebarHeader({ collapsed }: { collapsed: boolean }) {
   return (
     <div
       className={cn(
-        "border-border/70 relative flex items-center gap-2.5 border-b",
-        collapsed ? "justify-center px-2 py-3" : "px-4 py-3",
+        "border-border/70 relative flex shrink-0 items-center gap-2.5 border-b",
+        collapsed ? "justify-center px-2.5 py-3" : "px-3.5 py-3",
       )}
     >
       <span
-        className="relative flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-lg text-sm font-semibold text-white shadow-[0_4px_12px_-2px_color-mix(in_oklab,var(--brand)_45%,transparent)]"
+        className="relative flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-xl text-white shadow-[0_4px_14px_-2px_color-mix(in_oklab,var(--brand)_45%,transparent)]"
         style={{
           background:
             "linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 100%)",
@@ -349,14 +359,12 @@ function SidebarHeader({
           className="absolute inset-0 animate-[shimmer_3.6s_ease_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent"
           style={{ backgroundSize: "200% 100%" }}
         />
-        <span className="relative">◈</span>
+        <LiveLogo className="relative size-6" strokeWidth={1.6} />
       </span>
       <span
         className={cn(
           "min-w-0 overflow-hidden whitespace-nowrap transition-all duration-200",
-          collapsed
-            ? "pointer-events-none w-0 opacity-0"
-            : "opacity-100",
+          collapsed ? "pointer-events-none w-0 opacity-0" : "opacity-100",
         )}
       >
         <span className="block truncate text-sm leading-tight font-semibold tracking-tight">
@@ -371,23 +379,22 @@ function SidebarHeader({
           <ThemeSwitcher trigger="icon" />
         </span>
       ) : null}
-      <SidebarCollapseHandle
-        collapsed={collapsed}
-        onToggle={toggleCollapsed}
-      />
     </div>
   );
 }
 
-function SidebarBody({ state, onNavigate }: { state: SidebarState; onNavigate?: () => void }) {
+function SidebarBody({
+  collapsed,
+  onNavigate,
+}: {
+  collapsed: boolean;
+  onNavigate?: () => void;
+}) {
   return (
     <>
-      <SidebarHeader
-        collapsed={state.collapsed}
-        toggleCollapsed={state.toggleCollapsed}
-      />
-      <NavLinks collapsed={state.collapsed} onNavigate={onNavigate} />
-      <SidebarFooter collapsed={state.collapsed} />
+      <SidebarHeader collapsed={collapsed} />
+      <NavLinks collapsed={collapsed} onNavigate={onNavigate} />
+      <SidebarFooter collapsed={collapsed} />
     </>
   );
 }
@@ -397,13 +404,15 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Desktop: floating resizable rail */}
+      {/* Desktop: floating resizable rail, pinned to the viewport */}
       <aside
-        className="hidden shrink-0 self-stretch transition-[width,padding] duration-200 ease-out lg:flex lg:pl-4 lg:py-4"
+        className="sticky top-0 hidden h-dvh shrink-0 self-start transition-[width,padding] duration-200 ease-out lg:flex lg:py-4 lg:pl-4"
         aria-label="Primary navigation"
       >
         <ResizableSidebar>
-          {(state) => <SidebarBody state={state} />}
+          {(state: SidebarState) => (
+            <SidebarBody collapsed={state.collapsed} />
+          )}
         </ResizableSidebar>
       </aside>
 
@@ -416,14 +425,14 @@ export function Sidebar() {
             className="animate-overlay-in absolute inset-0 bg-black/60 backdrop-blur-[2px]"
             onClick={() => setSidebarOpen(false)}
           />
-          <div className="animate-rise-in border-border bg-panel absolute top-0 left-0 h-dvh w-72 border-r shadow-2xl">
-            <SidebarBody state={{ collapsed: false, width: 288 } as SidebarState} onNavigate={() => setSidebarOpen(false)} />
+          <div className="animate-rise-in border-border bg-panel absolute top-0 left-0 flex h-dvh w-72 flex-col border-r shadow-2xl">
+            <SidebarBody
+              collapsed={false}
+              onNavigate={() => setSidebarOpen(false)}
+            />
           </div>
         </div>
       ) : null}
     </>
   );
 }
-
-/* Re-export for any caller that wants the brand mark. */
-export { Wifi };

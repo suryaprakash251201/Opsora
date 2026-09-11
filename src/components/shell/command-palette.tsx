@@ -1,38 +1,50 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Command } from "cmdk";
 import {
-  Bell,
-  CalendarDays,
-  ChartNoAxesColumn,
-  Container,
-  House,
-  ListTodo,
+  ArrowRight,
+  CircleDashed,
+  Moon,
+  PanelLeft,
   Plus,
   RefreshCw,
   Search,
-  Server,
-  Settings,
-  ShieldCheck,
+  Sun,
 } from "lucide-react";
-import { GitHubIcon } from "@/components/icons/github";
+import {
+  LiveAnalytics,
+  LiveBell,
+  LiveCalendar,
+  LiveDocker,
+  LiveGithub,
+  LiveHome,
+  LiveServer,
+  LiveSettings,
+  LiveShield,
+  LiveTodo,
+} from "@/components/icons/live";
+import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { useTodoStore } from "@/features/todos/store";
+import { priorityMeta, statusLabels } from "@/features/todos/types";
+import { themeMode, useThemeStore } from "@/stores/theme-store";
 import { useUiStore } from "@/stores/ui-store";
+import { cn } from "@/lib/utils";
 
 const pages = [
-  { href: "/", label: "Home", icon: House },
-  { href: "/todos", label: "Todos", icon: ListTodo },
-  { href: "/calendar", label: "Calendar", icon: CalendarDays },
-  { href: "/github", label: "GitHub", icon: GitHubIcon },
-  { href: "/docker", label: "Docker", icon: Container },
-  { href: "/servers", label: "Servers", icon: Server },
-  { href: "/pihole", label: "Pi-hole", icon: ShieldCheck },
-  { href: "/analytics", label: "Analytics", icon: ChartNoAxesColumn },
-  { href: "/alerts", label: "Alerts", icon: Bell },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/", label: "Home", icon: LiveHome },
+  { href: "/todos", label: "Todos", icon: LiveTodo },
+  { href: "/calendar", label: "Calendar", icon: LiveCalendar },
+  { href: "/github", label: "GitHub", icon: LiveGithub },
+  { href: "/docker", label: "Docker", icon: LiveDocker },
+  { href: "/servers", label: "Servers", icon: LiveServer },
+  { href: "/pihole", label: "Pi-hole", icon: LiveShield },
+  { href: "/analytics", label: "Analytics", icon: LiveAnalytics },
+  { href: "/alerts", label: "Alerts", icon: LiveBell },
+  { href: "/settings", label: "Settings", icon: LiveSettings },
 ];
 
 const shortcuts: Record<string, string> = {
@@ -46,10 +58,25 @@ const shortcuts: Record<string, string> = {
   a: "/alerts",
 };
 
+const MAX_TASK_RESULTS = 8;
+
+const itemClass =
+  "group text-muted data-[selected=true]:bg-surface data-[selected=true]:text-foreground flex cursor-default items-center gap-2.5 rounded-md px-2 py-2 text-sm outline-none select-none";
+const groupClass =
+  "text-subtle [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:uppercase";
+
 export function CommandPalette() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [search, setSearch] = useState("");
   const { commandOpen, setCommandOpen, openTodoDialog } = useUiStore();
+  const todos = useTodoStore((state) => state.todos);
+  const theme = useThemeStore((state) => state.theme);
+  const toggleMode = useThemeStore((state) => state.toggleMode);
+  const toggleSidebar = useUiStore((state) => state.toggleSidebarCollapsed);
+
+  // Clear the query whenever the palette closes so the next open starts
+  // from a clean list (handled in the Dialog's onOpenChange below).
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -65,19 +92,23 @@ export function CommandPalette() {
         return;
       }
 
-      // ⌘⇧L / Ctrl+Shift+L — toggle dark/light theme
+      // ⌘⇧L / Ctrl+Shift+L — toggle dark/light theme.
       if (
         (event.metaKey || event.ctrlKey) &&
         event.shiftKey &&
         event.key.toLowerCase() === "l"
       ) {
         event.preventDefault();
-        // Lazy-load to avoid circular imports
-        void import("@/stores/theme-store").then(({ useThemeStore }) => {
-          const theme = useThemeStore.getState().theme;
-          const next = theme === "solar" ? "opsora" : "solar";
-          useThemeStore.getState().setTheme(next);
-        });
+        useThemeStore.getState().toggleMode();
+        return;
+      }
+
+      // ⌘\ / Ctrl+\ — toggle the sidebar. Checked before the modifier
+      // guard below (which exists to keep page shortcuts from firing while
+      // typing or with browser chords).
+      if ((event.metaKey || event.ctrlKey) && event.key === "\\") {
+        event.preventDefault();
+        useUiStore.getState().toggleSidebarCollapsed();
         return;
       }
 
@@ -99,6 +130,7 @@ export function CommandPalette() {
       if (href) {
         event.preventDefault();
         router.push(href);
+        return;
       }
 
       if (event.key.toLowerCase() === "n") {
@@ -116,8 +148,37 @@ export function CommandPalette() {
     action();
   };
 
+  // Local, deterministic task matching so the "Tasks" group can disappear
+  // entirely when nothing matches (cmdk hides items but not headings).
+  const matchedTodos = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return todos.slice(0, 5);
+    return todos
+      .filter((todo) => {
+        const haystack = [
+          todo.title,
+          todo.description ?? "",
+          todo.project ?? "",
+          ...(todo.tags ?? []),
+          statusLabels[todo.status],
+        ]
+          .join(" ")
+          .toLowerCase();
+        return haystack.includes(query);
+      })
+      .slice(0, MAX_TASK_RESULTS);
+  }, [todos, search]);
+
+  const mode = themeMode(theme);
+
   return (
-    <Dialog open={commandOpen} onOpenChange={setCommandOpen}>
+    <Dialog
+      open={commandOpen}
+      onOpenChange={(open) => {
+        if (!open) setSearch("");
+        setCommandOpen(open);
+      }}
+    >
       <DialogContent className="max-w-xl p-0" showClose={false}>
         <DialogTitle className="sr-only">Command palette</DialogTitle>
         <Command
@@ -129,20 +190,77 @@ export function CommandPalette() {
             <Search className="text-subtle size-4 shrink-0" />
             <Command.Input
               autoFocus
-              placeholder="Search pages and actions…"
+              value={search}
+              onValueChange={setSearch}
+              placeholder="Search pages, tasks and actions…"
               className="text-foreground placeholder:text-subtle h-11 w-full bg-transparent text-sm outline-none"
             />
+            <kbd className="border-border bg-surface/80 text-subtle rounded border px-1.5 py-0.5 font-mono text-[10px]">
+              esc
+            </kbd>
           </div>
 
-          <Command.List className="max-h-80 overflow-y-auto p-2">
+          <Command.List className="max-h-[22rem] overflow-y-auto p-2">
             <Command.Empty className="text-subtle px-3 py-6 text-center text-sm">
-              No results found.
+              No results found. Try a task title, project or page name.
             </Command.Empty>
 
-            <Command.Group
-              heading="Navigate"
-              className="text-subtle [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:uppercase"
-            >
+            {matchedTodos.length > 0 ? (
+              <>
+                <Command.Group
+                  heading={search.trim() ? "Tasks" : "Recent tasks"}
+                  className={groupClass}
+                >
+                  {matchedTodos.map((todo) => {
+                    const priority = priorityMeta[todo.priority];
+                    const done = todo.status === "done";
+                    return (
+                      <Command.Item
+                        key={todo.id}
+                        value={[
+                          todo.title,
+                          todo.project ?? "",
+                          ...(todo.tags ?? []),
+                        ].join(" ")}
+                        onSelect={() => run(() => openTodoDialog(todo.id))}
+                        className={itemClass}
+                      >
+                        <span
+                          aria-hidden
+                          className={cn(
+                            "size-2 shrink-0 rounded-full",
+                            done ? "bg-success" : priority.dot,
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            "min-w-0 flex-1 truncate",
+                            done && "text-subtle line-through",
+                          )}
+                        >
+                          {todo.title}
+                        </span>
+                        {todo.project ? (
+                          <span className="text-subtle hidden max-w-28 truncate text-[11px] sm:inline">
+                            {todo.project}
+                          </span>
+                        ) : null}
+                        <Badge
+                          variant={done ? "success" : "outline"}
+                          className="shrink-0"
+                        >
+                          {statusLabels[todo.status]}
+                        </Badge>
+                        <ArrowRight className="text-subtle size-3.5 shrink-0 opacity-0 transition-opacity group-data-[selected=true]:opacity-100" />
+                      </Command.Item>
+                    );
+                  })}
+                </Command.Group>
+                <Command.Separator className="bg-border my-1 h-px" />
+              </>
+            ) : null}
+
+            <Command.Group heading="Navigate" className={groupClass}>
               {pages.map((page) => {
                 const Icon = page.icon;
                 return (
@@ -150,7 +268,7 @@ export function CommandPalette() {
                     key={page.href}
                     value={page.label}
                     onSelect={() => run(() => router.push(page.href))}
-                    className="text-muted data-[selected=true]:bg-surface data-[selected=true]:text-foreground flex cursor-default items-center gap-2.5 rounded-md px-2 py-2 text-sm outline-none select-none"
+                    className={itemClass}
                   >
                     <Icon className="text-subtle size-4" />
                     {page.label}
@@ -161,30 +279,66 @@ export function CommandPalette() {
 
             <Command.Separator className="bg-border my-1 h-px" />
 
-            <Command.Group
-              heading="Actions"
-              className="text-subtle [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:uppercase"
-            >
+            <Command.Group heading="Actions" className={groupClass}>
               <Command.Item
-                value="New todo"
+                value="New todo task"
                 onSelect={() => run(() => openTodoDialog())}
-                className="text-muted data-[selected=true]:bg-surface data-[selected=true]:text-foreground flex cursor-default items-center gap-2.5 rounded-md px-2 py-2 text-sm outline-none select-none"
+                className={itemClass}
               >
                 <Plus className="text-subtle size-4" />
-                New todo
+                New task
+                <kbd className="border-border bg-background/50 ml-auto rounded border px-1 font-mono text-[10px]">
+                  N
+                </kbd>
               </Command.Item>
               <Command.Item
-                value="Refresh data"
+                value="Toggle theme dark light"
+                onSelect={() => run(() => toggleMode())}
+                className={itemClass}
+              >
+                {mode === "dark" ? (
+                  <Sun className="text-subtle size-4" />
+                ) : (
+                  <Moon className="text-subtle size-4" />
+                )}
+                Switch to {mode === "dark" ? "light" : "dark"} theme
+                <kbd className="border-border bg-background/50 ml-auto rounded border px-1 font-mono text-[10px]">
+                  ⌘⇧L
+                </kbd>
+              </Command.Item>
+              <Command.Item
+                value="Toggle sidebar collapse expand"
+                onSelect={() => run(() => toggleSidebar())}
+                className={itemClass}
+              >
+                <PanelLeft className="text-subtle size-4" />
+                Toggle sidebar
+                <kbd className="border-border bg-background/50 ml-auto rounded border px-1 font-mono text-[10px]">
+                  ⌘\
+                </kbd>
+              </Command.Item>
+              <Command.Item
+                value="Refresh data reload sources"
                 onSelect={() =>
                   run(() => {
                     void queryClient.invalidateQueries();
                   })
                 }
-                className="text-muted data-[selected=true]:bg-surface data-[selected=true]:text-foreground flex cursor-default items-center gap-2.5 rounded-md px-2 py-2 text-sm outline-none select-none"
+                className={itemClass}
               >
                 <RefreshCw className="text-subtle size-4" />
                 Refresh data
               </Command.Item>
+              {todos.length === 0 ? (
+                <Command.Item
+                  value="No tasks yet"
+                  disabled
+                  className={cn(itemClass, "opacity-60")}
+                >
+                  <CircleDashed className="text-subtle size-4" />
+                  No tasks yet — press N to add one
+                </Command.Item>
+              ) : null}
             </Command.Group>
           </Command.List>
         </Command>

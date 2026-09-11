@@ -45,12 +45,7 @@ export function TodayTodos() {
   };
 
   return (
-    <Card className="relative overflow-hidden">
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-12 -right-10 size-36 rounded-full opacity-20 blur-3xl"
-        style={{ background: ACCENT }}
-      />
+    <Card accent={ACCENT}>
       <CardHeader className="relative">
         <CardTitle>
           <span
@@ -81,17 +76,18 @@ export function TodayTodos() {
             today.slice(0, 6).map((todo) => {
               const priority = priorityMeta[todo.priority];
               return (
-                <label
+                <div
                   key={todo.id}
-                  className="hover:bg-surface/50 -mx-1 flex cursor-pointer items-center gap-2.5 rounded-md px-1 py-1.5 transition-colors"
+                  className="hover:bg-surface/50 -mx-1 flex items-center gap-2.5 rounded-md px-1 py-1.5 transition-colors"
                 >
                   <Checkbox
+                    id={`todo-${todo.id}`}
                     checked={todo.status === "done"}
                     onCheckedChange={() => toggleTodo(todo.id)}
                   />
-                  <span className="min-w-0 flex-1 truncate text-[13px]">
+                  <label htmlFor={`todo-${todo.id}`} className="min-w-0 flex-1 truncate text-[13px] cursor-pointer">
                     {todo.title}
-                  </span>
+                  </label>
                   <span
                     className={cn(
                       "size-1.5 shrink-0 rounded-full",
@@ -99,7 +95,7 @@ export function TodayTodos() {
                     )}
                     title={priority.label}
                   />
-                </label>
+                </div>
               );
             })
           )}

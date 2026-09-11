@@ -1,13 +1,13 @@
 "use client";
 
 import {
-  CalendarDays,
-  Container,
-  ListTodo,
-  Server,
-  ShieldCheck,
-} from "lucide-react";
-import { GitHubIcon } from "@/components/icons/github";
+  LiveCalendar,
+  LiveDocker,
+  LiveGithub,
+  LiveServer,
+  LiveShield,
+  LiveTodo,
+} from "@/components/icons/live";
 import {
   Card,
   CardContent,
@@ -17,15 +17,15 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDashboardSnapshot } from "@/hooks/use-snapshot";
 import { timeAgo } from "@/lib/format";
-import type { ActivityEvent } from "@/lib/mock/activity";
+import type { ActivityEvent } from "@/lib/activity";
 
 const sourceIcons = {
-  github: GitHubIcon,
-  docker: Container,
-  pihole: ShieldCheck,
-  servers: Server,
-  calendar: CalendarDays,
-  todos: ListTodo,
+  github: LiveGithub,
+  docker: LiveDocker,
+  pihole: LiveShield,
+  servers: LiveServer,
+  calendar: LiveCalendar,
+  todos: LiveTodo,
 } as const;
 
 const sourceAccent: Record<keyof typeof sourceIcons, string> = {
@@ -65,6 +65,10 @@ export function ActivityFeed({ limit = 8 }: { limit?: number }) {
               <Skeleton key={index} className="h-8 w-full" />
             ))}
           </div>
+        ) : events.length === 0 ? (
+          <p className="text-subtle px-1 py-6 text-center text-xs">
+            Nothing to show yet.
+          </p>
         ) : (
           <ol className="relative flex flex-col gap-1">
             {/* timeline rail */}
@@ -73,16 +77,16 @@ export function ActivityFeed({ limit = 8 }: { limit?: number }) {
               className="absolute top-1 bottom-1 left-[7px] w-px"
               style={{
                 background:
-                  "linear-gradient(180deg, transparent, var(--border-strong), transparent)",
+                  "linear-gradient(180deg, transparent, color-mix(in oklab, var(--brand) 35%, transparent), transparent)",
               }}
             />
             {events.map((event) => {
-              const Icon = sourceIcons[event.source] ?? Server;
+              const Icon = sourceIcons[event.source] ?? LiveServer;
               const accent = sourceAccent[event.source] ?? "var(--muted)";
               return (
                 <li
                   key={event.id}
-                  className="relative flex items-start gap-2.5 rounded-md px-1 py-1.5"
+                  className="group/row hover:bg-surface/40 relative flex items-start gap-2.5 rounded-md px-1 py-1.5 transition-colors"
                 >
                   <span
                     className="mt-1 flex size-3.5 shrink-0 items-center justify-center rounded-full"

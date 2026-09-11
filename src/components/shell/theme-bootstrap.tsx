@@ -4,15 +4,15 @@ import { useEffect } from "react";
 import { useThemeStore, applyTheme } from "@/stores/theme-store";
 
 /**
- * Reads the persisted theme from localStorage on mount and applies it.
- * Kept tiny so it can run in the layout without forcing a hydration
- * mismatch on the rest of the tree.
+ * Applies the persisted theme on mount and keeps <html> in sync with every
+ * future store change — so theme switches are instant, without a reload.
  */
 export function ThemeBootstrap() {
+  const theme = useThemeStore((state) => state.theme);
+
   useEffect(() => {
-    const stored = useThemeStore.getState().theme;
-    applyTheme(stored);
-  }, []);
+    applyTheme(theme);
+  }, [theme]);
 
   return null;
 }

@@ -1,6 +1,6 @@
 import http from "node:http";
 import type { Snapshot, SourceAdapter } from "@/lib/adapters/types";
-import type { DockerContainer, DockerSnapshot } from "@/lib/mock/docker";
+import type { DockerContainer, DockerSnapshot } from "@/lib/types/docker";
 
 const DEFAULT_SOCKET =
   process.env.DOCKER_SOCKET ?? "/var/run/docker.sock";
@@ -149,6 +149,13 @@ function fetchRestartCounts(socketPath: string): Promise<Map<string, number>> {
       JSON.stringify({ event: ["restart", "die", "oom"] }),
     );
 
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      resolve(counts);
+    };
+
     const request = http.request(
       {
         socketPath,
@@ -158,36 +165,45 @@ function fetchRestartCounts(socketPath: string): Promise<Map<string, number>> {
       },
       (response) => {
         let body = "";
+        let overflowed = false;
         response.setEncoding("utf8");
         response.on("data", (chunk: string) => {
+          if (overflowed) return;
           body += chunk;
-          // Guard against huge buffers on busy hosts.
-          if (body.length > 2_000_000) request.destroy();
+          // Guard against huge buffers on busy hosts — once we exceed the
+          // cap we stop parsing and let the socket drain to a clean close.
+          if (body.length > 2_000_000) {
+            overflowed = true;
+            body = "";
+          }
         });
         response.on("end", () => {
-          for (const line of body.split("\n")) {
-            if (!line.trim()) continue;
-            try {
-              const event = JSON.parse(line) as DockerEvent;
-              const name = (event.Actor?.Attributes?.name ?? "").replace(
-                /^\//,
-                "",
-              );
-              const id = (event.Actor?.ID ?? "").slice(0, 12);
-              const key = name || id;
-              if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
-            } catch {
-              // Ignore partial trailing lines.
+          if (!overflowed) {
+            for (const line of body.split("\n")) {
+              if (!line.trim()) continue;
+              try {
+                const event = JSON.parse(line) as DockerEvent;
+                const name = (event.Actor?.Attributes?.name ?? "").replace(
+                  /^\//,
+                  "",
+                );
+                const id = (event.Actor?.ID ?? "").slice(0, 12);
+                const key = name || id;
+                if (key) counts.set(key, (counts.get(key) ?? 0) + 1);
+              } catch {
+                // Ignore partial trailing lines.
+              }
             }
           }
-          resolve(counts);
+          finish();
         });
+        response.on("error", finish);
       },
     );
 
     request.setTimeout(8_000, () => request.destroy());
-    request.on("error", () => resolve(counts));
-    request.on("close", () => resolve(counts));
+    request.on("error", finish);
+    request.on("close", finish);
     request.end();
   });
 }
@@ -268,7 +284,12 @@ async function fetchDockerSnapshot(socketPath: string): Promise<DockerSnapshot> 
         (container) => container.health === "unhealthy",
       ).length,
       images: new Set(containers.map((container) => container.image)).size,
-      restarts24h: 0,
+      // Roll up per-container restarts so the dashboard and insights surface
+      // the right number — previously this stayed hardcoded at 0.
+      restarts24h: containers.reduce(
+        (total, container) => total + (container.restarts24h ?? 0),
+        0,
+      ),
       memoryUsedMb: runningContainers.reduce(
         (total, container) => total + container.memoryMb,
         0,

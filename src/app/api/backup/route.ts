@@ -9,31 +9,38 @@ export const dynamic = "force-dynamic";
 
 /** GET /api/backup — download a JSON envelope with every server-side bit. */
 export async function GET() {
-  const repository = getTodoRepository();
-  const snapshot = await repository.read();
+  try {
+    const repository = getTodoRepository();
+    const snapshot = await repository.read();
 
-  const envelope: BackupEnvelope = {
-    schemaVersion: 1,
-    exportedAt: new Date().toISOString(),
-    exportedBy: "opsora",
-    appVersion: readPackageVersionFresh(),
-    preferences: {
-      theme: null,
-      sidebarCollapsed: false,
-    },
-    todos: snapshot.todos,
-  };
+    const envelope: BackupEnvelope = {
+      schemaVersion: 1,
+      exportedAt: new Date().toISOString(),
+      exportedBy: "opsora",
+      appVersion: readPackageVersionFresh(),
+      preferences: {
+        theme: null,
+        sidebarCollapsed: false,
+      },
+      todos: snapshot.todos,
+    };
 
-  const filename = `opsora-backup-${envelope.exportedAt.slice(0, 10)}.json`;
+    const filename = `opsora-backup-${envelope.exportedAt.slice(0, 10)}.json`;
 
-  return new Response(JSON.stringify(envelope, null, 2), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Content-Disposition": `attachment; filename="${filename}"`,
-      "Cache-Control": "no-store",
-    },
-  });
+    return new Response(JSON.stringify(envelope, null, 2), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Disposition": `attachment; filename="${filename}"`,
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (error) {
+    return Response.json(
+      { error: error instanceof Error ? error.message : "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }
 
 /** PUT /api/backup — restore todos from a backup envelope. */
@@ -66,13 +73,20 @@ export async function PUT(request: Request) {
     (payload as { todos?: unknown }).todos,
   );
 
-  const repository = getTodoRepository();
-  const { updatedAt } = await repository.replace(todos);
+  try {
+    const repository = getTodoRepository();
+    const { updatedAt } = await repository.replace(todos);
 
-  return Response.json({
-    ok: true,
-    count: todos.length,
-    updatedAt,
-    mode: repository.kind,
-  });
+    return Response.json({
+      ok: true,
+      count: todos.length,
+      updatedAt,
+      mode: repository.kind,
+    });
+  } catch (error) {
+    return Response.json(
+      { error: error instanceof Error ? error.message : "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }

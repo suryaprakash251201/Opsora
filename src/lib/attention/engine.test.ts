@@ -5,9 +5,9 @@ import {
   overallHealth,
   summarizeAttention,
 } from "./engine";
-import type { ServersSnapshot } from "@/lib/mock/servers";
-import type { GithubSnapshot } from "@/lib/mock/github";
-import type { PiholeSnapshot } from "@/lib/mock/pihole";
+import type { ServersSnapshot } from "@/lib/types/servers";
+import type { GithubSnapshot } from "@/lib/types/github";
+import type { PiholeSnapshot } from "@/lib/types/pihole";
 import type { Todo } from "@/features/todos/types";
 
 function todo(overrides: Partial<Todo>): Todo {

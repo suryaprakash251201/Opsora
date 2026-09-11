@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { BellOff } from "lucide-react";
+import { LiveBell } from "@/components/icons/live";
 import { PageHeader } from "@/components/viz/page-header";
 import { EmptyState } from "@/components/viz/section";
 import { StatTile } from "@/components/viz/stat-tile";
@@ -99,7 +99,7 @@ export default function AlertsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <EmptyState
-          icon={BellOff}
+          icon={LiveBell}
           title={
             filter === "attention"
               ? "Nothing needs attention"

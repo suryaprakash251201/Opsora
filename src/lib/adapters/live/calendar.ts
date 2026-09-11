@@ -4,7 +4,7 @@ import type {
   CalendarColor,
   CalendarEvent,
   CalendarSnapshot,
-} from "@/lib/mock/calendar";
+} from "@/lib/types/calendar";
 
 const CACHE_TTL_MS = 300_000;
 const EVENT_LIMIT = 50;

@@ -1,6 +1,7 @@
 "use client";
 
-import { CalendarDays, CalendarPlus, Clock, MapPin, Users } from "lucide-react";
+import { CalendarPlus, Clock, MapPin, Users } from "lucide-react";
+import { LiveCalendar } from "@/components/icons/live";
 import { isToday, parseISO } from "date-fns";
 import { PageHeader } from "@/components/viz/page-header";
 import { EmptyConfigHint, EmptyState, ErrorState } from "@/components/viz/section";
@@ -10,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useClock } from "@/hooks/use-clock";
 import { REFETCH_INTERVALS, useSourceSnapshot } from "@/hooks/use-snapshot";
 import { formatDayLabel, formatTime } from "@/lib/format";
-import type { CalendarEvent } from "@/lib/mock/calendar";
+import type { CalendarEvent } from "@/lib/types/calendar";
 import { cn } from "@/lib/utils";
 
 const colorClasses: Record<CalendarEvent["color"], string> = {
@@ -29,7 +30,7 @@ export default function CalendarPage() {
   const now = useClock(30_000);
 
   const events = data?.data.events ?? [];
-  const isUnconfigured = data?.mode === "live" && events.length === 0;
+  const isUnconfigured = data?.mode === "empty" && events.length === 0;
   const days = new Map<string, CalendarEvent[]>();
 
   for (const event of events) {
@@ -53,7 +54,7 @@ export default function CalendarPage() {
         }
         actions={
           <Badge variant="outline" className="gap-1.5 px-2.5 py-1">
-            <CalendarDays className="size-3.5" />
+            <LiveCalendar className="size-3.5" />
             Work · Personal · Ops · Focus
           </Badge>
         }
@@ -86,7 +87,7 @@ export default function CalendarPage() {
             ]}
           />
           <EmptyState
-            icon={CalendarDays}
+            icon={LiveCalendar}
             title="No events to show"
             description="Today and the next seven days will appear here once Google Calendar is configured."
           />
