@@ -10,6 +10,9 @@ import { useEffect } from "react";
 export function useScrollReveal() {
   useEffect(() => {
     if (typeof window === "undefined") return;
+    // Signal that JS-driven reveal is active — the hidden pre-reveal state
+    // in CSS only applies under `html.js`, so content stays visible without JS.
+    document.documentElement.classList.add("js");
     if (typeof IntersectionObserver === "undefined") {
       // Fallback — just reveal everything
       document

@@ -2,7 +2,8 @@
 
 import { Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { themeMode, useThemeStore } from "@/stores/theme-store";
+import { useThemeStore } from "@/stores/theme-store";
+import { themeMode } from "@/lib/theme-config";
 import { cn } from "@/lib/utils";
 
 /**

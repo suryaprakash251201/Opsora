@@ -30,7 +30,8 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useTodoStore } from "@/features/todos/store";
 import { priorityMeta, statusLabels } from "@/features/todos/types";
-import { themeMode, useThemeStore } from "@/stores/theme-store";
+import { useThemeStore } from "@/stores/theme-store";
+import { themeMode } from "@/lib/theme-config";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
 
@@ -61,9 +62,9 @@ const shortcuts: Record<string, string> = {
 const MAX_TASK_RESULTS = 8;
 
 const itemClass =
-  "group text-muted data-[selected=true]:bg-surface data-[selected=true]:text-foreground flex cursor-default items-center gap-2.5 rounded-md px-2 py-2 text-sm outline-none select-none";
+  "group text-muted data-[selected=true]:bg-surface/90 data-[selected=true]:text-foreground data-[selected=true]:border-border/70 border border-transparent flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 text-sm outline-none select-none transition-all duration-150";
 const groupClass =
-  "text-subtle [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:tracking-wide [&_[cmdk-group-heading]]:uppercase";
+  "text-subtle [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-[10.5px] [&_[cmdk-group-heading]]:font-bold [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:uppercase";
 
 export function CommandPalette() {
   const router = useRouter();
@@ -183,24 +184,24 @@ export function CommandPalette() {
         <DialogTitle className="sr-only">Command palette</DialogTitle>
         <Command
           loop
-          className="flex flex-col overflow-hidden rounded-xl"
+          className="flex flex-col overflow-hidden rounded-2xl"
           label="Command palette"
         >
-          <div className="border-border/70 flex items-center gap-2 border-b px-3.5">
+          <div className="border-border/80 bg-surface/30 flex items-center gap-3 border-b px-4 py-1">
             <Search className="text-subtle size-4 shrink-0" />
             <Command.Input
               autoFocus
               value={search}
               onValueChange={setSearch}
-              placeholder="Search pages, tasks and actions…"
-              className="text-foreground placeholder:text-subtle h-11 w-full bg-transparent text-sm outline-none"
+              placeholder="Type a command or search (pages, tasks, sources)…"
+              className="text-foreground placeholder:text-subtle h-12 w-full bg-transparent text-sm outline-none font-medium"
             />
-            <kbd className="border-border bg-surface/80 text-subtle rounded border px-1.5 py-0.5 font-mono text-[10px]">
+            <kbd className="border-border/80 bg-surface/80 text-subtle rounded-md border px-2 py-0.5 font-mono text-[10px] font-semibold">
               esc
             </kbd>
           </div>
 
-          <Command.List className="max-h-[22rem] overflow-y-auto p-2">
+          <Command.List className="max-h-[22rem] overflow-y-auto p-2.5">
             <Command.Empty className="text-subtle px-3 py-6 text-center text-sm">
               No results found. Try a task title, project or page name.
             </Command.Empty>

@@ -40,14 +40,14 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "border-border bg-panel animate-panel-in fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border p-5 shadow-2xl outline-none",
+          "card-elevated border-border/80 bg-panel/95 animate-panel-in fixed top-1/2 left-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-2xl border p-6 shadow-2xl outline-none backdrop-blur-2xl",
           className,
         )}
         {...props}
       >
         {children}
         {showClose ? (
-          <DialogPrimitive.Close className="text-subtle hover:bg-surface hover:text-foreground absolute top-4 right-4 rounded-md p-1 transition-colors">
+          <DialogPrimitive.Close className="text-subtle hover:bg-surface hover:text-foreground absolute top-4 right-4 rounded-lg p-1.5 transition-colors">
             <XIcon className="size-4" />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>

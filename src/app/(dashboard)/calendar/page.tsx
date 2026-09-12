@@ -102,21 +102,36 @@ export default function CalendarPage() {
               <section
                 key={day}
                 className={cn(
-                  "border-border bg-panel rounded-card border",
-                  isCurrentDay && "border-info/30",
+                  "card-elevated relative overflow-hidden rounded-2xl border border-border/80 shadow-xs transition-all duration-200",
+                  isCurrentDay && "border-[var(--accent-calendar)]/50 ring-1 ring-[var(--accent-calendar)]/25",
                 )}
               >
-                <header className="border-border/60 flex items-center justify-between border-b px-4 py-2.5">
-                  <h2 className="flex items-center gap-2 text-[13px] font-semibold">
+                {isCurrentDay ? (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute inset-x-0 top-0 h-[2px]"
+                    style={{
+                      background: "var(--accent-calendar)",
+                      boxShadow: "0 1px 8px var(--accent-calendar)",
+                    }}
+                  />
+                ) : null}
+
+                <header className="border-b border-border/70 bg-surface/30 flex items-center justify-between px-5 py-3">
+                  <h2 className="flex items-center gap-2.5 text-[14px] font-bold text-foreground tracking-tight">
                     {formatDayLabel(day)}
-                    {isCurrentDay ? <Badge variant="info">today</Badge> : null}
+                    {isCurrentDay ? (
+                      <Badge variant="success" className="font-semibold uppercase text-[10px] tracking-wider px-2">
+                        Today
+                      </Badge>
+                    ) : null}
                   </h2>
-                  <span className="text-subtle text-xs">
+                  <span className="metrics text-subtle text-xs font-medium">
                     {dayEvents.length} event{dayEvents.length === 1 ? "" : "s"}
                   </span>
                 </header>
 
-                <ul className="divide-border/40 divide-y">
+                <ul className="divide-y divide-border/50">
                   {dayEvents.map((event) => {
                     const start = parseISO(event.start);
                     const end = parseISO(event.end);
@@ -127,50 +142,54 @@ export default function CalendarPage() {
                       <li
                         key={event.id}
                         className={cn(
-                          "flex items-center gap-3 px-4 py-3",
-                          current && "bg-info/5",
+                          "group flex items-center gap-3.5 px-5 py-3.5 transition-colors",
+                          current ? "bg-info/8" : "hover:bg-surface/50",
                         )}
                       >
-                        <span className="metrics text-subtle w-24 shrink-0 text-xs">
+                        <span className="metrics text-subtle rounded-md border border-border/60 bg-surface/60 px-2 py-0.5 w-28 shrink-0 text-[11px] font-semibold tracking-tight text-center">
                           {event.allDay
                             ? "All day"
-                            : `${formatTime(event.start)}–${formatTime(event.end)}`}
+                            : `${formatTime(event.start)} – ${formatTime(event.end)}`}
                         </span>
                         <span
                           className={cn(
-                            "size-2 shrink-0 rounded-full",
+                            "size-2.5 shrink-0 rounded-full ring-2 ring-[var(--panel)]",
                             colorClasses[event.color],
                           )}
                         />
                         <div className="min-w-0 flex-1">
                           <p
                             className={cn(
-                              "truncate text-[13px]",
-                              current && "font-medium",
+                              "truncate text-[13.5px] font-medium text-foreground",
+                              current && "font-bold text-info",
                             )}
                           >
                             {event.title}
                           </p>
-                          <p className="text-subtle mt-0.5 flex items-center gap-3 text-[11px]">
+                          <p className="text-subtle mt-1 flex flex-wrap items-center gap-3 text-[11px]">
                             {event.location ? (
                               <span className="flex items-center gap-1">
-                                <MapPin className="size-3" />
+                                <MapPin className="size-3 text-subtle" />
                                 {event.location}
                               </span>
                             ) : null}
                             {event.attendees ? (
                               <span className="flex items-center gap-1">
-                                <Users className="size-3" />
+                                <Users className="size-3 text-subtle" />
                                 {event.attendees}
                               </span>
                             ) : null}
                             <span className="flex items-center gap-1">
-                              <Clock className="size-3" />
+                              <Clock className="size-3 text-subtle" />
                               {event.calendar}
                             </span>
                           </p>
                         </div>
-                        {current ? <Badge variant="info">now</Badge> : null}
+                        {current ? (
+                          <Badge variant="info" className="font-bold tracking-wider uppercase text-[10px]">
+                            Now
+                          </Badge>
+                        ) : null}
                       </li>
                     );
                   })}

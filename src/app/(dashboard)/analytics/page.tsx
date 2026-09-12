@@ -75,7 +75,7 @@ export default function AnalyticsPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          <section className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+          <section className="grid grid-cols-1 gap-3.5 xl:grid-cols-2">
             {insights.map((insight) => {
               const meta = severityMeta[insight.tone as InsightTone];
               const Icon = toneIcon[insight.tone as InsightTone];
@@ -83,27 +83,35 @@ export default function AnalyticsPage() {
               return (
                 <article
                   key={insight.id}
-                  className="border-border bg-panel rounded-card flex items-start gap-3 border p-4"
+                  className="card-elevated group relative flex items-start gap-3.5 overflow-hidden rounded-2xl border border-border/80 p-4.5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:border-border-strong"
                 >
                   <span
+                    aria-hidden
                     className={cn(
-                      "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-md border",
+                      "absolute inset-y-2 left-0 w-1 rounded-r-full",
+                      meta.dot,
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      "mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl border shadow-xs transition-transform duration-200 group-hover:scale-105",
                       meta.bg,
                       meta.border,
                       meta.text,
                     )}
                   >
-                    <Icon className="size-4" />
+                    <Icon className="size-4" strokeWidth={2.2} />
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-[13px] font-medium">
+                      <h3 className="text-[13.5px] font-bold text-foreground tracking-tight">
                         {insight.title}
                       </h3>
                       {insight.metric ? (
                         <span
                           className={cn(
-                            "metrics shrink-0 text-xs font-medium",
+                            "metrics shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold tracking-tight",
+                            meta.bg,
                             meta.text,
                           )}
                         >
@@ -111,12 +119,14 @@ export default function AnalyticsPage() {
                         </span>
                       ) : null}
                     </div>
-                    <p className="text-muted mt-1 text-xs leading-relaxed">
+                    <p className="text-muted mt-1 text-xs leading-relaxed font-normal">
                       {insight.detail}
                     </p>
-                    <Badge variant="outline" className="mt-2">
-                      {sourceLabels[insight.source]}
-                    </Badge>
+                    <div className="mt-2.5 flex items-center gap-2">
+                      <Badge variant="outline" className="border-border/60 bg-surface/50 text-[10.5px] font-medium">
+                        {sourceLabels[insight.source]}
+                      </Badge>
+                    </div>
                   </div>
                 </article>
               );

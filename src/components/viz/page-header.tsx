@@ -34,47 +34,50 @@ export function PageHeader({
   return (
     <div
       className={cn(
-        "relative mb-2 flex flex-wrap items-center justify-between gap-3 sm:mb-3",
+        "relative mb-4 flex flex-wrap items-center justify-between gap-4 border-b pb-4 sm:mb-5",
         className,
       )}
+      style={{
+        borderColor: "color-mix(in oklab, var(--border) 60%, transparent)",
+      }}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute -top-12 left-0 h-32 w-72 rounded-full opacity-30 blur-3xl"
-        style={{ background: itemAccent }}
-      />
-      <div className="relative flex min-w-0 flex-1 items-center gap-3">
+      <div className="relative flex min-w-0 flex-1 items-center gap-3.5">
         {Icon ? (
           <span
             aria-hidden
-            className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-xl border"
+            className="relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border shadow-sm transition-all duration-300 hover:scale-105"
             style={{
               color: itemAccent,
-              borderColor: `color-mix(in oklab, ${itemAccent} 32%, transparent)`,
-              background: `color-mix(in oklab, ${itemAccent} 12%, transparent)`,
-              boxShadow: `0 4px 16px -6px color-mix(in oklab, ${itemAccent} 40%, transparent), inset 0 1px 0 0 color-mix(in oklab, ${itemAccent} 25%, transparent)`,
+              borderColor: `color-mix(in oklab, ${itemAccent} 35%, transparent)`,
+              background: `linear-gradient(135deg, color-mix(in oklab, ${itemAccent} 16%, transparent) 0%, color-mix(in oklab, var(--panel) 90%, transparent) 100%)`,
+              boxShadow: `0 2px 10px -2px color-mix(in oklab, ${itemAccent} 25%, transparent), inset 0 0 0 1px color-mix(in oklab, ${itemAccent} 20%, transparent)`,
             }}
           >
-            <Icon className="size-5" strokeWidth={1.9} />
+            <Icon className="size-5.5" strokeWidth={2} />
           </span>
         ) : (
           <span
             aria-hidden
-            className="inline-block h-8 w-1 rounded-full"
-            style={{ background: itemAccent, boxShadow: `0 0 12px ${itemAccent}` }}
+            className="inline-block h-8 w-1.5 rounded-full"
+            style={{
+              background: itemAccent,
+              boxShadow: `0 0 12px ${itemAccent}`,
+            }}
           />
         )}
         <div className="flex min-w-0 flex-col gap-0.5">
-          <h1 className="text-balance text-[20px] leading-tight font-semibold tracking-tight">
+          <h1 className="text-balance text-[22px] leading-tight font-bold tracking-tight text-foreground sm:text-[24px]">
             {title}
           </h1>
           {description ? (
-            <p className="text-muted text-[13px] leading-snug">{description}</p>
+            <p className="text-muted text-[13px] leading-snug font-normal">
+              {description}
+            </p>
           ) : null}
         </div>
       </div>
       {actions ? (
-        <div className="relative flex items-center gap-2">{actions}</div>
+        <div className="relative flex items-center gap-2.5 shrink-0">{actions}</div>
       ) : null}
     </div>
   );

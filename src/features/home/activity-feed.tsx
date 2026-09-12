@@ -39,6 +39,8 @@ const sourceAccent: Record<keyof typeof sourceIcons, string> = {
 
 const kindTone: Record<ActivityEvent["kind"], string> = {
   commit: "text-info",
+  pull: "text-info",
+  issue: "text-warning",
   ci: "text-danger",
   deploy: "text-success",
   docker: "text-muted",

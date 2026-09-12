@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/viz/section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import { StatTile } from "@/components/viz/stat-tile";
 import { TodoItem } from "@/features/todos/todo-item";
 import {
   collectProjects,
@@ -19,13 +20,6 @@ import {
 import { useTodoStore } from "@/features/todos/store";
 import { useUiStore } from "@/stores/ui-store";
 import { cn } from "@/lib/utils";
-
-const statTiles = [
-  { key: "open", label: "Open" },
-  { key: "dueToday", label: "Due today" },
-  { key: "overdue", label: "Overdue" },
-  { key: "completedToday", label: "Done today" },
-] as const;
 
 export default function TodosPage() {
   const todos = useTodoStore((state) => state.todos);
@@ -77,58 +71,75 @@ export default function TodosPage() {
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {statTiles.map((tile) => (
-          <div
-            key={tile.key}
-            className="border-border bg-panel rounded-card border p-3.5 transition-all hover:border-border-strong"
-          >
-            <p className="text-subtle text-xs">{tile.label}</p>
-            <p className="metrics mt-1.5 text-xl font-semibold tracking-tight">
-              {stats[tile.key]}
-            </p>
-          </div>
-        ))}
+        <StatTile
+          label="Open tasks"
+          value={stats.open}
+          accent="var(--brand)"
+        />
+        <StatTile
+          label="Due today"
+          value={stats.dueToday}
+          accent="var(--accent-todos)"
+        />
+        <StatTile
+          label="Overdue"
+          value={stats.overdue}
+          accent={stats.overdue > 0 ? "var(--danger)" : "var(--muted)"}
+        />
+        <StatTile
+          label="Completed today"
+          value={stats.completedToday}
+          accent="var(--success)"
+          footer={`${stats.completionRate}% total completion`}
+        />
       </div>
 
-      <div className="mb-4 flex flex-col gap-2.5">
-        <div className="flex items-center gap-2">
+      <div className="mb-4 flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-3">
           <div className="relative max-w-sm flex-1">
-            <Search className="text-subtle pointer-events-none absolute top-1/2 left-2.5 size-3.5 -translate-y-1/2" />
+            <Search className="text-subtle pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" />
             <Input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder="Filter tasks…"
-              className="h-9 pl-8 text-xs"
+              placeholder="Search tasks, projects, #tags…"
+              className="h-9.5 pl-9 text-xs rounded-xl border-border/80 bg-panel/80 focus-visible:border-border-strong shadow-2xs"
             />
           </div>
-          <div className="hidden items-center gap-2 sm:flex">
+          <div className="hidden items-center gap-2.5 sm:flex bg-panel/70 border border-border/70 rounded-xl px-3 py-1.5 shadow-2xs">
             <Progress
               value={stats.completionRate}
-              className="w-24"
+              className="w-24 h-2 bg-surface"
               indicatorClassName="bg-success"
             />
-            <span className="text-subtle text-xs">
+            <span className="metrics text-subtle text-xs font-semibold">
               {stats.completionRate}% done
             </span>
           </div>
         </div>
 
-        <div className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
+        <div className="flex gap-1.5 overflow-x-auto p-1 bg-surface/50 border border-border/60 rounded-2xl backdrop-blur-sm">
           {TODO_VIEWS.map((item) => (
             <button
               key={item.value}
               type="button"
               onClick={() => setView(item.value)}
               className={cn(
-                "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors",
+                "flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-semibold tracking-tight transition-all duration-200 cursor-pointer",
                 view === item.value
-                  ? "border-border-strong bg-surface text-foreground"
-                  : "text-muted hover:bg-surface/60 hover:text-foreground border-transparent",
+                  ? "bg-panel text-foreground shadow-xs border border-border/80"
+                  : "text-muted hover:text-foreground hover:bg-surface/80 border border-transparent",
               )}
             >
               {item.label}
               {counts[item.value] > 0 ? (
-                <span className="metrics text-subtle">
+                <span
+                  className={cn(
+                    "metrics rounded-full px-1.5 py-0.2 text-[10px] font-bold",
+                    view === item.value
+                      ? "bg-surface text-foreground"
+                      : "bg-surface/80 text-subtle",
+                  )}
+                >
                   {counts[item.value]}
                 </span>
               ) : null}

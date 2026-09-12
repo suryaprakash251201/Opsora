@@ -2,15 +2,17 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 interface CardProps extends React.ComponentProps<"div"> {
-  /** Add a subtle multi-color halo in the corner of the card. */
+  /** Solid accent used for a thin top rule. Omit for a plain card. */
   accent?: string;
-  /** When true, slightly lift the card on hover (e.g. for clickable tiles). */
+  /** When true, highlight the border on hover (e.g. for clickable tiles). */
   interactive?: boolean;
-  /** Use the glassmorphism background. Defaults to true. */
+  /** Use the elevated surface with top bevel highlight. Defaults to true. */
+  elevated?: boolean;
+  /** Use the glassmorphism background. Defaults to false (flat panel). */
   glass?: boolean;
-  /** Use the animated gradient border. Defaults to true. */
+  /** Use the animated gradient border. Defaults to false (plain border). */
   gradientBorder?: boolean;
-  /** Trigger the shine-on-hover sweep. Defaults to true. */
+  /** Trigger the shine-on-hover sweep. Defaults to false. */
   shine?: boolean;
 }
 
@@ -18,26 +20,27 @@ function Card({
   className,
   accent,
   interactive,
-  glass = true,
-  gradientBorder = true,
-  shine = true,
+  elevated = true,
+  glass = false,
+  gradientBorder = false,
+  shine = false,
   ...props
 }: CardProps) {
   return (
     <div
       data-slot="card"
       className={cn(
-        "group/card relative overflow-hidden rounded-xl border shadow-[inset_0_1px_0_0_color-mix(in_oklab,var(--foreground)_4%,transparent)]",
-        "transition-[border-color,box-shadow,transform] duration-300 ease-out",
+        "group/card relative overflow-hidden rounded-xl border bg-panel",
+        "transition-all duration-200",
+        elevated && "card-elevated",
         glass && "card-glass",
         gradientBorder && "gradient-border",
         shine && "shine-on-hover",
-        interactive &&
-          "hover:-translate-y-0.5 hover:shadow-[0_18px_44px_-22px_color-mix(in_oklab,var(--brand)_45%,transparent)]",
+        interactive && "hover:border-border-strong cursor-pointer hover:-translate-y-0.5",
         className,
       )}
       style={{
-        borderColor: "color-mix(in oklab, var(--border) 70%, transparent)",
+        borderColor: "color-mix(in oklab, var(--border) 75%, transparent)",
         ...props.style,
       }}
       {...props}
@@ -45,8 +48,11 @@ function Card({
       {accent ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute -top-16 -right-16 size-44 rounded-full opacity-30 blur-3xl transition-opacity duration-500 group-hover/card:opacity-55"
-          style={{ background: accent }}
+          className="pointer-events-none absolute inset-x-0 top-0 h-[2px] opacity-90 transition-opacity group-hover/card:opacity-100"
+          style={{
+            background: accent,
+            boxShadow: `0 1px 8px ${accent}`,
+          }}
         />
       ) : null}
       {props.children}

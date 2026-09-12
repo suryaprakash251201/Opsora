@@ -89,42 +89,53 @@ export default function DockerPage() {
               label="Running"
               value={snapshot.summary.running}
               icon={LiveDocker}
+              accent="var(--success)"
             />
             <StatTile
               label="Stopped"
               value={snapshot.summary.stopped}
               icon={Boxes}
+              accent="var(--muted)"
             />
             <StatTile
               label="Unhealthy"
               value={snapshot.summary.unhealthy}
               icon={TriangleAlert}
+              accent={snapshot.summary.unhealthy > 0 ? "var(--danger)" : "var(--muted)"}
             />
             <StatTile
               label="Restarts · 24h"
               value={snapshot.summary.restarts24h}
               icon={RotateCw}
+              accent={snapshot.summary.restarts24h > 0 ? "var(--warning)" : "var(--muted)"}
               footer={`${formatBytes(snapshot.summary.memoryUsedMb * 1024 * 1024)} in use`}
             />
           </div>
 
-          <div className="border-border bg-panel rounded-card overflow-hidden border">
+          <div className="card-elevated overflow-hidden rounded-2xl border border-border/80 shadow-xs">
+            <div className="border-b border-border/70 bg-surface/40 px-4 py-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-[13.5px] font-semibold text-foreground tracking-tight">Active Containers</h3>
+                <p className="text-subtle text-xs">Live socket metrics from Docker daemon</p>
+              </div>
+              <Badge variant="outline" className="metrics text-xs font-semibold">
+                {containers.length} total
+              </Badge>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[860px] text-left text-xs">
                 <thead>
-                  <tr className="border-border/70 text-subtle border-b text-[11px] tracking-wide uppercase">
-                    <th className="px-4 py-2.5 font-medium">Container</th>
-                    <th className="px-3 py-2.5 font-medium">State</th>
-                    <th className="px-3 py-2.5 font-medium">Health</th>
-                    <th className="px-3 py-2.5 text-right font-medium">CPU</th>
-                    <th className="px-3 py-2.5 font-medium">Memory</th>
-                    <th className="px-3 py-2.5 text-right font-medium">Uptime</th>
-                    <th className="px-4 py-2.5 text-right font-medium">
-                      Restarts
-                    </th>
+                  <tr className="border-b border-border/70 bg-surface/30 text-subtle text-[11px] font-semibold tracking-wider uppercase">
+                    <th className="px-4 py-3">Container</th>
+                    <th className="px-3 py-3">State</th>
+                    <th className="px-3 py-3">Health</th>
+                    <th className="px-3 py-3 text-right">CPU</th>
+                    <th className="px-3 py-3">Memory</th>
+                    <th className="px-3 py-3 text-right">Uptime</th>
+                    <th className="px-4 py-3 text-right">Restarts</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-border/50">
                   {containers.map((container) => {
                     const memoryPercent =
                       container.memoryLimitMb > 0
@@ -134,51 +145,61 @@ export default function DockerPage() {
                     return (
                       <tr
                         key={container.id}
-                        className="border-border/50 hover:bg-surface/40 border-b transition-colors last:border-0"
+                        className="hover:bg-surface/50 transition-colors"
                       >
-                        <td className="px-4 py-2.5">
-                          <p className="font-medium">{container.name}</p>
-                          <p className="text-subtle font-mono text-[10px]">
-                            {container.image}
-                          </p>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={cn(
+                                "size-2 rounded-full",
+                                container.state === "running" ? "bg-success" : "bg-subtle",
+                              )}
+                            />
+                            <div>
+                              <p className="font-semibold text-[13px] text-foreground">{container.name}</p>
+                              <p className="text-subtle font-mono text-[10.5px]">
+                                {container.image}
+                              </p>
+                            </div>
+                          </div>
                         </td>
-                        <td className="px-3 py-2.5">
-                          <Badge variant={stateVariant(container)}>
+                        <td className="px-3 py-3">
+                          <Badge variant={stateVariant(container)} className="font-semibold uppercase text-[10px]">
                             {container.state}
                           </Badge>
                         </td>
-                        <td className="px-3 py-2.5">
+                        <td className="px-3 py-3">
                           {container.health === "none" ? (
-                            <span className="text-subtle">—</span>
+                            <span className="text-subtle text-xs">—</span>
                           ) : (
-                            <Badge variant={healthVariant(container.health)}>
+                            <Badge variant={healthVariant(container.health)} className="font-semibold uppercase text-[10px]">
                               {container.health}
                             </Badge>
                           )}
                         </td>
-                        <td className="metrics px-3 py-2.5 text-right">
+                        <td className="metrics px-3 py-3 text-right font-medium text-foreground">
                           {container.state === "running"
                             ? `${container.cpu}%`
                             : "—"}
                         </td>
-                        <td className="px-3 py-2.5">
+                        <td className="px-3 py-3">
                           {container.state === "running" ? (
-                            <div className="flex w-36 flex-col gap-1">
-                              <span className="metrics text-[10px]">
+                            <div className="flex w-36 flex-col gap-1.5">
+                              <span className="metrics text-[10.5px] font-medium text-foreground">
                                 {formatBytes(container.memoryMb * 1024 * 1024)} /{" "}
                                 {formatBytes(
                                   container.memoryLimitMb * 1024 * 1024,
                                 )}
                               </span>
-                              <div className="bg-surface h-1 overflow-hidden rounded-full">
+                              <div className="bg-surface h-1.5 overflow-hidden rounded-full border border-border/50">
                                 <div
                                   className={cn(
-                                    "h-full rounded-full",
+                                    "h-full rounded-full transition-all duration-300",
                                     memoryPercent > 85
                                       ? "bg-warning"
-                                      : "bg-info/70",
+                                      : "bg-info/80",
                                   )}
-                                  style={{ width: `${memoryPercent}%` }}
+                                  style={{ width: `${Math.min(memoryPercent, 100)}%` }}
                                 />
                               </div>
                             </div>
@@ -186,15 +207,15 @@ export default function DockerPage() {
                             <span className="text-subtle">—</span>
                           )}
                         </td>
-                        <td className="metrics text-subtle px-3 py-2.5 text-right">
+                        <td className="metrics text-subtle px-3 py-3 text-right font-medium">
                           {container.state === "running"
                             ? formatDuration(container.uptimeSeconds)
                             : "—"}
                         </td>
                         <td
                           className={cn(
-                            "metrics px-4 py-2.5 text-right",
-                            container.restarts24h >= 2 && "text-warning",
+                            "metrics px-4 py-3 text-right font-semibold",
+                            container.restarts24h >= 2 ? "text-warning" : "text-subtle",
                           )}
                         >
                           {container.restarts24h}

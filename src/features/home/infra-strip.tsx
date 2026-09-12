@@ -44,35 +44,40 @@ function Tile({
       href={href}
       style={{ ["--accent" as string]: accent } as React.CSSProperties}
       className={cn(
-        "group card-glass gradient-border shine-on-hover relative flex min-h-[112px] flex-col gap-2 overflow-hidden rounded-[12px] p-4",
-        "transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_18px_44px_-22px_color-mix(in_oklab,var(--accent)_45%,transparent)]",
+        "kpi-card group relative flex min-h-[116px] flex-col justify-between overflow-hidden rounded-xl p-4.5",
+        "transition-all duration-200 hover:-translate-y-1 hover:border-border-strong",
       )}
     >
+      {/* Top accent glow line */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -top-10 -right-10 size-28 rounded-full opacity-30 blur-2xl transition-opacity duration-500 group-hover:opacity-60"
-        style={{ background: accent }}
+        className="pointer-events-none absolute inset-x-0 top-0 h-[2px] opacity-75 transition-opacity group-hover:opacity-100"
+        style={{
+          background: accent,
+          boxShadow: `0 1px 8px ${accent}`,
+        }}
       />
 
       <div className="relative flex items-center justify-between gap-2">
-        <span className="text-muted flex items-center gap-2 text-xs">
+        <span className="text-muted flex items-center gap-2.5 text-xs font-semibold tracking-tight">
           <span
-            className="flex size-6 items-center justify-center rounded-md"
+            className="flex size-7 items-center justify-center rounded-lg border transition-transform duration-200 group-hover:scale-105"
             style={{
-              background: `color-mix(in oklab, ${accent} 14%, transparent)`,
+              background: `color-mix(in oklab, ${accent} 16%, transparent)`,
+              borderColor: `color-mix(in oklab, ${accent} 30%, transparent)`,
               color: accent,
-              boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${accent} 25%, transparent)`,
+              boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${accent} 20%, transparent)`,
             }}
           >
-            <Icon className="size-3.5" strokeWidth={2.2} />
+            <Icon className="size-4" strokeWidth={2.2} />
           </span>
-          {label}
+          <span className="text-foreground/90">{label}</span>
         </span>
-        <StatusDot status={status} />
+        <StatusDot status={status} pulse={status !== "healthy"} />
       </div>
 
-      <div className="relative flex items-end justify-between gap-3">
-        <span className="metrics text-[22px] leading-none font-semibold tracking-tight">
+      <div className="relative mt-2 flex items-end justify-between gap-3">
+        <span className="metrics text-[24px] leading-none font-bold tracking-tight text-foreground">
           {value}
         </span>
         {spark && spark.length > 1 ? (
@@ -85,14 +90,14 @@ function Tile({
         ) : null}
       </div>
 
-      <p className="text-subtle relative truncate text-[11px]">{footer}</p>
+      <p className="text-subtle relative mt-1.5 truncate text-[11px] font-medium">{footer}</p>
     </Link>
   );
 }
 
 function TileSkeleton() {
   return (
-    <Skeleton className="card-glass h-[104px] rounded-[12px] border border-[var(--border)]/60" />
+    <Skeleton className="h-[104px] rounded-[12px] border border-[var(--border)]/60 bg-panel" />
   );
 }
 

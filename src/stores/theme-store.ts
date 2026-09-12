@@ -5,16 +5,11 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import {
   DEFAULT_DARK,
   DEFAULT_LIGHT,
-  THEMES,
   THEME_COLORS,
   isValidTheme,
   themeMode,
   type ThemeId,
-  type ThemeMode,
 } from "@/lib/theme-config";
-
-export { THEMES, themeMode, isValidTheme, type ThemeId, type ThemeMode };
-
 
 interface ThemeState {
   theme: ThemeId;

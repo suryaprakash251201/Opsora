@@ -1,4 +1,26 @@
+"use client";
+
+import { memo, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+
+/**
+ * Tracks `prefers-reduced-motion`. Initial `false` keeps SSR and first
+ * client paint identical (no hydration mismatch); the effect below syncs
+ * the real preference once on mount, then only on preference changes.
+ */
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    // One-time mount sync so first paint matches SSR — not a render cascade.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setReduced(query.matches);
+    const onChange = (event: MediaQueryListEvent) => setReduced(event.matches);
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+  return reduced;
+}
 
 /**
  * CircuitBackground — an animated PCB-style circuit layer that sits behind
@@ -62,7 +84,17 @@ const VIAS: [number, number, string][] = [
   [1500, 568, "-7s"],
 ];
 
-export function CircuitBackground({ className }: { className?: string }) {
+/**
+ * Memoized — the layer is static props behind the whole dashboard, so it
+ * must never re-render with page state. Reduced-motion users get the static
+ * traces only (no pulse/via animation nodes at all, not just zeroed CSS).
+ */
+export const CircuitBackground = memo(function CircuitBackground({
+  className,
+}: {
+  className?: string;
+}) {
+  const reducedMotion = usePrefersReducedMotion();
   return (
     <div
       aria-hidden
@@ -105,7 +137,7 @@ export function CircuitBackground({ className }: { className?: string }) {
                 className="circuit-trace"
                 strokeWidth={trace.wide ? 1.6 : 1}
               />
-              {trace.pulse ? (
+              {trace.pulse && !reducedMotion ? (
                 <path
                   d={trace.d}
                   pathLength={100}
@@ -122,8 +154,17 @@ export function CircuitBackground({ className }: { className?: string }) {
           ))}
 
           {VIAS.map(([cx, cy, delay], i) => (
-            <g key={i} className="circuit-via" style={{ animationDelay: delay }}>
-              <circle cx={cx} cy={cy} r="5.5" className="circuit-via-ring" />
+            <g
+              key={i}
+              className={reducedMotion ? undefined : "circuit-via"}
+              style={reducedMotion ? undefined : { animationDelay: delay }}
+            >
+              <circle
+                cx={cx}
+                cy={cy}
+                r="5.5"
+                className={reducedMotion ? "circuit-via-core" : "circuit-via-ring"}
+              />
               <circle cx={cx} cy={cy} r="2.4" className="circuit-via-core" />
             </g>
           ))}
@@ -134,4 +175,4 @@ export function CircuitBackground({ className }: { className?: string }) {
       <div className="circuit-aura absolute inset-0" />
     </div>
   );
-}
+});

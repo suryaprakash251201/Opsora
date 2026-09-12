@@ -10,7 +10,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { THEMES, useThemeStore, type ThemeId } from "@/stores/theme-store";
+import { useThemeStore } from "@/stores/theme-store";
+import { THEMES, type ThemeId } from "@/lib/theme-config";
 import { cn } from "@/lib/utils";
 
 interface ThemeSwitcherProps {

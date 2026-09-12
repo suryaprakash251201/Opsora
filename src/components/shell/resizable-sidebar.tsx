@@ -146,8 +146,8 @@ export function SidebarCollapseHandle({
       title={collapsed ? "Expand sidebar (⌘\\)" : "Collapse sidebar (⌘\\)"}
       className={cn(
         "group/rail-handle absolute top-1/2 right-0 z-40 flex size-8 -translate-y-1/2 translate-x-1/2 items-center justify-center rounded-full border outline-none",
-        "transition-[transform,border-color,box-shadow] duration-200 ease-out",
-        "hover:scale-[1.12] hover:border-[color-mix(in_oklab,var(--brand)_65%,var(--border-strong))] active:scale-95",
+        "transition-[border-color,box-shadow] duration-200 ease-out",
+        "hover:border-[color-mix(in_oklab,var(--brand)_65%,var(--border-strong))]",
         "focus-visible:ring-2 focus-visible:ring-[var(--brand)]/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)]",
       )}
       style={{

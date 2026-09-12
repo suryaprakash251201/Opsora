@@ -49,7 +49,8 @@ import { accentVar } from "@/components/shell/nav";
 import { useTodoStore } from "@/features/todos/store";
 import { syncNow } from "@/features/todos/sync";
 import { useSyncStore } from "@/stores/sync-store";
-import { THEMES, useThemeStore } from "@/stores/theme-store";
+import { useThemeStore } from "@/stores/theme-store";
+import { THEMES } from "@/lib/theme-config";
 import { SourceHealth } from "@/features/settings/source-health";
 import { SyncStatus } from "@/features/settings/sync-status";
 import { AlertChannels } from "@/features/settings/alert-channels";
@@ -306,7 +307,7 @@ function DataSourcesCard({
               )}
             >
               <span
-                className="flex size-9 shrink-0 items-center justify-center rounded-lg transition-transform group-hover:scale-105"
+                className="flex size-9 shrink-0 items-center justify-center rounded-lg"
                 style={{
                   color: visual.accent,
                   background: `color-mix(in oklab, ${visual.accent} 13%, transparent)`,
@@ -407,7 +408,7 @@ function PaletteTile({ color }: { color: PaletteSwatch }) {
     <div className="group/tile flex flex-col gap-1" title={color.value}>
       <span
         className={cn(
-          "h-9 rounded-lg border border-white/10 transition-transform duration-200 group-hover/tile:scale-[1.04]",
+          "h-9 rounded-lg border border-white/10 transition-colors duration-200",
           color.className,
         )}
         style={{

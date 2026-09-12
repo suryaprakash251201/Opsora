@@ -38,34 +38,44 @@ export function StatTile({
   return (
     <div
       className={cn(
-        "group card-glass gradient-border relative overflow-hidden rounded-[10px] p-4 transition-all duration-300 ease-out",
+        "kpi-card group/kpi relative overflow-hidden rounded-xl p-4 transition-all duration-200",
         className,
       )}
       style={
         {
-          borderColor:
-            "color-mix(in oklab, var(--border) 70%, transparent)",
+          borderColor: accent
+            ? `color-mix(in oklab, ${accent} 25%, var(--border))`
+            : "color-mix(in oklab, var(--border) 75%, transparent)",
         } as React.CSSProperties
       }
     >
       {accent ? (
         <span
           aria-hidden
-          className="pointer-events-none absolute -top-12 -right-12 size-32 rounded-full opacity-30 blur-2xl transition-opacity duration-500 group-hover:opacity-55"
-          style={{ background: accent }}
+          className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] opacity-75 transition-opacity group-hover/kpi:opacity-100"
+          style={{
+            background: accent,
+            boxShadow: `0 1px 6px ${accent}`,
+          }}
         />
       ) : null}
 
       <div className="relative flex items-center justify-between gap-2">
-        <span className="text-muted flex items-center gap-2 text-xs">
+        <span className="text-muted flex items-center gap-2 text-xs font-medium">
           {Icon ? (
             <span
-              className="flex size-5 items-center justify-center rounded-md"
+              className="flex size-6 items-center justify-center rounded-lg border transition-transform duration-200 group-hover/kpi:scale-105"
               style={{
                 background: accent
                   ? `color-mix(in oklab, ${accent} 14%, transparent)`
                   : "color-mix(in oklab, var(--surface) 80%, transparent)",
+                borderColor: accent
+                  ? `color-mix(in oklab, ${accent} 28%, transparent)`
+                  : "var(--border)",
                 color: accent ?? "var(--muted)",
+                boxShadow: accent
+                  ? `inset 0 0 0 1px color-mix(in oklab, ${accent} 15%, transparent)`
+                  : undefined,
               }}
             >
               <Icon className="size-3.5" strokeWidth={2.2} />
@@ -76,8 +86,10 @@ export function StatTile({
         {delta !== undefined ? (
           <span
             className={cn(
-              "metrics inline-flex items-center gap-0.5 text-xs",
-              negative ? "text-success" : "text-warning",
+              "metrics inline-flex items-center gap-0.5 rounded-full border px-1.5 py-0.5 text-[10px] font-semibold tracking-wide",
+              negative
+                ? "border-success/25 bg-success/10 text-success"
+                : "border-warning/25 bg-warning/10 text-warning",
             )}
           >
             <DeltaIcon className="size-3" />
@@ -87,10 +99,10 @@ export function StatTile({
         ) : null}
       </div>
 
-      <div className="metrics relative mt-1 flex items-baseline gap-1 text-[22px] leading-none font-semibold tracking-tight">
+      <div className="metrics relative mt-2 flex items-baseline gap-1.5 text-[24px] leading-none font-bold tracking-tight text-foreground">
         {value}
         {unit ? (
-          <span className="text-subtle text-xs font-normal">{unit}</span>
+          <span className="text-muted text-xs font-normal">{unit}</span>
         ) : null}
       </div>
 
@@ -99,7 +111,7 @@ export function StatTile({
           data={spark}
           height={28}
           className={cn(
-            "relative mt-2 h-7 w-full",
+            "relative mt-2.5 h-7 w-full",
             accent ? "" : "text-subtle",
             sparkClassName,
           )}
@@ -107,7 +119,11 @@ export function StatTile({
         />
       ) : null}
 
-      {footer ? <div className="text-subtle mt-1 text-xs">{footer}</div> : null}
+      {footer ? (
+        <div className="text-subtle mt-2 truncate text-[11px] font-medium">
+          {footer}
+        </div>
+      ) : null}
     </div>
   );
 }

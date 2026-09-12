@@ -7,47 +7,33 @@ import { QuickActions } from "@/features/home/quick-actions";
 import { SourceWarnings } from "@/features/home/source-warnings";
 import { TodayCalendar } from "@/features/home/today-calendar";
 import { TodayTodos } from "@/features/home/today-todos";
-import { ScrollRevealMount } from "@/components/viz/scroll-reveal-mount";
 
 export const metadata: Metadata = {
   title: "Home",
 };
 
+/**
+ * Home dashboard — critical blocks (source warnings, attention feed) render
+ * directly with no scroll-reveal gating, so a JS or observer failure can
+ * never hide them. Each feature owns its own loading skeleton.
+ */
 export default function HomePage() {
   return (
     <>
-      {/* Wires the IntersectionObserver for `.reveal` elements. Client-only. */}
-      <ScrollRevealMount />
-
       <Hero />
-
-      <div className="reveal" data-delay="2">
-        <SourceWarnings />
-      </div>
+      <SourceWarnings />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
         <div className="flex flex-col gap-4 xl:col-span-2">
-          <div className="reveal" data-delay="2">
-            <AttentionFeed />
-          </div>
-          <div className="reveal" data-delay="3">
-            <InfraStrip />
-          </div>
-          <div className="reveal" data-delay="4">
-            <ActivityFeed />
-          </div>
+          <AttentionFeed />
+          <InfraStrip />
+          <ActivityFeed />
         </div>
 
-        <aside className="flex flex-col gap-4">
-          <div className="reveal" data-delay="2">
-            <TodayTodos />
-          </div>
-          <div className="reveal" data-delay="3">
-            <QuickActions />
-          </div>
-          <div className="reveal" data-delay="4">
-            <TodayCalendar />
-          </div>
+        <aside className="flex flex-col gap-4" aria-label="Today">
+          <TodayTodos />
+          <QuickActions />
+          <TodayCalendar />
         </aside>
       </div>
     </>

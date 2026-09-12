@@ -63,7 +63,7 @@ function HealthCard({ collapsed }: { collapsed: boolean }) {
       >
         <Icon
           className={cn(
-            "size-5 shrink-0 transition-transform group-hover:scale-110",
+            "size-5 shrink-0 transition-colors",
             isLoading ? "text-subtle" : meta.text,
           )}
           strokeWidth={2.2}
@@ -100,7 +100,7 @@ function HealthCard({ collapsed }: { collapsed: boolean }) {
       />
       <Icon
         className={cn(
-          "size-4.5 shrink-0 transition-transform group-hover:scale-110",
+          "size-4.5 shrink-0 transition-colors",
           isLoading ? "text-subtle" : meta.text,
         )}
         strokeWidth={2.2}
@@ -185,7 +185,7 @@ function NavLinkItem({
       ) : null}
       <Icon
         className={cn(
-          "relative shrink-0 transition-transform duration-300 ease-[cubic-bezier(0.34,1.4,0.64,1)] group-hover:scale-110",
+          "relative shrink-0 transition-colors duration-200",
           collapsed ? "size-[22px]" : "size-5",
         )}
         strokeWidth={2}

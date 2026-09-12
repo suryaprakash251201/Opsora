@@ -70,21 +70,26 @@ export default function ServersPage() {
         <div className="flex flex-col gap-5">
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatTile
-              label="Online"
+              label="Online nodes"
               value={`${snapshot.summary.online}/${snapshot.summary.total}`}
+              icon={LiveServer}
+              accent="var(--success)"
             />
             <StatTile
               label="Average CPU"
               value={`${snapshot.summary.cpuAvg}%`}
+              accent="var(--accent-servers)"
             />
             <StatTile
               label="Total memory"
               value={formatBytes(snapshot.summary.memoryUsedBytes)}
               unit={`of ${formatBytes(snapshot.summary.memoryTotalBytes)}`}
+              accent="var(--info)"
             />
             <StatTile
               label="Average disk"
               value={`${snapshot.summary.diskAvg}%`}
+              accent="var(--brand)"
             />
           </div>
 

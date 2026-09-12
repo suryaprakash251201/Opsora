@@ -72,29 +72,40 @@ export default function AlertsPage() {
         />
       </div>
 
-      <div className="mb-4 flex gap-1 overflow-x-auto pb-1">
+      <div className="mb-4 flex gap-1.5 overflow-x-auto p-1 bg-surface/50 border border-border/60 rounded-2xl backdrop-blur-sm">
         {filters.map((item) => (
           <button
             key={item.value}
             type="button"
             onClick={() => setFilter(item.value)}
             className={cn(
-              "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors",
+              "flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-semibold tracking-tight transition-all duration-200 cursor-pointer",
               filter === item.value
-                ? "border-border-strong bg-surface text-foreground"
-                : "text-muted hover:bg-surface/60 hover:text-foreground border-transparent",
+                ? "bg-panel text-foreground shadow-xs border border-border/80"
+                : "text-muted hover:text-foreground hover:bg-surface/80 border border-transparent",
             )}
           >
             {item.label}
-            <span className="metrics text-subtle">{counts[item.value]}</span>
+            {counts[item.value] > 0 ? (
+              <span
+                className={cn(
+                  "metrics rounded-full px-1.5 py-0.2 text-[10px] font-bold",
+                  filter === item.value
+                    ? "bg-surface text-foreground"
+                    : "bg-surface/80 text-subtle",
+                )}
+              >
+                {counts[item.value]}
+              </span>
+            ) : null}
           </button>
         ))}
       </div>
 
       {isLoading ? (
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-2">
           {[0, 1, 2, 3].map((index) => (
-            <Skeleton key={index} className="h-16" />
+            <Skeleton key={index} className="h-16 rounded-xl" />
           ))}
         </div>
       ) : filtered.length === 0 ? (
@@ -108,7 +119,7 @@ export default function AlertsPage() {
           description="Systems look healthy. New signals will appear here as they arrive."
         />
       ) : (
-        <div className="border-border bg-panel rounded-card flex flex-col gap-0.5 border p-1.5">
+        <div className="card-elevated flex flex-col gap-1 rounded-2xl border border-border/80 p-2 shadow-xs">
           {filtered.map((item) => (
             <AttentionRow key={item.id} item={item} />
           ))}

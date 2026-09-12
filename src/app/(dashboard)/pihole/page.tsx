@@ -40,23 +40,29 @@ function TopList({
   const max = Math.max(...items.map((item) => item.value), 1);
 
   return (
-    <ul className="flex flex-col gap-2.5">
-      {items.map((item) => (
-        <li key={item.label} className="flex flex-col gap-1">
-          <div className="flex items-baseline justify-between gap-3 text-xs">
-            <span className="truncate">{item.label}</span>
-            <span className="metrics text-subtle shrink-0">
-              {formatNumber(item.value)} {valueLabel}
+    <ul className="flex flex-col gap-3">
+      {items.map((item, index) => (
+        <li key={item.label} className="group/item flex flex-col gap-1.5 rounded-xl border border-border/50 bg-surface/30 p-2.5 transition-colors hover:bg-surface/60">
+          <div className="flex items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="flex size-4.5 shrink-0 items-center justify-center rounded-md bg-surface text-subtle text-[10px] font-mono font-bold">
+                {index + 1}
+              </span>
+              <span className="truncate font-medium text-foreground text-[12.5px]">{item.label}</span>
+            </div>
+            <span className="metrics text-foreground font-semibold shrink-0 text-xs">
+              {formatNumber(item.value)}{" "}
+              <span className="text-subtle font-normal text-[11px]">{valueLabel}</span>
             </span>
           </div>
-          <div className="bg-surface h-1.5 overflow-hidden rounded-full">
+          <div className="bg-surface/80 h-1.5 overflow-hidden rounded-full border border-border/40">
             <div
-              className={`h-full rounded-full ${tone}`}
+              className={`h-full rounded-full transition-all duration-300 ${tone}`}
               style={{ width: `${(item.value / max) * 100}%` }}
             />
           </div>
           {item.sub ? (
-            <span className="text-subtle font-mono text-[10px]">{item.sub}</span>
+            <span className="text-subtle font-mono text-[10.5px] pl-6.5">{item.sub}</span>
           ) : null}
         </li>
       ))}
@@ -125,22 +131,25 @@ export default function PiholePage() {
               label="DNS queries"
               value={formatNumber(snapshot.summary.queries)}
               icon={Globe}
+              accent="var(--info)"
             />
             <StatTile
               label="Blocked"
               value={formatNumber(snapshot.summary.blocked)}
               icon={Ban}
+              accent="var(--danger)"
               footer={`${formatPercent(snapshot.summary.blockRate, 1)} block rate`}
             />
             <StatTile
-              label="Clients"
+              label="Active clients"
               value={snapshot.summary.clients}
               icon={Users}
+              accent="var(--accent-pihole)"
             />
             <StatTile
-              label="Upstream"
+              label="Upstream DNS"
               value={
-                <span className="flex items-center gap-2 text-base">
+                <span className="flex items-center gap-2 text-base font-semibold">
                   <StatusDot
                     status={
                       snapshot.summary.upstreamStatus === "healthy"
@@ -154,6 +163,7 @@ export default function PiholePage() {
                 </span>
               }
               icon={Network}
+              accent="var(--brand)"
               footer={`${snapshot.summary.latencyMs} ms average latency`}
             />
           </div>
