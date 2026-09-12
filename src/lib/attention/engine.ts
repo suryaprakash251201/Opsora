@@ -198,6 +198,18 @@ function githubItems(snapshot: GithubSnapshot, now: Date): DraftItem[] {
         meta: "CI",
         urgency: Math.min(age, 10),
       });
+    } else if (repo.ci.status === "running") {
+      items.push({
+        id: `github-ci-running-${repo.id}`,
+        source: "github",
+        severity: "info",
+        title: `${repo.name} workflow running`,
+        detail: `${repo.ci.workflow} is in progress on ${repo.defaultBranch}`,
+        href: "/github",
+        createdAt: repo.ci.at,
+        context: repo.description,
+        meta: "CI",
+      });
     }
 
     if (repo.deployment.status === "failed") {
@@ -242,6 +254,25 @@ function githubItems(snapshot: GithubSnapshot, now: Date): DraftItem[] {
       context: pull.repo,
       meta: `#${pull.id}`,
       urgency: Math.min(age / 2, 10),
+    });
+  }
+
+  // Authored PRs whose checks are red are a signal that something you pushed
+  // needs attention even before a reviewer looks at it.
+  for (const pull of snapshot.pulls) {
+    if (pull.checks !== "failing" || pull.reviewRequested) continue;
+
+    items.push({
+      id: `github-checks-${pull.repoFullName}-${pull.id}`,
+      source: "github",
+      severity: "warning",
+      title: `PR #${pull.id} checks failing`,
+      detail: `${pull.title} · ${pull.repoFullName}`,
+      href: "/github",
+      createdAt: pull.updatedAt,
+      context: pull.author,
+      meta: `#${pull.id}`,
+      urgency: 4,
     });
   }
 

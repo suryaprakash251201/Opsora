@@ -3,6 +3,8 @@ import type { SnapshotBundle } from "@/lib/adapters/types";
 
 export type ActivityKind =
   | "commit"
+  | "pull"
+  | "issue"
   | "ci"
   | "deploy"
   | "docker"
@@ -31,7 +33,8 @@ export function getActivityFeed(sources: SnapshotBundle): ActivityEvent[] {
       feed.push({
         id: `gh-${event.id}`,
         source: "github",
-        kind: event.kind === "commit" ? "commit" : ("ci" as ActivityKind),
+        // Workflow runs surface as CI activity; everything else keeps its kind.
+        kind: event.kind === "action" ? "ci" : event.kind,
         title: event.repo,
         detail: event.text,
         at: event.at,

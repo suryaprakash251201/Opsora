@@ -123,9 +123,38 @@ export function generateInsights(sources: SnapshotBundle): Insight[] {
     tone: "info",
     source: "github",
     title: `${github.data.stats.commitsToday} commits pushed today`,
-    detail: `${github.data.stats.openPulls} pull requests open · ${github.data.stats.openIssues} issues awaiting triage.`,
+    detail: `${github.data.stats.openPulls} pull requests open · ${github.data.stats.openIssues} issues involving you · ${github.data.stats.stars} stars across ${github.data.stats.repos} repositories.`,
     metric: String(github.data.stats.commitsToday),
   });
+
+  const runningWorkflows = github.data.runs.filter(
+    (run) => run.status !== "completed",
+  );
+  if (runningWorkflows.length > 0) {
+    insights.push({
+      id: "insight-workflows-running",
+      tone: "info",
+      source: "github",
+      title: `${runningWorkflows.length} workflow${runningWorkflows.length > 1 ? "s" : ""} in progress`,
+      detail: runningWorkflows
+        .slice(0, 3)
+        .map((run) => `${run.repo} · ${run.name}`)
+        .join(" · "),
+      metric: "running",
+    });
+  }
+
+  const latestRelease = github.data.releases[0];
+  if (latestRelease) {
+    insights.push({
+      id: "insight-release",
+      tone: "success",
+      source: "github",
+      title: `${latestRelease.repo} released ${latestRelease.tag}`,
+      detail: `${latestRelease.name} · published by ${latestRelease.author}${latestRelease.prerelease ? " (pre-release)" : ""}.`,
+      metric: latestRelease.tag,
+    });
+  }
 
   const reviewPulls = github.data.pulls.filter(
     (pull) => pull.reviewRequested && !pull.draft,
