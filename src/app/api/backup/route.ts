@@ -2,7 +2,8 @@ import {
   getTodoRepository,
   normalizeTodoList,
 } from "@/lib/server/todo-repository";
-import { readPackageVersionFresh } from "@/lib/server/package-meta";
+import { readPackageVersion } from "@/lib/server/package-meta";
+import { noStoreJson, apiError, readJsonBody } from "@/lib/server/api";
 import type { BackupEnvelope } from "@/lib/server/backup";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export async function GET() {
       schemaVersion: 1,
       exportedAt: new Date().toISOString(),
       exportedBy: "opsora",
-      appVersion: readPackageVersionFresh(),
+      appVersion: readPackageVersion(),
       preferences: {
         theme: null,
         sidebarCollapsed: false,
@@ -36,31 +37,22 @@ export async function GET() {
       },
     });
   } catch (error) {
-    return Response.json(
-      { error: error instanceof Error ? error.message : "Internal Server Error" },
-      { status: 500 }
-    );
+    return apiError(error);
   }
 }
 
 /** PUT /api/backup — restore todos from a backup envelope. */
 export async function PUT(request: Request) {
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return Response.json(
-      { error: "Body must be valid JSON" },
-      { status: 400 },
-    );
-  }
+  const body = await readJsonBody(request);
+  if (!body.ok) return body.response;
+  const payload = body.value;
 
   if (
     typeof payload !== "object" ||
     payload === null ||
     (payload as { schemaVersion?: unknown }).schemaVersion !== 1
   ) {
-    return Response.json(
+    return noStoreJson(
       {
         error:
           "Unsupported backup — expected a JSON envelope with schemaVersion: 1",
@@ -77,16 +69,13 @@ export async function PUT(request: Request) {
     const repository = getTodoRepository();
     const { updatedAt } = await repository.replace(todos);
 
-    return Response.json({
+    return noStoreJson({
       ok: true,
       count: todos.length,
       updatedAt,
       mode: repository.kind,
     });
   } catch (error) {
-    return Response.json(
-      { error: error instanceof Error ? error.message : "Internal Server Error" },
-      { status: 500 }
-    );
+    return apiError(error);
   }
 }

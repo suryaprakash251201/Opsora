@@ -1,11 +1,12 @@
 import { sendTestAlert } from "@/lib/server/alert-dispatcher";
+import { noStoreJson, apiError } from "@/lib/server/api";
 
 export async function POST() {
   try {
     const results = await sendTestAlert();
 
     if (results.length === 0) {
-      return Response.json(
+      return noStoreJson(
         {
           results,
           message:
@@ -15,11 +16,8 @@ export async function POST() {
       );
     }
 
-    return Response.json({ results });
+    return noStoreJson({ results });
   } catch (error) {
-    return Response.json(
-      { error: error instanceof Error ? error.message : "Internal Server Error" },
-      { status: 500 }
-    );
+    return apiError(error);
   }
 }

@@ -8,6 +8,7 @@ import type {
   SnapshotMap,
 } from "@/lib/adapters/types";
 import type { ActivityEvent } from "@/lib/activity";
+import { fetchJson } from "@/lib/fetch-json";
 import { useRealtimeStore } from "@/stores/realtime-store";
 
 export interface DashboardSnapshot {
@@ -23,14 +24,6 @@ export const REFETCH_INTERVALS = {
   pihole: 60_000,
   calendar: 300_000,
 } as const;
-
-async function fetchJson<T>(url: string): Promise<T> {
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Request failed with ${response.status}`);
-  }
-  return response.json() as Promise<T>;
-}
 
 export function useDashboardSnapshot(refetchInterval = 30_000) {
   // The SSE stream pushes updates every 5s; polling is only the fallback

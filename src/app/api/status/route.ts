@@ -4,7 +4,7 @@ import {
   isAgentOnline,
 } from "@/lib/adapters/live/agent-store";
 import { getChannelStatuses } from "@/lib/server/alert-channels";
-import { readPackageVersionFresh } from "@/lib/server/package-meta";
+import { readPackageVersion } from "@/lib/server/package-meta";
 import { noStoreJson, apiError } from "@/lib/server/api";
 
 export const dynamic = "force-dynamic";
@@ -40,7 +40,7 @@ export async function GET() {
       })),
       serverTime: new Date().toISOString(),
       uptimeSeconds: Math.round(process.uptime()),
-      version: readPackageVersionFresh(),
+      version: readPackageVersion(),
       channels: getChannelStatuses(),
       desktop: {
         active: process.env.OPSORA_DESKTOP === "1",

@@ -1,40 +1,22 @@
-import { getAllSnapshots } from "@/lib/adapters";
-import type { SnapshotBundle } from "@/lib/adapters/types";
-import { getActivityFeed, type ActivityEvent } from "@/lib/activity";
+import { buildDashboardSnapshot } from "@/lib/server/dashboard-snapshot";
+import type { DashboardPayload } from "@/lib/server/dashboard-snapshot";
 
 const TICK_MS = 5_000;
 const SHARE_WINDOW_MS = 4_000;
 
-interface StreamPayload {
-  sources: SnapshotBundle;
-  activity: ActivityEvent[];
-  fetchedAt: string;
-}
-
-let shared: { at: number; payload: StreamPayload } | null = null;
-let sharedPending: Promise<StreamPayload> | null = null;
+let shared: { at: number; payload: DashboardPayload } | null = null;
+let sharedPending: Promise<DashboardPayload> | null = null;
 
 /**
  * All connected clients share one payload per tick window so N tabs don't
  * cause N snapshot recomputes.
  */
-async function getSharedPayload(): Promise<StreamPayload> {
+async function getSharedPayload(): Promise<DashboardPayload> {
   if (shared && Date.now() - shared.at < SHARE_WINDOW_MS) {
     return shared.payload;
   }
   if (!sharedPending) {
-    sharedPending = (async () => {
-      // Keep a little latency variance between polls so the UI feels alive.
-      const [sources] = await Promise.all([
-        getAllSnapshots(),
-        new Promise((resolve) => setTimeout(resolve, 40)),
-      ]);
-      return {
-        sources,
-        activity: getActivityFeed(sources),
-        fetchedAt: new Date().toISOString(),
-      };
-    })();
+    sharedPending = buildDashboardSnapshot();
   }
 
   try {

@@ -1,8 +1,9 @@
 import { ingestAgentMetrics } from "@/lib/adapters/live/agent-store";
 import { timingSafeEqual } from "node:crypto";
+import { noStoreJson, readJsonBody } from "@/lib/server/api";
 
 function unauthorized(): Response {
-  return Response.json({ error: "Invalid agent token" }, { status: 401 });
+  return noStoreJson({ error: "Invalid agent token" }, { status: 401 });
 }
 
 /** Length-independent string comparison so token checks don't leak timing. */
@@ -27,22 +28,18 @@ export async function POST(request: Request) {
     if (!provided || !safeEqual(provided, expected)) return unauthorized();
   }
 
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return Response.json({ error: "Body must be valid JSON" }, { status: 400 });
-  }
+  const body = await readJsonBody(request);
+  if (!body.ok) return body.response;
 
   try {
-    const metrics = await ingestAgentMetrics(payload);
-    return Response.json({
+    const metrics = await ingestAgentMetrics(body.value);
+    return noStoreJson({
       ok: true,
       hostname: metrics.hostname,
       receivedAt: metrics.receivedAt,
     });
   } catch (error) {
-    return Response.json(
+    return noStoreJson(
       { error: error instanceof Error ? error.message : "Invalid payload" },
       { status: 422 },
     );

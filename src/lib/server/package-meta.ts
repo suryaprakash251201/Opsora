@@ -3,6 +3,10 @@ import path from "node:path";
 
 let cached: string | null = null;
 
+/**
+ * Cached per process — the version only changes across deploys/restarts,
+ * which reset module state anyway, so every caller shares one read.
+ */
 export function readPackageVersion(): string {
   if (cached) return cached;
   try {
@@ -16,10 +20,4 @@ export function readPackageVersion(): string {
     cached = "0.0.0";
   }
   return cached;
-}
-
-/** Server-only: bypass the cache so a version change is picked up live. */
-export function readPackageVersionFresh(): string {
-  cached = null;
-  return readPackageVersion();
 }

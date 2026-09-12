@@ -2,7 +2,7 @@ import {
   getTodoRepository,
   normalizeTodoList,
 } from "@/lib/server/todo-repository";
-import { noStoreJson, apiError } from "@/lib/server/api";
+import { noStoreJson, apiError, readJsonBody } from "@/lib/server/api";
 
 export const dynamic = "force-dynamic";
 
@@ -18,16 +18,12 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch {
-    return noStoreJson({ error: "Body must be valid JSON" }, { status: 400 });
-  }
+  const body = await readJsonBody(request);
+  if (!body.ok) return body.response;
 
   const todos = normalizeTodoList(
-    typeof payload === "object" && payload !== null
-      ? (payload as Record<string, unknown>).todos
+    typeof body.value === "object" && body.value !== null
+      ? (body.value as Record<string, unknown>).todos
       : undefined,
   );
 
