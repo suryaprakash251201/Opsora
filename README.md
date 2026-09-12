@@ -199,20 +199,30 @@ Pull the prebuilt image (CI publishes it on every release tag):
 docker run -d \
   --name opsora \
   -p 9942:9942 \
+  --env-file .env \
+  --group-add "$(stat -c '%g' /var/run/docker.sock)" \
   -v opsora-data:/app/.data \
-  # -v /var/run/docker.sock:/var/run/docker.sock:ro  # monitor host containers
+  -v /var/run/docker.sock:/var/run/docker.sock:ro \
   ghcr.io/suryaprakash251201/opsora:latest
 ```
+
+- `--env-file .env` passes your `GITHUB_TOKEN` / `PIHOLE_URL` / … into the
+  container. Without it every source renders a "not configured" empty state.
+- The socket mount plus `--group-add` is what makes the Docker page live. The
+  image runs as a non-root user, so it needs the host's docker group GID to
+  read `/var/run/docker.sock`.
 
 Or build and run from source:
 
 ```bash
+cp .env.example .env   # fill in what you have
 docker compose up -d --build
 ```
 
 The image builds a Next.js standalone server and runs as a non-root user. Ingested
-agent metrics persist in the `opsora-data` volume. Uncomment the socket mount in
-`docker-compose.yml` to monitor the host's containers.
+agent metrics persist in the `opsora-data` volume. `docker-compose.yml` already
+mounts the host socket and loads `.env`; set `DOCKER_GID` if your host docker
+GID is not `983` (`stat -c '%g' /var/run/docker.sock`).
 
 ## CI/CD
 

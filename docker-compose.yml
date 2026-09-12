@@ -8,18 +8,26 @@ services:
       # Change the host side (`9942:9942`) to expose Opsora on a different
       # port without rebuilding the image.
       - "9942:9942"
+    # Load your live-source credentials (GITHUB_TOKEN, PIHOLE_URL, …) into the
+    # container. Without this the container has no config and every source
+    # renders an empty "not configured" state.
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=9942
       - HOSTNAME=0.0.0.0
-      # - GITHUB_TOKEN=${GITHUB_TOKEN}
-      # - PIHOLE_URL=${PIHOLE_URL}
-      # - PIHOLE_PASSWORD=${PIHOLE_PASSWORD}
-      # - OPSORA_AGENT_TOKEN=${OPSORA_AGENT_TOKEN}
+    # The container runs as the non-root `nextjs` user, which is not in the
+    # host's docker group. Adding the host docker GID here lets it read the
+    # mounted socket. Find yours with: stat -c '%g' /var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID:-983}"
     volumes:
       - opsora-data:/app/.data
-      # Mount the socket to monitor the host's containers:
-      # - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount the host's Docker socket so the Docker page shows the real
+      # containers running on this machine (read-only is enough; Opsora only
+      # performs GET requests against the Engine API).
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     restart: unless-stopped
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://127.0.0.1:9942/api/status || exit 1
